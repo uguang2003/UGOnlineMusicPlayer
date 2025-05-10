@@ -64,22 +64,44 @@ switch($types)   // 根据请求的 Api，执行相应操作
     case 'url':   // 获取歌曲链接
         $id = getParam('id');  // 歌曲ID
         
-        $data = $API->url($id);
+        // 先尝试使用第三方 API
+        $thirdPartyData = requestThirdPartyApi('url', $id, $source);
         
-        echojson($data);
+        if($thirdPartyData !== false) {
+            echojson($thirdPartyData);
+        } else {
+            // 第三方 API 失败，使用本地 meting
+            $data = $API->url($id);
+            
+            // 确保返回的不是第三方 API 的 URL
+            $jsonData = json_decode($data, true);
+            if (isset($jsonData['url']) && strpos($jsonData['url'], 'api.qijieya.cn') !== false) {
+                // 如果 URL 还是包含 api.qijieya.cn，则修正为直接使用本地 meting 获取的实际 URL
+                $localMeting = new Meting($source);
+                $localMeting->format(true);
+                
+                if($source == 'netease' && $netease_cookie) {
+                    $localMeting->cookie($netease_cookie);
+                }
+                
+                $realData = $localMeting->url($id);
+                echojson($realData);
+            } else {
+                echojson($data);
+            }
+        }
         break;
         
     case 'pic':   // 获取封面链接
         $id = getParam('id');  // 歌曲ID
-        
+
         $data = $API->pic($id);
-        
         echojson($data);
         break;
     
     case 'lyric':       // 获取歌词
         $id = getParam('id');  // 歌曲ID
-        
+
         if(defined('CACHE_PATH')) {
             $cache = CACHE_PATH.$source.'_'.$types.'_'.$id.'.json';
             
@@ -98,6 +120,7 @@ switch($types)   // 根据请求的 Api，执行相应操作
         }
         
         echojson($data);
+        
         break;
     
     case 'userlist':    // 获取用户歌单列表
@@ -128,6 +151,7 @@ switch($types)   // 根据请求的 Api，执行相应操作
     case 'playlist':    // 获取歌单中的歌曲
         $id = getParam('id');  // 歌单ID
         
+        // 直接使用本地 meting 获取歌曲列表
         if(defined('CACHE_PATH')) {
             $cache = CACHE_PATH.$source.'_'.$types.'_'.$id.'.json';
             
@@ -153,37 +177,45 @@ switch($types)   // 根据请求的 Api，执行相应操作
         $limit = getParam('count', 20);  // 每页显示数量
         $pages = getParam('pages', 1);  // 页码
         
-        if(defined('CACHE_PATH')) {
-            $cache = CACHE_PATH.$source.'_'.$types.'_'.md5($s).'_'.$pages.'_'.$limit.'.json';
+        // 注意：第三方 API 可能没有提供搜索功能，或者参数不同，需要根据实际情况调整
+        $thirdPartyData = requestThirdPartyApi('search', $s, $source);
+        
+        if($thirdPartyData !== false) {
+            echojson($thirdPartyData);
+        } else {
+            // 第三方 API 失败，使用本地 meting
+            if(defined('CACHE_PATH')) {
+                $cache = CACHE_PATH.$source.'_'.$types.'_'.md5($s).'_'.$pages.'_'.$limit.'.json';
 
-            if(file_exists($cache)) {   // 缓存存在，则读取缓存
-                $data = file_get_contents($cache);
+                if(file_exists($cache)) {   // 缓存存在，则读取缓存
+                    $data = file_get_contents($cache);
+                } else {
+                    $data = $API->search($s, [
+                        'page' => $pages, 
+                        'limit' => $limit
+                    ]);
+
+                    // 只缓存链接获取成功的歌曲
+                    if(isset($data) && json_decode($data)) {
+                        file_put_contents($cache, $data);
+                    }
+                }
             } else {
                 $data = $API->search($s, [
                     'page' => $pages, 
                     'limit' => $limit
                 ]);
-
-                // 只缓存链接获取成功的歌曲
-                if(isset($data) && json_decode($data)) {
-                    file_put_contents($cache, $data);
-                }
             }
-        } else {
-            $data = $API->search($s, [
-                'page' => $pages, 
-                'limit' => $limit
-            ]);
+            
+            echojson($data);
         }
-        
-        echojson($data);
         break;
     
     case 'comments':  // 获取评论
         $id = getParam('id');  // 歌曲id
         $limit = getParam('count', 50);  // 每页显示数量
         $pages = getParam('pages', 1);  // 页码
-        
+
         if(defined('CACHE_PATH')) {
             $cache = CACHE_PATH.$source.'_'.$types.'_'.$id.'_'.$pages.'_'.$limit.'.json';
 
@@ -208,6 +240,7 @@ switch($types)   // 根据请求的 Api，执行相应操作
         }
 
         echojson($data);
+    
         break;
     
     case 'download':    // 下载歌曲
@@ -313,6 +346,92 @@ function checkfunc($f,$m = false) {
 function getParam($key, $default='')
 {
     return trim($key && is_string($key) ? (isset($_POST[$key]) ? $_POST[$key] : (isset($_GET[$key]) ? $_GET[$key] : $default)) : $default);
+}
+
+/**
+ * 请求第三方 meting 接口
+ * @param $type 请求类型
+ * @param $id ID
+ * @param $source 音乐源
+ * @param $use_local 是否优先使用本地源 (1:使用本地，0:使用第三方)
+ * @return 接口返回的数据，失败返回false
+ */
+function requestThirdPartyApi($type, $id, $source = 'netease', $use_local = 0) {
+    // 如果明确要使用本地源，则直接返回false让系统使用本地API
+    if ($use_local == 1) {
+        return false;
+    }
+    
+    // 对于URL类型的请求，先测试API是否可用
+    if ($type == 'url') {
+        $testUrl = "https://api.qijieya.cn/meting/?server={$source}&type=url&id={$id}";
+        
+        // 使用curl测试第三方接口可用性
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $testUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 3); // 3秒超时，避免影响用户体验
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_HEADER, true); // 获取头信息以分析音频属性
+        $result = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $contentLength = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+        curl_close($ch);
+        
+        // 检查API是否返回了有效内容
+        if ($httpCode >= 200 && $httpCode < 400 && $httpCode != 416) {
+            // 添加额外检查，验证是否真的有音频文件（非空响应）
+            if (!empty($result) && $contentLength > 1000 && strpos($contentType, 'audio') !== false) {
+                // 根据Content-Type和大小估算比特率
+                $br = 128.000; // 默认比特率
+                
+                // 尝试从音频文件格式判断比特率
+                if (strpos($contentType, 'mpeg') !== false || strpos($contentType, 'mp3') !== false) {
+                    // MP3文件，根据大小推测比特率
+                    if ($contentLength > 10000000) { // 大于10MB
+                        $br = 320.000;
+                    } elseif ($contentLength > 5000000) { // 大于5MB
+                        $br = 256.000;
+                    } elseif ($contentLength > 2500000) { // 大于2.5MB
+                        $br = 192.000;
+                    } elseif ($contentLength > 1500000) { // 大于1.5MB
+                        $br = 128.000;
+                    } else {
+                        $br = 96.000;
+                    }
+                } elseif (strpos($contentType, 'flac') !== false) {
+                    // FLAC文件通常是无损的
+                    $br = 900.000; // 近似无损音质
+                } elseif (strpos($contentType, 'wav') !== false) {
+                    // WAV文件通常是无损的
+                    $br = 1400.000;
+                } elseif (strpos($contentType, 'aac') !== false || strpos($contentType, 'mp4') !== false) {
+                    // AAC文件
+                    if ($contentLength > 8000000) {
+                        $br = 256.000;
+                    } elseif ($contentLength > 4000000) {
+                        $br = 192.000;
+                    } else {
+                        $br = 128.000;
+                    }
+                }
+                
+                // 确认有有效音频文件，按照本地数据格式构建JSON
+                return '{
+                    "url": "'.$testUrl.'",
+                    "size": '.$contentLength.',
+                    "br": '.$br.'
+                }';
+            }
+        }
+        
+        // API不可用或没有有效音频文件，返回false让系统使用本地meting
+        return false;
+    } 
+
+    return false;
 }
 
 /**
