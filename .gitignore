@@ -70,3 +70,4 @@ Desktop.ini
 # 保留空目录
 !cache/.gitkeep
 !temp/.gitkeep
+!temp/*/.gitkeep
