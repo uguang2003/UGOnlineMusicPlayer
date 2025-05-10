@@ -45,7 +45,7 @@ dist/
 
 # 忽略缓存文件
 cache/*.json
-temp/*
+
 
 # 忽略日志文件
 *.log
@@ -67,7 +67,4 @@ Desktop.ini
 *.swp
 *~
 
-# 保留空目录
-!cache/.gitkeep
-!temp/.gitkeep
-!temp/*/.gitkeep
+
