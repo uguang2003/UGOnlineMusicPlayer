@@ -3,7 +3,7 @@
 *.patch
 *.diff
 *.err
- 
+
 # temp file for git conflict merging
 *.orig
 *.log
@@ -16,7 +16,7 @@
 *.sass-cache
 *.tmp.html
 *.dump
- 
+
 # OS or Editor folders
 .DS_Store
 ._*
@@ -30,7 +30,7 @@
 nbproject
 thumbs.db
 *.iml
- 
+
 # Folders to ignore
 .hg
 .svn
@@ -42,3 +42,31 @@ bower_components/
 dist/
 
 .user.ini
+
+# 忽略缓存文件
+cache/*.json
+temp/*
+
+# 忽略日志文件
+*.log
+
+# 忽略IDE和编辑器文件
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# 忽略操作系统生成的文件
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# 忽略备份文件
+*.bak
+*.swp
+*~
+
+# 保留空目录
+!cache/.gitkeep
+!temp/.gitkeep
