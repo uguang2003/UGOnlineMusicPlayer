@@ -244,6 +244,7 @@ switch($types)   // 根据请求的 Api，执行相应操作
         break;
     
     case 'download':    // 下载歌曲
+        
         $url = getParam('url');
         $name = getParam('name');
         $artist = getParam('artist');
@@ -361,77 +362,73 @@ function requestThirdPartyApi($type, $id, $source = 'netease', $use_local = 0) {
     if ($use_local == 1) {
         return false;
     }
-    
-    // 对于URL类型的请求，先测试API是否可用
-    if ($type == 'url') {
-        $testUrl = "https://api.qijieya.cn/meting/?server={$source}&type=url&id={$id}";
-        
-        // 使用curl测试第三方接口可用性
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $testUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 3); // 3秒超时，避免影响用户体验
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_HEADER, true); // 获取头信息以分析音频属性
-        $result = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $contentLength = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
-        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-        curl_close($ch);
-        
-        // 检查API是否返回了有效内容
-        if ($httpCode >= 200 && $httpCode < 400 && $httpCode != 416) {
-            // 添加额外检查，验证是否真的有音频文件（非空响应）
-            if (!empty($result) && $contentLength > 1000 && strpos($contentType, 'audio') !== false) {
-                // 根据Content-Type和大小估算比特率
-                $br = 128.000; // 默认比特率
-                
-                // 尝试从音频文件格式判断比特率
-                if (strpos($contentType, 'mpeg') !== false || strpos($contentType, 'mp3') !== false) {
-                    // MP3文件，根据大小推测比特率
-                    if ($contentLength > 10000000) { // 大于10MB
-                        $br = 320.000;
-                    } elseif ($contentLength > 5000000) { // 大于5MB
-                        $br = 256.000;
-                    } elseif ($contentLength > 2500000) { // 大于2.5MB
-                        $br = 192.000;
-                    } elseif ($contentLength > 1500000) { // 大于1.5MB
-                        $br = 128.000;
-                    } else {
-                        $br = 96.000;
-                    }
-                } elseif (strpos($contentType, 'flac') !== false) {
-                    // FLAC文件通常是无损的
-                    $br = 900.000; // 近似无损音质
-                } elseif (strpos($contentType, 'wav') !== false) {
-                    // WAV文件通常是无损的
-                    $br = 1400.000;
-                } elseif (strpos($contentType, 'aac') !== false || strpos($contentType, 'mp4') !== false) {
-                    // AAC文件
-                    if ($contentLength > 8000000) {
-                        $br = 256.000;
-                    } elseif ($contentLength > 4000000) {
-                        $br = 192.000;
-                    } else {
-                        $br = 128.000;
-                    }
-                }
-                
-                // 确认有有效音频文件，按照本地数据格式构建JSON
-                return '{
-                    "url": "'.$testUrl.'",
-                    "size": '.$contentLength.',
-                    "br": '.$br.'
-                }';
-            }
-        }
-        
-        // API不可用或没有有效音频文件，返回false让系统使用本地meting
-        return false;
-    } 
 
+    $testUrl = "https://api.qijieya.cn/meting/?server={$source}&type=url&id={$id}";
+    
+    // 使用curl测试第三方接口可用性
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $testUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 3); // 3秒超时，避免影响用户体验
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($ch, CURLOPT_HEADER, true); // 获取头信息以分析音频属性
+    $result = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $contentLength = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+    $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+    curl_close($ch);
+    
+    // 检查API是否返回了有效内容
+    if ($httpCode >= 200 && $httpCode < 400 && $httpCode != 416) {
+        // 添加额外检查，验证是否真的有音频文件（非空响应）
+        if (!empty($result) && $contentLength > 1000 && strpos($contentType, 'audio') !== false) {
+            // 根据Content-Type和大小估算比特率
+            $br = 128.000; // 默认比特率
+            
+            // 尝试从音频文件格式判断比特率
+            if (strpos($contentType, 'mpeg') !== false || strpos($contentType, 'mp3') !== false) {
+                // MP3文件，根据大小推测比特率
+                if ($contentLength > 10000000) { // 大于10MB
+                    $br = 320.000;
+                } elseif ($contentLength > 5000000) { // 大于5MB
+                    $br = 256.000;
+                } elseif ($contentLength > 2500000) { // 大于2.5MB
+                    $br = 192.000;
+                } elseif ($contentLength > 1500000) { // 大于1.5MB
+                    $br = 128.000;
+                } else {
+                    $br = 96.000;
+                }
+            } elseif (strpos($contentType, 'flac') !== false) {
+                // FLAC文件通常是无损的
+                $br = 900.000; // 近似无损音质
+            } elseif (strpos($contentType, 'wav') !== false) {
+                // WAV文件通常是无损的
+                $br = 1400.000;
+            } elseif (strpos($contentType, 'aac') !== false || strpos($contentType, 'mp4') !== false) {
+                // AAC文件
+                if ($contentLength > 8000000) {
+                    $br = 256.000;
+                } elseif ($contentLength > 4000000) {
+                    $br = 192.000;
+                } else {
+                    $br = 128.000;
+                }
+            }
+            
+            // 确认有有效音频文件，按照本地数据格式构建JSON
+            return '{
+                "url": "'.$testUrl.'",
+                "size": '.$contentLength.',
+                "br": '.$br.'
+            }';
+        }
+    }
+    
+    // API不可用或没有有效音频文件，返回false让系统使用本地meting
     return false;
+    
 }
 
 /**

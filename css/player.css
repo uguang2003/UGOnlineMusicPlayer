@@ -243,7 +243,8 @@ body {
     position: absolute;
     left: 240px;
     top: 15px;
-    right: 15px;
+    right: 20px;
+    /* 调整回原来的边距，不再为公告按钮留空间 */
     bottom: 0;
     height: 35px;
     box-sizing: border-box;
@@ -277,6 +278,40 @@ body {
     height: 32px;
     width: 32px;
     border-radius: 50%;
+}
+
+/* 公告按钮 */
+.placard-btn {
+    transition: all 0.25s ease;
+    -webkit-transition: all 0.25s ease;
+    -moz-transition: all 0.25s ease;
+    -o-transition: all 0.25s ease;
+    -ms-transition: all 0.25s ease;
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    height: 35px;
+    opacity: .8;
+    z-index: 10;
+}
+
+.placard-btn a {
+    display: block;
+    color: #fff;
+    line-height: 35px;
+    border-radius: 35px;
+    padding: 0 15px;
+    border: 1px solid rgba(150, 150, 150, .5);
+}
+
+.placard-btn a:hover {
+    border: 1px solid #fff;
+    opacity: 1;
+    color: #fff;
+}
+
+.placard-btn .layui-icon {
+    margin-right: 5px;
 }
 
 /* 宽度约束容器 */

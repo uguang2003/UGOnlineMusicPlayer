@@ -23,7 +23,7 @@
 	<title>UG的音乐盒</title>
 	<meta name="description"
 		content="UG的音乐盒是一个以H5 + JavaScript + php为基础开发的在线听歌房，原作者孟坤（MK），除了可以在线听歌，还可以免费下载各大音乐网站的收费歌曲，欢迎各位音乐爱好者前来体验。" />
-	<meta name="keywords" content="MKOnlinePlayer,在线听歌房,热门歌曲下载,网易云音乐免费下载,QQ音乐免费下载,酷狗音乐免费下载" />
+	<meta name="keywords" content="UGOnlinePlayer,MKOnlinePlayer,在线听歌房,热门歌曲下载,网易云音乐免费下载,QQ音乐免费下载,酷狗音乐免费下载" />
 
 	<!-- 不支持IE8及以下版本浏览器 -->
 	<!--[if lte IE 8]>
@@ -60,6 +60,81 @@
 			font-size: 13px;
 			list-style: decimal;
 		}
+
+		/* UG666页面样式 */
+		.about-content {
+			padding: 20px;
+			color: #fff;
+			max-width: 800px;
+			margin: 0 auto;
+			height: 90%;
+			/* 添加固定高度以启用滚动条 */
+			overflow: auto;
+			/* 确保内容溢出时显示滚动条 */
+		}
+
+		.about-section {
+			margin-bottom: 30px;
+			background: rgba(0, 0, 0, 0.2);
+			padding: 20px;
+			border-radius: 5px;
+		}
+
+		.about-section h2 {
+			margin-bottom: 15px;
+			font-size: 22px;
+			color: #31c27c;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+			padding-bottom: 10px;
+		}
+
+		.about-avatar {
+			text-align: center;
+			margin-bottom: 15px;
+		}
+
+		.about-avatar img {
+			width: 100px;
+			height: 100px;
+			border-radius: 50%;
+			border: 3px solid rgba(255, 255, 255, 0.2);
+		}
+
+		.about-info p {
+			margin-bottom: 10px;
+			line-height: 1.6;
+		}
+
+		.about-info a,
+		.about-section a {
+			color: #31c27c;
+			text-decoration: none;
+		}
+
+		.about-info a:hover,
+		.about-section a:hover {
+			text-decoration: underline;
+		}
+
+		.about-notice {
+			text-align: center;
+		}
+
+		.placard-btn-inner {
+			background-color: #31c27c;
+			border: none;
+		}
+
+		/* 移动设备适配 */
+		@media screen and (max-width: 768px) {
+			.about-content {
+				padding: 15px 10px;
+			}
+
+			.about-section {
+				padding: 15px;
+			}
+		}
 	</style>
 </head>
 
@@ -78,6 +153,12 @@
 				<span>歌曲热评/评论</span>
 			</a>
 		</div>
+		<!-- <div class="placard-btn">
+			<a href="javascript:showPlacard();" title="查看公告">
+				<i class="layui-icon layui-icon-notice"></i>
+				<span>公告</span>
+			</a>
+		</div> -->
 	</div> <!--class="header"-->
 
 	<!-- 中间主体区域 -->
@@ -90,6 +171,7 @@
 					<span class="btn" data-action="playing" title="正在播放列表">正在播放</span>
 					<span class="btn" data-action="sheet" title="音乐播放列表">播放列表</span>
 					<span class="btn" data-action="search" title="点击搜索音乐">歌曲搜索</span>
+					<span class="btn" data-action="about" title="UG666">UG666</span>
 				</div>
 			</div> <!--class="btn-bar"-->
 
@@ -99,6 +181,36 @@
 
 				<!--音乐播放列表-->
 				<div id="main-list" class="music-list data-box"></div>
+
+				<!--UG666页面-->
+				<div id="about" class="data-box" hidden>
+					<div class="about-content mCustomScrollbar">
+						<div class="about-section">
+							<h2>公告</h2>
+							<div class="about-notice">
+								<button class="layui-btn placard-btn-inner" onclick="showPlacard()">
+									<i class="layui-icon layui-icon-notice"></i> 查看公告
+								</button>
+							</div>
+						</div>
+						<div class="about-section">
+							<h2>关于我</h2>
+							<div class="about-avatar">
+								<img src="https://ug666.top/images/me.jpg" alt="UG头像">
+							</div>
+							<div class="about-info">
+								<p>大家好，我是UG，一名热爱音乐的开发者。</p>
+								<p>我的博客: <a href="https://ug666.top" target="_blank">UGBlog</a></p>
+							</div>
+						</div>
+
+						<div class="about-section">
+							<h2>关于本站</h2>
+							<p>UG音乐盒是我基于MKOnlinePlayer修改的在线音乐播放器，支持多个音乐平台的歌曲搜索和播放。</p>
+							<p>本站技术栈: HTML5, CSS3, JavaScript, PHP, layui</p>
+						</div>
+					</div>
+				</div>
 			</div> <!--class="data-area"-->
 
 			<!-- 右侧封面及歌词展示 -->
@@ -172,17 +284,48 @@
 
 	<!-- 自定义js -->
 	<script>
-		// (function () {
-		// 	setTimeout(function () {
-		// 		var cnzz_s_tag = document.createElement('script');
-		// 		cnzz_s_tag.type = 'text/javascript';
-		// 		cnzz_s_tag.async = true;
-		// 		cnzz_s_tag.charset = 'utf-8';
-		// 		cnzz_s_tag.src = 'https://w.cnzz.com/c.php?id=1273282175&async=1';
-		// 		var root_s = document.getElementsByTagName('script')[0];
-		// 		root_s.parentNode.insertBefore(cnzz_s_tag, root_s);
-		// 	}, 0);
-		// })();
+		$(function () {
+			// 处理所有选项卡的点击事件，确保正确显示/隐藏内容
+			$(".btn").click(function () {
+				var action = $(this).data("action");
+
+				// 搜索按钮有特殊处理，不在这里处理
+				if (action === "search") return;
+
+				// 移除其他选项卡的激活状态
+				$('.btn-box .active').removeClass('active');
+				// 激活当前选项卡
+				$(this).addClass('active');
+
+				// 处理播放器显示/隐藏
+				if ($(".btn[data-action='player']").css('display') !== 'none') {
+					$("#player").hide();
+				} else if ($("#player").css('display') == 'none') {
+					$("#player").fadeIn();
+				}
+
+				// 根据不同选项卡显示对应内容，隐藏其他内容
+				if (action === "about") {
+					$("#about").fadeIn();
+					$("#sheet").hide();
+					$("#main-list").hide();
+				} else if (action === "sheet") {
+					$("#sheet").fadeIn();
+					$("#about").hide();
+					$("#main-list").hide();
+				} else if (action === "playing") {
+					loadList(1); // 显示正在播放列表
+					$("#main-list").fadeIn();
+					$("#about").hide();
+					$("#sheet").hide();
+				} else if (action === "player") {
+					$("#player").fadeIn();
+					$("#about").hide();
+					$("#sheet").hide();
+					$("#main-list").hide();
+				}
+			});
+		});
 	</script>
 
 	<!-- 搜索弹窗 -->
@@ -207,13 +350,14 @@
 	</script>
 
 	<!-- 公告html -->
-	<!-- <script type="text/html" id="layer-placard-box">
+	<script type="text/html" id="layer-placard-box">
     <ul id="layer-placard-content">
+				<li>点击进入<a href="https://ug666.top" style="cursor: pointer; color: #0366d6;">UGBlog</a></li>
         <li>由于本站歌曲和封面图片较多，所以第一次加载会比较慢，耐心稍等一会就行。</li>
         <li>PC端可使用快捷键控制，Ctrl+左方向键=上一首、Ctrl+右方向键=下一首、空格键=播放/暂停。</li>
         <li>移动端（手机、平板用户）请双击播放，第一次点击是加载，第二点击是播放，为防止误操作。</li>
     </ul>
-	</script> -->
+	</script>
 
 </body>
 
