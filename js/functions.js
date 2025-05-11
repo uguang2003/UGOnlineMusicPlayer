@@ -419,6 +419,9 @@ function searchSubmit() {
 
     layer.closeAll('page');     // 关闭搜索框
 
+    // 隐藏UG666页面，避免搜索结果与其重叠
+    $("#about").hide();
+
     rem.loadPage = 1;   // 已加载页数复位
     rem.wd = wd;    // 搜索词
     ajaxSearch();   // 加载搜索结果
@@ -1082,4 +1085,26 @@ function playerReaddata(key) {
     if (!window.localStorage) return '';
     key = 'mkPlayer2_' + key;
     return JSON.parse(localStorage.getItem(key));
+}
+
+// 同步网易云音乐歌单功能
+function syncPlaylist() {
+    var uid = $("#uid").val().trim();
+    if (!uid) {
+        layer.msg("请输入网易云音乐用户ID", { anim: 6 });
+        return false;
+    }
+
+    if (isNaN(uid)) {
+        layer.msg("用户ID只能是数字", { anim: 6 });
+        return false;
+    }
+
+    // 显示播放列表标签页
+    dataBox("sheet");
+
+    // 调用同步歌单功能
+    ajaxUserList(uid);
+
+    return true;
 }

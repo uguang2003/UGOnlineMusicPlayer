@@ -602,12 +602,152 @@ function ajaxLyric(music, callback) {
 function ajaxUserList(uid) {
     var tmpLoading = layer.msg('加载中...', { icon: 16, shade: [0.75, '#000'] });
 
+    // 先获取用户详细信息（包含头像）
+    ajaxUserInfo(uid, function (userInfo) {
+        if (userInfo && userInfo.profile) {
+            // 记录用户信息
+            rem.uid = uid;  // 记录已同步用户 uid
+            rem.uname = userInfo.profile.nickname;  // 用户昵称
+            rem.uavatar = userInfo.profile.avatarUrl + "?param=200y200";  // 用户头像
+
+            // 保存用户信息到本地存储
+            playerSavedata('uid', rem.uid);
+            playerSavedata('uname', rem.uname);
+            playerSavedata('uavatar', rem.uavatar);  // 保存头像URL
+
+            // 更新UI上的用户头像和昵称（如果相应的元素存在）
+            if ($("#user-avatar").length) {
+                $("#user-avatar").attr("src", rem.uavatar);
+            }
+            if ($("#logged-user-name").length) {
+                $("#logged-user-name").text(rem.uname);
+            }
+            if ($("#logged-user-id").length) {
+                $("#logged-user-id").text(uid);
+            }
+
+            // 更新登录状态UI
+            if ($("#sync-login-container").length && $("#sync-loggedin-container").length) {
+                $("#sync-login-container").hide();
+                $("#sync-loggedin-container").show();
+            }
+
+            layer.msg('欢迎您 ' + rem.uname);
+        }
+
+        // 继续获取用户歌单信息
+        getUserPlaylists();
+    });
+
+    // 内部函数：获取用户歌单
+    function getUserPlaylists() {
+        // 构造API请求参数
+        var apiData = "types=userlist&uid=" + uid;
+
+        // 调试信息输出
+        if (mkPlayer.debug) {
+            console.log("正在请求用户歌单...");
+            console.log("API地址: " + mkPlayer.api);
+            console.log("请求参数: " + apiData);
+            console.log("用户ID: " + uid);
+        }
+
+        $.ajax({
+            type: mkPlayer.method,
+            url: mkPlayer.api,
+            data: apiData,
+            dataType: mkPlayer.dataType,
+            complete: function (XMLHttpRequest, textStatus) {
+                if (tmpLoading) layer.close(tmpLoading);    // 关闭加载中动画
+                if (mkPlayer.debug) {
+                    console.log("用户歌单请求完成，状态: " + textStatus);
+                }
+            },  // complete
+            success: function (jsonData) {
+                // 调试信息输出
+                if (mkPlayer.debug) {
+                    console.log("用户歌单获取成功，返回数据: ", jsonData);
+                }
+
+                if (jsonData.code == "-1" || jsonData.code == 400) {
+                    if (mkPlayer.debug) {
+                        console.warn("用户ID输入有误: " + uid);
+                    }
+                    layer.msg('用户 uid 输入有误', { anim: 6 });
+                    return false;
+                }
+
+                if (jsonData.playlist.length === 0 || typeof (jsonData.playlist.length) === "undefined") {
+                    if (mkPlayer.debug) {
+                        console.warn("未找到用户歌单: " + uid);
+                    }
+                    layer.msg('没找到用户 ' + uid + ' 的歌单', { anim: 6 });
+                    return false;
+                } else {
+                    var tempList, userList = [];
+                    $("#sheet-bar").remove();   // 移除登陆条
+
+                    if (mkPlayer.debug) {
+                        console.log("用户歌单数量: " + jsonData.playlist.length);
+                    }
+
+                    for (var i = 0; i < jsonData.playlist.length; i++) {
+                        // 获取歌单信息
+                        tempList = {
+                            id: jsonData.playlist[i].id,    // 列表的网易云 id
+                            name: jsonData.playlist[i].name,   // 列表名字
+                            cover: jsonData.playlist[i].coverImgUrl + "?param=200y200",   // 列表封面
+                            creatorID: uid,   // 列表创建者id
+                            creatorName: jsonData.playlist[i].creator.nickname,   // 列表创建者名字
+                            creatorAvatar: jsonData.playlist[i].creator.avatarUrl,   // 列表创建者头像
+                            item: []
+                        };
+
+                        if (mkPlayer.debug) {
+                            console.log("加载歌单: [" + (i + 1) + "/" + jsonData.playlist.length + "] " + tempList.name);
+                        }
+
+                        // 存储并显示播放列表
+                        addSheet(musicList.push(tempList) - 1, tempList.name, tempList.cover);
+                        userList.push(tempList);
+                    }
+                    playerSavedata('ulist', userList);
+                    // 显示退出登录的提示条
+                    sheetBar();
+
+                    if (mkPlayer.debug) {
+                        console.log("用户歌单全部加载完成");
+                    }
+                }
+                // 调试信息输出
+                if (mkPlayer.debug) {
+                    console.debug("用户歌单获取成功 [用户网易云ID：" + uid + "]");
+                }
+            },   //success
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                layer.msg('歌单同步失败 - ' + XMLHttpRequest.status);
+                if (mkPlayer.debug) {
+                    console.error("用户歌单获取失败");
+                    console.error("状态码: " + XMLHttpRequest.status);
+                    console.error("错误信息: " + errorThrown);
+                    console.error("响应文本: " + XMLHttpRequest.responseText);
+                }
+                console.error(XMLHttpRequest + textStatus + errorThrown);
+            }   // error
+        });//ajax
+    }
+    return true;
+}
+
+// ajax获取用户信息
+// 参数：用户的网易云ID，回调函数
+function ajaxUserInfo(uid, callback) {
     // 构造API请求参数
-    var apiData = "types=userlist&uid=" + uid;
+    var apiData = "types=userinfo&uid=" + uid;
 
     // 调试信息输出
     if (mkPlayer.debug) {
-        console.log("正在请求用户歌单...");
+        console.log("正在请求用户信息...");
         console.log("API地址: " + mkPlayer.api);
         console.log("请求参数: " + apiData);
         console.log("用户ID: " + uid);
@@ -618,91 +758,30 @@ function ajaxUserList(uid) {
         url: mkPlayer.api,
         data: apiData,
         dataType: mkPlayer.dataType,
-        complete: function (XMLHttpRequest, textStatus) {
-            if (tmpLoading) layer.close(tmpLoading);    // 关闭加载中动画
-            if (mkPlayer.debug) {
-                console.log("用户歌单请求完成，状态: " + textStatus);
-            }
-        },  // complete
         success: function (jsonData) {
             // 调试信息输出
             if (mkPlayer.debug) {
-                console.log("用户歌单获取成功，返回数据: ", jsonData);
+                console.log("用户信息获取成功，返回数据: ", jsonData);
             }
 
             if (jsonData.code == "-1" || jsonData.code == 400) {
                 if (mkPlayer.debug) {
-                    console.warn("用户ID输入有误: " + uid);
+                    console.warn("用户ID输入有误或API返回错误: " + uid);
                 }
-                layer.msg('用户 uid 输入有误', { anim: 6 });
+                callback(null);
                 return false;
             }
 
-            if (jsonData.playlist.length === 0 || typeof (jsonData.playlist.length) === "undefined") {
-                if (mkPlayer.debug) {
-                    console.warn("未找到用户歌单: " + uid);
-                }
-                layer.msg('没找到用户 ' + uid + ' 的歌单', { anim: 6 });
-                return false;
-            } else {
-                var tempList, userList = [];
-                $("#sheet-bar").remove();   // 移除登陆条
-                rem.uid = uid;  // 记录已同步用户 uid
-                rem.uname = jsonData.playlist[0].creator.nickname;  // 第一个列表(喜欢列表)的创建者即用户昵称
-
-                if (mkPlayer.debug) {
-                    console.log("用户信息: ID=" + uid + ", 昵称=" + rem.uname);
-                    console.log("用户歌单数量: " + jsonData.playlist.length);
-                }
-
-                layer.msg('欢迎您 ' + rem.uname);
-                // 记录登录用户
-                playerSavedata('uid', rem.uid);
-                playerSavedata('uname', rem.uname);
-
-                for (var i = 0; i < jsonData.playlist.length; i++) {
-                    // 获取歌单信息
-                    tempList = {
-                        id: jsonData.playlist[i].id,    // 列表的网易云 id
-                        name: jsonData.playlist[i].name,   // 列表名字
-                        cover: jsonData.playlist[i].coverImgUrl + "?param=200y200",   // 列表封面
-                        creatorID: uid,   // 列表创建者id
-                        creatorName: jsonData.playlist[i].creator.nickname,   // 列表创建者名字
-                        creatorAvatar: jsonData.playlist[i].creator.avatarUrl,   // 列表创建者头像
-                        item: []
-                    };
-
-                    if (mkPlayer.debug) {
-                        console.log("加载歌单: [" + (i + 1) + "/" + jsonData.playlist.length + "] " + tempList.name);
-                    }
-
-                    // 存储并显示播放列表
-                    addSheet(musicList.push(tempList) - 1, tempList.name, tempList.cover);
-                    userList.push(tempList);
-                }
-                playerSavedata('ulist', userList);
-                // 显示退出登录的提示条
-                sheetBar();
-
-                if (mkPlayer.debug) {
-                    console.log("用户歌单全部加载完成");
-                }
-            }
-            // 调试信息输出
-            if (mkPlayer.debug) {
-                console.debug("用户歌单获取成功 [用户网易云ID：" + uid + "]");
-            }
-        },   //success
+            // 获取成功，返回数据
+            callback(jsonData);
+        },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            layer.msg('歌单同步失败 - ' + XMLHttpRequest.status);
             if (mkPlayer.debug) {
-                console.error("用户歌单获取失败");
+                console.error("用户信息获取失败");
                 console.error("状态码: " + XMLHttpRequest.status);
                 console.error("错误信息: " + errorThrown);
-                console.error("响应文本: " + XMLHttpRequest.responseText);
             }
-            console.error(XMLHttpRequest + textStatus + errorThrown);
-        }   // error
-    });//ajax
-    return true;
+            callback(null);
+        }
+    });
 }

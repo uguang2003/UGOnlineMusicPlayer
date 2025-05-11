@@ -74,10 +74,38 @@
 		}
 
 		.about-section {
-			margin-bottom: 30px;
-			background: rgba(0, 0, 0, 0.2);
+			margin-bottom: 35px;
+			/* 增加更多的底部间距 */
+			background: rgba(0, 0, 0, 0.3);
 			padding: 20px;
-			border-radius: 5px;
+			border-radius: 8px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			clear: both;
+			/* 确保元素不会浮动叠加 */
+			position: relative;
+			/* 建立层叠上下文 */
+			z-index: 1;
+			/* 确保正常层叠顺序 */
+		}
+
+		.about-section:before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 3px;
+			background: linear-gradient(to right, rgba(49, 194, 124, 0.7), rgba(49, 194, 124, 0.2));
+			border-radius: 8px 8px 0 0;
+		}
+
+		.about-section>h2:first-child {
+			margin-top: 5px;
+		}
+
+		.about-section:last-child {
+			margin-bottom: 10px;
 		}
 
 		.about-section h2 {
@@ -86,6 +114,17 @@
 			color: #31c27c;
 			border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 			padding-bottom: 10px;
+		}
+
+		.about-section:nth-child(2) {
+			display: block;
+			padding: 20px;
+			overflow: hidden;
+		}
+
+		/* 优化同步歌单区域内容布局 */
+		.about-section:nth-child(2) {
+			padding: 20px;
 		}
 
 		.about-avatar {
@@ -123,6 +162,142 @@
 		.placard-btn-inner {
 			background-color: #31c27c;
 			border: none;
+		}
+
+		/* 同步歌单容器优化 */
+		.sync-container {
+			display: block;
+			width: 100%;
+			background: none;
+			border: none;
+			box-shadow: none;
+			padding: 0;
+			margin: 0 auto;
+			max-width: 98%;
+		}
+
+		/* 优化已登录状态和未登录状态的样式 */
+		#sync-login-container,
+		#sync-loggedin-container,
+		.sync-container .sheet-item {
+			margin-left: auto;
+			margin-right: auto;
+			width: 100% !important;
+			box-sizing: border-box;
+		}
+
+		/* 调整同步歌单容器的内部间距 */
+		.sync-container {
+			padding: 0;
+		}
+
+		/* 优化内部卡片项目 */
+		.sync-container .sheet-item {
+			display: block;
+			float: none;
+			width: 100%;
+			background: none;
+			border: none;
+			box-shadow: none;
+			margin-bottom: 20px;
+			overflow: hidden;
+			padding: 0;
+		}
+
+		/* 确保最后一个项目没有底部边距 */
+		.sync-container .sheet-item:last-child {
+			margin-bottom: 0;
+		}
+
+		/* 标题栏样式 */
+		.sync-container .sheet-title-bar {
+			background-color: transparent !important;
+			padding: 12px 0 !important;
+			margin: 0 0 10px 0 !important;
+			font-weight: 500;
+			border-bottom: 1px solid rgba(49, 194, 124, 0.3);
+			text-align: left;
+		}
+
+		/* 内容区域样式 */
+		.sync-container .sheet-item>div:not(.sheet-title-bar) {
+			padding: 10px 0;
+		}
+
+		/* 按钮样式优化 */
+		.sync-container .layui-btn {
+			transition: all 0.3s ease;
+		}
+
+		.sync-container .layui-btn:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+		}
+
+		/* 输入框样式优化 */
+		.sync-container .layui-input {
+			background: rgba(30, 30, 30, 0.6) !important;
+			border: 1px solid rgba(255, 255, 255, 0.1) !important;
+			color: #fff !important;
+			border-radius: 4px;
+			transition: all 0.3s ease;
+		}
+
+		.sync-container .layui-input:focus {
+			border-color: rgba(49, 194, 124, 0.5) !important;
+			box-shadow: 0 0 5px rgba(49, 194, 124, 0.3);
+		}
+
+		/* 优化表单区域布局 */
+		.sync-container .layui-form-item {
+			margin-bottom: 15px;
+		}
+
+		/* 按钮容器居中且有足够上下间距 */
+		.sync-container .sheet-item>div:last-child {
+			margin-top: 20px;
+			margin-bottom: 10px;
+			text-align: center;
+		}
+
+		/* 优化帮助提示区域的文本布局 */
+		.sync-container .sheet-item p {
+			line-height: 1.8;
+			margin-bottom: 8px;
+		}
+
+		/* 帮助区域文本居中对齐 */
+		.sync-container .sheet-item div[style*="text-align: left; padding: 15px;"] {
+			padding: 15px 25px !important;
+		}
+
+		/* 帮助提示样式 */
+		.help-title {
+			position: relative;
+			transition: all 0.3s ease;
+		}
+
+		.help-title:hover {
+			background-color: rgba(49, 194, 124, 0.3) !important;
+		}
+
+		.help-title:after {
+			content: '点击查看';
+			font-size: 12px;
+			color: rgba(255, 255, 255, 0.6);
+			position: absolute;
+			right: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+		.help-content {
+			margin-top: 10px;
+			padding: 15px;
+			background: rgba(0, 0, 0, 0.2);
+			border-radius: 4px;
+			border-left: 3px solid rgba(49, 194, 124, 0.5);
+			transition: all 0.3s ease;
 		}
 
 		/* 移动设备适配 */
@@ -184,30 +359,112 @@
 
 				<!--UG666页面-->
 				<div id="about" class="data-box" hidden>
-					<div class="about-content mCustomScrollbar">
-						<div class="about-section">
-							<h2>公告</h2>
-							<div class="about-notice">
-								<button class="layui-btn placard-btn-inner" onclick="showPlacard()">
-									<i class="layui-icon layui-icon-notice"></i> 查看公告
-								</button>
+					<div class="about-content">
+						<div class="about-background">
+							<div class="about-section">
+								<h2>公告</h2>
+								<div class="about-notice">
+									<button class="layui-btn placard-btn-inner" onclick="showPlacard()">
+										<i class="layui-icon layui-icon-notice"></i> 查看公告
+									</button>
+								</div>
 							</div>
-						</div>
-						<div class="about-section">
-							<h2>关于我</h2>
-							<div class="about-avatar">
-								<img src="https://ug666.top/images/me.jpg" alt="UG头像">
-							</div>
-							<div class="about-info">
-								<p>大家好，我是UG，一名热爱音乐的开发者。</p>
-								<p>我的博客: <a href="https://ug666.top" target="_blank">UGBlog</a></p>
-							</div>
-						</div>
+							<div class="about-section">
+								<h2>同步歌单</h2>
+								<div class="sync-container">
+									<!-- 未登录状态 -->
+									<div id="sync-login-container" class="sheet-item"
+										style="width: 100%; text-align: left; padding: 15px; display: none;">
+										<div class="sheet-title-bar"
+											style="margin: 0 0 15px 0; text-align: left; padding-left: 15px; background-color: rgba(49, 194, 124, 0.2);">
+											<i class="layui-icon layui-icon-template-1" style="margin-right: 5px;"></i> 输入网易云音乐用户ID同步歌单
+										</div>
+										<div style="display: flex; align-items: center; margin-bottom: 10px;">
+											<img src="images/player_cover.png" class="sheet-cover"
+												style="width: 80px; height: 80px; margin: 0 20px 0 0;">
+											<div style="flex: 1;">
+												<div class="layui-form-item" style="margin-bottom: 10px;">
+													<input type="text" id="uid" class="layui-input" placeholder="请输入网易云音乐的用户ID"
+														style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2);">
+												</div>
+												<p style="color: #bdbdbe; font-size: 12px; margin-bottom: 5px;">* 网易云音乐个人主页网址中的数字即为您的用户ID</p>
+												<p style="color: #bdbdbe; font-size: 12px;">* 例如：https://music.163.com/#/user/home?id=123456789
+													中的123456789</p>
+											</div>
+										</div>
+										<div style="text-align: center; margin-top: 15px;">
+											<button class="layui-btn placard-btn-inner" onclick="syncPlaylist()"
+												style="width: 200px; height: 40px; border-radius: 20px;">
+												<i class="layui-icon layui-icon-template-1"></i> 立即同步歌单
+											</button>
+										</div>
+									</div>
 
-						<div class="about-section">
-							<h2>关于本站</h2>
-							<p>UG音乐盒是我基于MKOnlinePlayer修改的在线音乐播放器，支持多个音乐平台的歌曲搜索和播放。</p>
-							<p>本站技术栈: HTML5, CSS3, JavaScript, PHP, layui</p>
+									<!-- 已登录状态 -->
+									<div id="sync-loggedin-container" class="sheet-item"
+										style="width: 100%; text-align: left; padding: 15px; display: none;">
+										<div class="sheet-title-bar"
+											style="margin: 0 0 15px 0; text-align: left; padding-left: 15px; background-color: rgba(49, 194, 124, 0.2);">
+											<i class="layui-icon layui-icon-user" style="margin-right: 5px;"></i> 已同步网易云音乐歌单
+										</div>
+										<div style="display: flex; align-items: center; margin-bottom: 20px;">
+											<img src="images/player_cover.png" id="user-avatar" class="sheet-cover"
+												style="width: 80px; height: 80px; margin: 0 20px 0 0; border-radius: 50%; border: 2px solid rgba(49, 194, 124, 0.5);">
+											<div style="flex: 1;">
+												<div style="font-size: 18px; margin-bottom: 10px; color: #fff;">
+													欢迎您，<span id="logged-user-name">用户</span>
+												</div>
+												<p style="color: #bdbdbe; font-size: 12px; margin-bottom: 5px;">
+													用户ID：<span id="logged-user-id"></span>
+												</p>
+											</div>
+										</div>
+										<div
+											style="text-align: center; margin-top: 15px; display: flex; justify-content: center; gap: 20px;">
+											<button class="layui-btn placard-btn-inner login-refresh"
+												style="width: 150px; height: 40px; border-radius: 20px;">
+												<i class="layui-icon layui-icon-refresh"></i> 刷新歌单
+											</button>
+											<button class="layui-btn placard-btn-inner login-out"
+												style="width: 150px; height: 40px; border-radius: 20px; background-color: rgba(255,255,255,0.2);">
+												<i class="layui-icon layui-icon-logout"></i> 退出登录
+											</button>
+										</div>
+									</div>
+
+									<!-- 帮助提示 -->
+									<div class="sheet-item help-item" style="width: 100%; text-align: center; padding: 15px;">
+										<div class="sheet-title-bar help-title"
+											style="margin: 0; text-align: left; padding-left: 15px; background-color: rgba(49, 194, 124, 0.2); cursor: pointer;">
+											<i class="layui-icon layui-icon-help" style="margin-right: 5px;"></i> 如何获取网易云音乐用户ID
+										</div>
+										<div class="help-content"
+											style="text-align: left; padding: 15px; color: #bdbdbe; line-height: 1.8; display: none;">
+											<p>1. 打开网易云音乐官网 <a href="https://music.163.com/" target="_blank"
+													style="color: #31c27c;">https://music.163.com/</a></p>
+											<p>2. 登录您的账号，点击右上角头像进入个人中心</p>
+											<p>3. 此时浏览器地址栏中 <span style="color: #31c27c;">/user/home?id=</span> 后面的数字就是您的网易云用户ID</p>
+											<p>4. 复制该ID，粘贴到上方输入框中，点击"立即同步歌单"按钮即可</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="about-section">
+								<h2>关于我</h2>
+								<div class="about-avatar">
+									<img src="https://ug666.top/images/me.jpg" alt="UG头像">
+								</div>
+								<div class="about-info">
+									<p>大家好，我是UG，一名热爱音乐的开发者。</p>
+									<p>我的博客: <a href="https://ug666.top" target="_blank">UGBlog</a></p>
+								</div>
+							</div>
+
+							<div class="about-section">
+								<h2>关于本站</h2>
+								<p>UG音乐盒是我基于MKOnlinePlayer修改的在线音乐播放器，支持多个音乐平台的歌曲搜索和播放。</p>
+								<p>本站技术栈: HTML5, CSS3, JavaScript, PHP, layui</p>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -325,6 +582,31 @@
 					$("#main-list").hide();
 				}
 			});
+
+			// 帮助提示内容显示/隐藏逻辑
+			$(".help-title").hover(
+				function () {
+					// 鼠标移入时显示提示
+					$(this).siblings(".help-content").stop(true, true).fadeIn(300);
+					$(this).find(".layui-icon").css("color", "#31c27c");
+				},
+				function () {
+					// 鼠标移出时隐藏提示
+					var $content = $(this).siblings(".help-content");
+					$content.stop(true, true).fadeOut(300);
+					$(this).find(".layui-icon").css("color", "");
+				}
+			);
+
+			// 当鼠标悬停在内容上时保持显示
+			$(".help-content").hover(
+				function () {
+					$(this).stop(true, true).show();
+				},
+				function () {
+					$(this).stop(true, true).fadeOut(300);
+				}
+			);
 		});
 	</script>
 
@@ -357,6 +639,134 @@
         <li>PC端可使用快捷键控制，Ctrl+左方向键=上一首、Ctrl+右方向键=下一首、空格键=播放/暂停。</li>
         <li>移动端（手机、平板用户）请双击播放，第一次点击是加载，第二点击是播放，为防止误操作。</li>
     </ul>
+	</script>
+
+	<!-- 修复UG666与其他内容重叠的问题 -->
+	<script>
+		// 等待页面完全加载
+		$(document).ready(function () {
+			// 保存原始的syncPlaylist函数
+			var originalSyncPlaylist = window.syncPlaylist;
+
+			// 重新定义syncPlaylist函数
+			window.syncPlaylist = function () {
+				// 首先隐藏UG666页面
+				$("#about").hide();
+
+				// 然后调用原始的同步函数
+				return originalSyncPlaylist.apply(this, arguments);
+			};
+		});
+	</script>
+
+	<!-- 登录状态管理 -->
+	<script>
+		// 检查用户登录状态并显示相应界面
+		function checkLoginStatus() {
+			// 获取保存的用户信息
+			var savedUid = playerReaddata('uid');
+			var savedUname = playerReaddata('uname');
+			var savedUavatar = playerReaddata('uavatar');  // 获取保存的用户头像URL
+
+			if (savedUid) {
+				// 用户已登录，显示已登录状态
+				$("#sync-loggedin-container").show();
+				$("#sync-login-container").hide();
+
+				// 更新用户信息
+				$("#logged-user-name").text(savedUname || "用户");
+				$("#logged-user-id").text(savedUid);
+
+				// 使用保存的用户头像（如果有）
+				if (savedUavatar) {
+					$("#user-avatar").attr("src", savedUavatar);
+				} else {
+					// 没有保存的头像，使用默认头像
+					$("#user-avatar").attr("src", "images/avatar.png");
+				}
+			} else {
+				// 用户未登录，显示登录界面
+				$("#sync-login-container").show();
+				$("#sync-loggedin-container").hide();
+			}
+		}
+
+		// 页面加载时检查登录状态
+		$(document).ready(function () {
+			// 初始化检查登录状态
+			checkLoginStatus();
+
+			// 给UG666标签页中的登录/登出按钮绑定事件
+			// 登出按钮点击事件
+			$("#about").on("click", ".login-out", function () {
+				playerSavedata('uid', '');
+				playerSavedata('ulist', '');
+				layer.msg('已退出登录');
+				clearUserlist();
+
+				// 更新登录状态UI
+				checkLoginStatus();
+
+				// 隐藏UG666页面并切换到正在播放列表
+				$("#about").hide();
+
+				// 激活"正在播放"按钮
+				$('.btn-box .active').removeClass('active');
+				$('.btn[data-action="playing"]').addClass('active');
+
+				// 显示播放列表和播放器
+				loadList(1); // 显示正在播放列表
+				$("#main-list").fadeIn();
+				$("#player").fadeIn();
+			});
+
+			// 刷新按钮点击事件
+			$("#about").on("click", ".login-refresh", function () {
+				playerSavedata('ulist', '');
+				layer.msg('正在刷新歌单...');
+				clearUserlist();
+
+				// 重新加载用户列表
+				var uid = playerReaddata('uid');
+				if (uid) {
+					ajaxUserList(uid);
+				}
+
+				// 更新登录状态UI
+				checkLoginStatus();
+			});
+
+			// 修改原有的syncPlaylist函数，使其在成功登录后更新UI
+			var originalSyncPlaylist = window.syncPlaylist;
+			window.syncPlaylist = function () {
+				var uid = $("#uid").val().trim();
+				if (!uid) {
+					layer.msg("请输入网易云音乐用户ID", { anim: 6 });
+					return false;
+				}
+
+				if (isNaN(uid)) {
+					layer.msg("用户ID只能是数字", { anim: 6 });
+					return false;
+				}
+
+				// 隐藏UG666页面
+				$("#about").hide();
+
+				// 保存用户ID
+				playerSavedata('uid', uid);
+
+				// 调用原始的同步歌单功能
+				var result = originalSyncPlaylist.apply(this, arguments);
+
+				// 等待一段时间后检查登录状态以更新UI (异步操作后可能需要)
+				setTimeout(function () {
+					checkLoginStatus();
+				}, 1000);
+
+				return result;
+			};
+		});
 	</script>
 
 </body>

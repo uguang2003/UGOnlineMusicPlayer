@@ -123,6 +123,31 @@ switch($types)   // 根据请求的 Api，执行相应操作
         
         break;
     
+    case 'userinfo':    // 获取用户详细信息
+        $uid = getParam('uid');  // 用户ID
+        
+        if(defined('CACHE_PATH')) {
+            $cache = CACHE_PATH.$source.'_'.$types.'_'.$uid.'.json';
+            
+            if(file_exists($cache)) {   // 缓存存在，则读取缓存
+                $data = file_get_contents($cache);
+            } else {
+                $url= 'http://music.163.com/api/v1/user/detail/'.$uid;
+                $data = file_get_contents($url);
+
+                // 只缓存链接获取成功的用户信息
+                if(isset($data) && isset(json_decode($data)->profile)) {
+                    file_put_contents($cache, $data);
+                }
+            }
+        } else {
+            $url= 'http://music.163.com/api/v1/user/detail/'.$uid;
+            $data = file_get_contents($url);
+        }
+        
+        echojson($data);
+        break;
+        
     case 'userlist':    // 获取用户歌单列表
         $uid = getParam('uid');  // 用户ID
         
