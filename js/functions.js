@@ -280,11 +280,12 @@ $(function () {
             $("#sync-loggedin-container").hide();
         }
 
-        // 调用clearUserlist刷新其他界面元素
-        clearUserlist();
 
         // 强制刷新用户界面的登录状态
         $("#user-login").html('我的歌单 <span class="login-btn login-in">[点击同步]</span>');
+
+        // 调用clearUserlist刷新其他界面元素
+        clearUserlist();
     });
 
     // 播放、暂停按钮的处理
@@ -1150,20 +1151,19 @@ function clearUserlist() {
             $("#sync-loggedin-container").hide();
         }
 
-        // 更新歌单列表页中的用户登录信息
-        $("#sheet .login-out").parent().html('我的歌单 <span class="login-btn login-in">[点击同步]</span>');
+        // 更新歌单列表页中的用户登录信息 - 修改选择器更精确地匹配目标元素
+        $("#user-login").html('我的歌单 <span class="login-btn login-in">[点击同步]</span>')
 
         // 刷新播放列表
         refreshSheetList();
 
-        // 显示最后一项登陆条
+        // 显示最后一项登陆条 - 确保在删除后再创建新的
         sheetBar();
 
         return true;
     } else {
         // 移除登录条，将在ajaxUserList函数结束时添加
         $("#sheet-bar").remove();
-
         // 触发重新加载用户歌单
         ajaxUserList(rem.uid);
         return true;
@@ -1214,9 +1214,6 @@ function syncPlaylist() {
         layer.msg("用户ID只能是数字", { anim: 6 });
         return false;
     }
-
-    // 显示播放列表标签页
-    dataBox("sheet");
 
     // 调用同步歌单功能
     ajaxUserList(uid);

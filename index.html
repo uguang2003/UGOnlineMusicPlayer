@@ -641,24 +641,6 @@
     </ul>
 	</script>
 
-	<!-- 修复UG666与其他内容重叠的问题 -->
-	<script>
-		// 等待页面完全加载
-		$(document).ready(function () {
-			// 保存原始的syncPlaylist函数
-			var originalSyncPlaylist = window.syncPlaylist;
-
-			// 重新定义syncPlaylist函数
-			window.syncPlaylist = function () {
-				// 首先隐藏UG666页面
-				$("#about").hide();
-
-				// 然后调用原始的同步函数
-				return originalSyncPlaylist.apply(this, arguments);
-			};
-		});
-	</script>
-
 	<!-- 登录状态管理 -->
 	<script>
 		// 检查用户登录状态并显示相应界面
@@ -725,6 +707,8 @@
 					$('.user-sheets').remove();
 				}
 
+				$("#user-login").html('我的歌单 <span class="login-btn login-in">[点击同步]</span>')
+
 				// 重新加载系统歌单
 				refreshSheetList();
 
@@ -755,31 +739,29 @@
 
 			// 修改原有的syncPlaylist函数，使其在成功登录后更新UI
 			var originalSyncPlaylist = window.syncPlaylist;
+			// 重新定义syncPlaylist函数
 			window.syncPlaylist = function () {
-				var uid = $("#uid").val().trim();
-				if (!uid) {
-					layer.msg("请输入网易云音乐用户ID", { anim: 6 });
-					return false;
+				// 记录当前页面状态 - 现在只用于调试
+				var currentPage = "";
+				if ($("#about").is(":visible")) {
+					currentPage = "about";
+				} else if ($("#sheet").is(":visible")) {
+					currentPage = "sheet";
+				} else if ($("#main-list").is(":visible")) {
+					currentPage = "list";
+				} else if ($("#player").is(":visible")) {
+					currentPage = "player";
 				}
 
-				if (isNaN(uid)) {
-					layer.msg("用户ID只能是数字", { anim: 6 });
-					return false;
+				if (mkPlayer.debug) {
+					console.log("同步歌单，当前页面: " + currentPage);
 				}
 
-				// 隐藏UG666页面
-				$("#about").hide();
-
-				// 保存用户ID
-				playerSavedata('uid', uid);
-
-				// 调用原始的同步歌单功能
+				// 调用原始的同步函数
 				var result = originalSyncPlaylist.apply(this, arguments);
 
-				// 等待一段时间后检查登录状态以更新UI (异步操作后可能需要)
-				setTimeout(function () {
-					checkLoginStatus();
-				}, 1000);
+				// 直接检查登录状态并更新UI，不做页面切换
+				checkLoginStatus();
 
 				return result;
 			};
