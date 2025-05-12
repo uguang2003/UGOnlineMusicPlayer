@@ -304,11 +304,116 @@
 		@media screen and (max-width: 768px) {
 			.about-content {
 				padding: 15px 10px;
+				height: 85vh;
+				/* 调整高度适应移动设备 */
 			}
 
 			.about-section {
 				padding: 15px;
+				margin-bottom: 20px;
+				/* 减少底部间距 */
 			}
+
+			.about-section h2 {
+				font-size: 18px;
+				/* 减小标题字体 */
+				margin-bottom: 10px;
+			}
+
+			/* 优化同步歌单布局 */
+			#sync-login-container>div,
+			#sync-loggedin-container>div {
+				display: block !important;
+				/* 强制块级显示 */
+				flex-direction: column !important;
+				align-items: center !important;
+			}
+
+			/* 调整登录区域的图片和输入区布局 */
+			#sync-login-container>div:first-of-type img {
+				width: 60px !important;
+				height: 60px !important;
+				margin: 0 auto 15px auto !important;
+				display: block;
+			}
+
+			#sync-login-container>div:first-of-type>div,
+			#sync-loggedin-container>div:first-of-type>div {
+				width: 100% !important;
+				margin-left: 0 !important;
+			}
+
+			/* 已登录状态头像调整 */
+			#user-avatar {
+				width: 60px !important;
+				height: 60px !important;
+				margin: 0 auto 15px auto !important;
+				display: block;
+			}
+
+			/* 调整按钮布局 */
+			#sync-loggedin-container>div:last-child {
+				display: flex !important;
+				flex-wrap: wrap !important;
+				justify-content: center !important;
+				align-items: center !important;
+			}
+
+			.login-refresh,
+			.login-out {
+				margin: 5px !important;
+				min-width: 140px !important;
+				max-width: 170px !important;
+			}
+
+			/* 调整帮助内容显示 */
+			.help-content p {
+				font-size: 13px !important;
+				line-height: 1.5 !important;
+			}
+
+			/* 标题栏文本溢出处理 */
+			.sheet-title-bar {
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				padding-right: 60px !important;
+				/* 为"点击查看"文本留出空间 */
+			}
+		}
+
+		/* 超小屏幕适配 */
+		@media screen and (max-width: 480px) {
+			.about-section {
+				padding: 12px;
+				margin-bottom: 15px;
+			}
+
+			.sync-container .layui-btn {
+				font-size: 13px !important;
+				height: 36px !important;
+				line-height: 36px !important;
+			}
+
+			/* 强制按钮全宽 */
+			.login-refresh,
+			.login-out,
+			.sync-container button[onclick="syncPlaylist()"] {
+				width: 100% !important;
+				max-width: 180px !important;
+			}
+		}
+
+		/* 处理横向滚动问题 */
+		.about-content p {
+			word-break: break-word;
+			overflow-wrap: break-word;
+		}
+
+		/* 优化链接在移动设备上的点击区域 */
+		.about-section a {
+			padding: 2px 0;
+			display: inline-block;
 		}
 	</style>
 </head>
@@ -420,13 +525,13 @@
 											</div>
 										</div>
 										<div
-											style="text-align: center; margin-top: 15px; display: flex; justify-content: center; gap: 20px;">
+											style="text-align: center; margin-top: 15px;">
 											<button class="layui-btn placard-btn-inner login-refresh"
-												style="width: 150px; height: 40px; border-radius: 20px;">
+												style="width: 150px; height: 40px; border-radius: 20px; margin: 0 10px 10px 10px;">
 												<i class="layui-icon layui-icon-refresh"></i> 刷新歌单
 											</button>
 											<button class="layui-btn placard-btn-inner login-out"
-												style="width: 150px; height: 40px; border-radius: 20px; background-color: rgba(255,255,255,0.2);">
+												style="width: 150px; height: 40px; border-radius: 20px; background-color: rgba(255,255,255,0.2); margin: 0 10px 10px 10px;">
 												<i class="layui-icon layui-icon-logout"></i> 退出登录
 											</button>
 										</div>
@@ -583,30 +688,18 @@
 				}
 			});
 
-			// 帮助提示内容显示/隐藏逻辑
-			$(".help-title").hover(
-				function () {
-					// 鼠标移入时显示提示
-					$(this).siblings(".help-content").stop(true, true).fadeIn(300);
+			// 帮助提示内容显示/隐藏逻辑 - 修改为点击事件
+			$(".help-title").click(function () {
+				var $content = $(this).siblings(".help-content");
+				// 切换帮助内容的显示状态
+				$content.slideToggle(300);
+				// 切换图标颜色
+				if ($content.is(":visible")) {
 					$(this).find(".layui-icon").css("color", "#31c27c");
-				},
-				function () {
-					// 鼠标移出时隐藏提示
-					var $content = $(this).siblings(".help-content");
-					$content.stop(true, true).fadeOut(300);
+				} else {
 					$(this).find(".layui-icon").css("color", "");
 				}
-			);
-
-			// 当鼠标悬停在内容上时保持显示
-			$(".help-content").hover(
-				function () {
-					$(this).stop(true, true).show();
-				},
-				function () {
-					$(this).stop(true, true).fadeOut(300);
-				}
-			);
+			});
 		});
 	</script>
 
