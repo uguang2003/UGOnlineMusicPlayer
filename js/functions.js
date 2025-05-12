@@ -576,42 +576,64 @@ function download(music) {
         layer.msg('这首歌不支持下载');
         return;
     }
-    var loadMsg = layer.msg('正在请求远程服务器，如果10秒后没有开始下载请重试', {
-        time: 10000
-    });
-    var load = layer.load(0, {
-        shade: [0.25, , '#000'],
-    });
-    var loading = setTimeout(function () {
-        layer.close(load);
-        layer.close(loadMsg);
-        layer.msg('下载请求歌曲链接失败，请检查网络或稍后再试');
-    }, 10000)
-    $.ajax({
-        type: mkPlayer.method,
-        url: mkPlayer.api,
-        data: 'types=download&artist=' + music.artist + '&name=' + music.name + '&source=' + music.source + '&url=' + encodeURIComponent(music.url),
-        dataType: 'json',
-        timeout: 10000,
-        success: function (jsonData) {
-            layer.closeAll();
-            clearInterval(loading);
-            if (jsonData.code == 1) {
-                if ($('.download').length) {
-                    $('.download').remove();
+
+    // 检测是否是移动设备，使用不同的下载策略
+    if (rem.isMobile) {
+        // 移动设备使用直接下载模式，通过修改后的API接口
+        var loadMsg = layer.msg('准备下载...', { time: 3000 });
+        // 构造直接下载的URL（使用新增的direct参数）
+        var directDownloadUrl = mkPlayer.api + '?types=download&direct=1&artist=' + encodeURIComponent(music.artist) +
+            '&name=' + encodeURIComponent(music.name) +
+            '&source=' + encodeURIComponent(music.source) +
+            '&url=' + encodeURIComponent(music.url);
+
+        // 使用window.open打开下载链接，这样在大多数移动浏览器中会触发下载
+        setTimeout(function () {
+            layer.close(loadMsg);
+            window.open(directDownloadUrl, '_blank');
+        }, 1000);
+    } else {
+        // PC端使用原有的下载方式
+        var loadMsg = layer.msg('正在请求远程服务器，如果10秒后没有开始下载请重试', {
+            time: 10000
+        });
+        var load = layer.load(0, {
+            shade: [0.25, , '#000'],
+        });
+        var loading = setTimeout(function () {
+            layer.close(load);
+            layer.close(loadMsg);
+            layer.msg('下载请求歌曲链接失败，请检查网络或稍后再试');
+        }, 10000)
+        $.ajax({
+            type: mkPlayer.method,
+            url: mkPlayer.api,
+            data: 'types=download&artist=' + encodeURIComponent(music.artist) +
+                '&name=' + encodeURIComponent(music.name) +
+                '&source=' + encodeURIComponent(music.source) +
+                '&url=' + encodeURIComponent(music.url),
+            dataType: 'json',
+            timeout: 10000,
+            success: function (jsonData) {
+                layer.closeAll();
+                clearInterval(loading);
+                if (jsonData.code == 1) {
+                    if ($('.download').length) {
+                        $('.download').remove();
+                    }
+                    var downDom = $('<iframe class="download" style="height: 0;width: 0;display: none;"></iframe>');
+                    downDom[0].src = jsonData.url;
+                    $('body').append(downDom);
+                } else {
+                    layer.msg(jsonData.msg);
                 }
-                var downDom = $('<iframe class="download" style="height: 0;width: 0;display: none;"></iframe>');
-                downDom[0].src = jsonData.url;
-                $('body').append(downDom);
-            } else {
-                layer.msg(jsonData.msg);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                layer.msg('下载失败，服务器错误 - ' + XMLHttpRequest.status);
+                console.error(XMLHttpRequest + textStatus + errorThrown);
             }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            layer.msg('下载失败，服务器错误 - ' + XMLHttpRequest.status);
-            console.error(XMLHttpRequest + textStatus + errorThrown);
-        }
-    });
+        });
+    }
 }
 
 // 获取外链的ajax回调函数

@@ -273,10 +273,29 @@ switch($types)   // 根据请求的 Api，执行相应操作
         $url = getParam('url');
         $name = getParam('name');
         $artist = getParam('artist');
+        $direct = getParam('direct', '0'); // 新增参数，是否直接下载(1为直接下载)
 
-        $data = $DOWNLOAD->download($url, $name, $artist);
-
-        echojson($data);
+        if($direct == '1') {
+            // 直接下载模式
+            $source = getParam('source', 'netease');
+            $artistStr = $artist ? ' - '.$artist : '';
+            $filename = $name.$artistStr.'.mp3';
+            
+            // 设置下载所需的响应头
+            header('Content-Type: audio/mpeg');
+            header('Content-Disposition: attachment; filename="'.$filename.'"');
+            header('Content-Transfer-Encoding: binary');
+            header('Cache-Control: no-cache, must-revalidate');
+            header('Expires: 0');
+            
+            // 直接从URL读取并输出
+            readfile($url);
+            exit;
+        } else {
+            // 原有的下载处理逻辑
+            $data = $DOWNLOAD->download($url, $name, $artist);
+            echojson($data);
+        }
         break;
     
     case 'cache':
