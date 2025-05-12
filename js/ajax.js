@@ -685,7 +685,41 @@ function ajaxUserList(uid) {
                     return false;
                 } else {
                     var tempList, userList = [];
-                    $("#sheet-bar").remove();   // 移除登陆条
+
+                    // 查找用户歌单起点
+                    var firstUserListIndex = musicList.length;
+                    for (var i = 1; i < musicList.length; i++) {
+                        if (musicList[i].creatorID !== undefined && musicList[i].creatorID == uid) {
+                            firstUserListIndex = i;
+                            break;  // 找到了用户歌单起点就退出
+                        }
+                    }
+
+                    // 删除当前用户的歌单数据
+                    if (firstUserListIndex < musicList.length) {
+                        musicList.splice(firstUserListIndex, musicList.length - firstUserListIndex);
+                    }
+
+                    // 清空网页上的用户歌单区域
+                    $("#sheet-bar").remove();  // 移除登陆条
+
+                    // 如果用户歌单区域不存在，则创建
+                    if ($('.user-sheets').length === 0) {
+                        // 创建用户歌单卡片组
+                        var userCardHtml = '<div class="sheet-group user-sheets">' +
+                            '<div class="sheet-group-title"><i class="layui-icon layui-icon-user"></i> ' +
+                            rem.uname + ' 的网易云歌单</div>' +
+                            '<div class="sheet-group-content clear-fix"></div>' +
+                            '</div>';
+                        rem.sheetList.append(userCardHtml);
+                    } else {
+                        // 更新卡片组标题
+                        $('.user-sheets .sheet-group-title').html('<i class="layui-icon layui-icon-user"></i> ' +
+                            rem.uname + ' 的网易云歌单');
+
+                        // 清空用户歌单内容
+                        $('.user-sheets .sheet-group-content').empty();
+                    }
 
                     if (mkPlayer.debug) {
                         console.log("用户歌单数量: " + jsonData.playlist.length);
@@ -707,11 +741,17 @@ function ajaxUserList(uid) {
                             console.log("加载歌单: [" + (i + 1) + "/" + jsonData.playlist.length + "] " + tempList.name);
                         }
 
-                        // 存储并显示播放列表
-                        addSheet(musicList.push(tempList) - 1, tempList.name, tempList.cover);
+                        // 存储并显示播放列表，将用户歌单添加到用户卡片组中
+                        var sheetIndex = musicList.push(tempList) - 1;
+                        var sheetHtml = '<div class="sheet-item" data-no="' + sheetIndex + '">' +
+                            '<img class="sheet-cover" src="' + tempList.cover + '">' +
+                            '<p class="sheet-name">' + tempList.name + '</p>' +
+                            '</div>';
+                        $('.user-sheets .sheet-group-content').append(sheetHtml);
                         userList.push(tempList);
                     }
                     playerSavedata('ulist', userList);
+
                     // 显示退出登录的提示条
                     sheetBar();
 

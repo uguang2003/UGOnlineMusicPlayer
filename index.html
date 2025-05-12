@@ -699,25 +699,56 @@
 			// 给UG666标签页中的登录/登出按钮绑定事件
 			// 登出按钮点击事件
 			$("#about").on("click", ".login-out", function () {
+				// 保存用户退出状态 - 彻底清空所有用户相关的本地存储数据
 				playerSavedata('uid', '');
 				playerSavedata('ulist', '');
+				playerSavedata('uname', '');
+				playerSavedata('uavatar', '');
+
+				// 清除localStorage中所有可能包含用户信息的项
+				for (var key in localStorage) {
+					if (key.indexOf('mkPlayer2_') === 0) {
+						localStorage.removeItem(key);
+					}
+				}
+
+				// 彻底清除内存中的用户信息
+				rem.uid = null;
+				rem.uname = null;
+				rem.uavatar = null;
+
+				// 清除UI上的用户信息
 				layer.msg('已退出登录');
-				clearUserlist();
 
-				// 更新登录状态UI
-				checkLoginStatus();
+				// 重新加载歌单列表，清除用户歌单
+				if ($('.user-sheets').length) {
+					$('.user-sheets').remove();
+				}
 
-				// 隐藏UG666页面并切换到正在播放列表
-				$("#about").hide();
+				// 重新加载系统歌单
+				refreshSheetList();
 
-				// 激活"正在播放"按钮
-				$('.btn-box .active').removeClass('active');
-				$('.btn[data-action="playing"]').addClass('active');
+				// 强制UI状态切换 - 使用更直接的方式，直接修改显示状态
+				$("#sync-login-container").css("display", "block");
+				$("#sync-loggedin-container").css("display", "none");
 
-				// 显示播放列表和播放器
-				loadList(1); // 显示正在播放列表
-				$("#main-list").fadeIn();
-				$("#player").fadeIn();
+				// 确保DOM更新后再执行后续操作
+				setTimeout(function () {
+					// 更新登录状态UI
+					checkLoginStatus();
+
+					// 隐藏UG666页面并切换到正在播放列表
+					$("#about").hide();
+
+					// 激活"正在播放"按钮
+					$('.btn-box .active').removeClass('active');
+					$('.btn[data-action="playing"]').addClass('active');
+
+					// 显示播放列表和播放器
+					loadList(1); // 显示正在播放列表
+					$("#main-list").fadeIn();
+					$("#player").fadeIn();
+				}, 100); // 短暂延迟确保DOM已更新
 			});
 
 			// 刷新按钮点击事件

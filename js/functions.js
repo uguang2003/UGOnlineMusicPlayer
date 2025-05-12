@@ -353,7 +353,7 @@ function musicInfo(list, index) {
         '<br><span class="info-title">歌手：</span>' + music.artist +
         '<br><span class="info-title">专辑：</span>' + music.album;
 
-    if (list == rem.playlist && index == rem.playid) {   // 当前正在播放这首歌，那么还可以顺便获取一下时长。。
+    if (list == rem.playlist && index == rem.playid) {   // 当前正在播放这首歌，那么还可以顺便获取一下时长。。。
         tempStr += '<br><span class="info-title">时长：</span>' + formatTime(rem.audio[0].duration);
     }
 
@@ -992,15 +992,31 @@ function initList() {
     if (playerReaddata('uid')) {
         rem.uid = playerReaddata('uid');
         rem.uname = playerReaddata('uname');
-        // musicList.push(playerReaddata('ulist'));
+        rem.uavatar = playerReaddata('uavatar'); // 读取用户头像
         var tmp_ulist = playerReaddata('ulist');    // 读取本地记录的用户歌单
 
         if (tmp_ulist) musicList.push.apply(musicList, tmp_ulist);   // 追加到系统歌单的后面
     }
 
+    // 创建系统歌单卡片组
+    var systemCardHtml = '<div class="sheet-group system-sheets">' +
+        '<div class="sheet-group-title"><i class="layui-icon layui-icon-headset"></i> 系统推荐歌单</div>' +
+        '<div class="sheet-group-content clear-fix"></div>' +
+        '</div>';
+    rem.sheetList.append(systemCardHtml);
+
+    // 如果用户已登录，创建用户歌单卡片组
+    if (playerReaddata('uid')) {
+        var userCardHtml = '<div class="sheet-group user-sheets">' +
+            '<div class="sheet-group-title"><i class="layui-icon layui-icon-user"></i> ' +
+            rem.uname + ' 的网易云歌单</div>' +
+            '<div class="sheet-group-content clear-fix"></div>' +
+            '</div>';
+        rem.sheetList.append(userCardHtml);
+    }
+
     // 显示所有的歌单
     for (var i = 1; i < musicList.length; i++) {
-
         if (i == 1) {    // 正在播放列表
             // 读取正在播放列表
             var tmp_item = playerReaddata('playing');
@@ -1008,14 +1024,12 @@ function initList() {
                 musicList[1].item = tmp_item;
                 mkPlayer.defaultlist = 1;   // 默认显示正在播放列表
             }
-
         } else if (i == 2) { // 历史记录列表
             // 读取历史记录
             var tmp_item = playerReaddata('his');
             if (tmp_item) {
                 musicList[2].item = tmp_item;
             }
-
             // 列表不是用户列表，并且信息为空，需要ajax读取列表
         } else if (!musicList[i].creatorID && (musicList[i].item == undefined || (i > 2 && musicList[i].item.length == 0))) {
             musicList[i].item = [];
@@ -1027,8 +1041,22 @@ function initList() {
             }
         }
 
-        // 在前端显示出来
-        addSheet(i, musicList[i].name, musicList[i].cover);
+        // 判断是否是用户歌单，将歌单添加到对应区域
+        if (musicList[i].creatorID && musicList[i].creatorID == rem.uid) {
+            // 用户歌单添加到用户区域
+            var sheetHtml = '<div class="sheet-item" data-no="' + i + '">' +
+                '<img class="sheet-cover" src="' + (musicList[i].cover || "images/player_cover.png") + '">' +
+                '<p class="sheet-name">' + (musicList[i].name || "读取中...") + '</p>' +
+                '</div>';
+            $('.user-sheets .sheet-group-content').append(sheetHtml);
+        } else {
+            // 系统歌单添加到系统区域
+            var sheetHtml = '<div class="sheet-item" data-no="' + i + '">' +
+                '<img class="sheet-cover" src="' + (musicList[i].cover || "images/player_cover.png") + '">' +
+                '<p class="sheet-name">' + (musicList[i].name || "读取中...") + '</p>' +
+                '</div>';
+            $('.system-sheets .sheet-group-content').append(sheetHtml);
+        }
     }
 
     // 登陆了，但歌单又没有，说明是在刷新歌单
@@ -1055,26 +1083,49 @@ function clearUserlist() {
         if (musicList[i].creatorID !== undefined && musicList[i].creatorID == rem.uid) break;    // 找到了就退出
     }
 
-    // 删除记忆数组
+    // 删除记忆数组中的用户歌单
     musicList.splice(i, musicList.length - i); // 先删除相同的
     musicList.length = i;
 
-    // 刷新列表显示
-    clearSheet();
-    initList();
-}
+    // 只清空用户歌单区域，保留系统歌单区域
+    $('.user-sheets .sheet-group-content').empty();
 
-// 清空当前显示的列表
-function clearDislist() {
-    musicList[rem.dislist].item.length = 0;  // 清空内容
-    if (rem.dislist == 1) {  // 正在播放列表
-        playerSavedata('playing', '');  // 清空本地记录
-        $(".sheet-item[data-no='1'] .sheet-cover").attr('src', 'images/player_cover.png');    // 恢复正在播放的封面
-    } else if (rem.dislist == 2) {   // 播放记录
-        playerSavedata('his', '');  // 清空本地记录
+    // 更新用户歌单卡片标题（以防万一）
+    $('.user-sheets .sheet-group-title').html('<i class="layui-icon layui-icon-user"></i> ' +
+        rem.uname + ' 的网易云歌单');
+
+    // 如果是退出操作，则移除用户数据
+    var isLogout = (playerReaddata('uid') === '');
+
+    if (isLogout) {
+        // 完全清除用户信息
+        rem.uid = null;
+        rem.uname = null;
+        rem.uavatar = null;
+
+        // 移除整个用户歌单区域
+        $('.user-sheets').remove();
+
+        // 更新UG666页面的登录状态
+        if (typeof checkLoginStatus === 'function') {
+            checkLoginStatus();
+        }
+
+        // 刷新播放列表
+        refreshSheetList();
+
+        // 显示最后一项登陆条
+        sheetBar();
+
+        return true;
+    } else {
+        // 移除登录条，将在ajaxUserList函数结束时添加
+        $("#sheet-bar").remove();
+
+        // 触发重新加载用户歌单
+        ajaxUserList(rem.uid);
+        return true;
     }
-    layer.msg('列表已被清空');
-    dataBox("sheet");    // 在主界面显示出音乐专辑
 }
 
 // 刷新播放列表，为正在播放的项添加正在播放中的标识

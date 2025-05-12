@@ -687,6 +687,59 @@ body {
     color: #31c27c;
 }
 
+/* 歌单列表分组样式 */
+#sheet {
+    /* 原有样式保持不变 */
+}
+
+/* 系统歌单和用户歌单分组样式 */
+.sheet-group {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sheet-group-title {
+    color: #31c27c;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    position: relative;
+}
+
+.sheet-group-title:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 30%;
+    height: 2px;
+    background: linear-gradient(to right, rgba(49, 194, 124, 0.8), rgba(49, 194, 124, 0.1));
+    border-radius: 2px;
+}
+
+.sheet-group-title:after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    width: 30%;
+    height: 2px;
+    background: linear-gradient(to left, rgba(49, 194, 124, 0.8), rgba(49, 194, 124, 0.1));
+    border-radius: 2px;
+}
+
+.sheet-group-title .layui-icon {
+    margin-right: 5px;
+    color: #31c27c;
+}
+
 /* 以下是界面右侧 css 样式 */
 /* 播放器主体(歌词和封面) */
 .player {
