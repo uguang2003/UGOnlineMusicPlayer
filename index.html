@@ -724,13 +724,11 @@
 			$("#about").on("click", ".login-refresh", function () {
 				playerSavedata('ulist', '');
 				layer.msg('正在刷新歌单...');
-				clearUserlist();
 
-				// 重新加载用户列表
-				var uid = playerReaddata('uid');
-				if (uid) {
-					ajaxUserList(uid);
-				}
+				// 注释掉重复的clearUserlist()调用，因为functions.js中已经有相同的调用
+				// 由于关联性，这里不能完全删除clearUserlist()调用
+				// 只保留一个clearUserlist()调用，将由它触发functions.js中的事件处理
+				clearUserlist();
 
 				// 更新登录状态UI
 				checkLoginStatus();
