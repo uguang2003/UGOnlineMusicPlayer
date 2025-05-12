@@ -697,8 +697,8 @@
 			checkLoginStatus();
 
 			// 给UG666标签页中的登录/登出按钮绑定事件
-			// 登出按钮点击事件
-			$("#about").on("click", ".login-out", function () {
+			// 登出按钮点击事件 - 绑定到document上，使任何页面中的登出按钮都能正确响应
+			$(document).on("click", ".login-out", function () {
 				// 保存用户退出状态 - 彻底清空所有用户相关的本地存储数据
 				playerSavedata('uid', '');
 				playerSavedata('ulist', '');
@@ -728,37 +728,25 @@
 				// 重新加载系统歌单
 				refreshSheetList();
 
-				// 强制UI状态切换 - 使用更直接的方式，直接修改显示状态
-				$("#sync-login-container").css("display", "block");
-				$("#sync-loggedin-container").css("display", "none");
+				// 直接强制显示登录面板、隐藏已登录面板(使用show/hide方法，不只是设置CSS)
+				$("#sync-login-container").show();
+				$("#sync-loggedin-container").hide();
 
-				// 确保DOM更新后再执行后续操作
+				// 调用clearUserlist刷新其他界面元素
+				clearUserlist();
+
+				// 确保切换后刷新UI状态(强制重新检查)
 				setTimeout(function () {
-					// 更新登录状态UI
 					checkLoginStatus();
-
-					// 隐藏UG666页面并切换到正在播放列表
-					$("#about").hide();
-
-					// 激活"正在播放"按钮
-					$('.btn-box .active').removeClass('active');
-					$('.btn[data-action="playing"]').addClass('active');
-
-					// 显示播放列表和播放器
-					loadList(1); // 显示正在播放列表
-					$("#main-list").fadeIn();
-					$("#player").fadeIn();
-				}, 100); // 短暂延迟确保DOM已更新
+				}, 100);
 			});
 
 			// 刷新按钮点击事件
-			$("#about").on("click", ".login-refresh", function () {
+			$(document).on("click", ".login-refresh", function () {
 				playerSavedata('ulist', '');
 				layer.msg('正在刷新歌单...');
 
-				// 注释掉重复的clearUserlist()调用，因为functions.js中已经有相同的调用
-				// 由于关联性，这里不能完全删除clearUserlist()调用
-				// 只保留一个clearUserlist()调用，将由它触发functions.js中的事件处理
+				// 调用clearUserlist刷新其他界面元素
 				clearUserlist();
 
 				// 更新登录状态UI
@@ -796,6 +784,33 @@
 				return result;
 			};
 		});
+
+		// 在登录状态管理脚本的末尾添加
+		// 刷新歌单列表函数
+		function refreshSheetList() {
+			// 清空现有歌单
+			$('.system-sheets .sheet-group-content').empty();
+
+			// 重新加载系统歌单
+			for (var i = 1; i < 3; i++) {  // 只加载系统歌单(正在播放和播放历史)
+				var sheetHtml = '<div class="sheet-item" data-no="' + i + '">' +
+					'<img class="sheet-cover" src="' + (musicList[i].cover || "images/player_cover.png") + '">' +
+					'<p class="sheet-name">' + (musicList[i].name || "读取中...") + '</p>' +
+					'</div>';
+				$('.system-sheets .sheet-group-content').append(sheetHtml);
+			}
+
+			// 加载其他系统歌单
+			for (var i = 3; i < musicList.length; i++) {
+				if (!musicList[i].creatorID) { // 只加载系统歌单
+					var sheetHtml = '<div class="sheet-item" data-no="' + i + '">' +
+						'<img class="sheet-cover" src="' + (musicList[i].cover || "images/player_cover.png") + '">' +
+						'<p class="sheet-name">' + (musicList[i].name || "读取中...") + '</p>' +
+						'</div>';
+					$('.system-sheets .sheet-group-content').append(sheetHtml);
+				}
+			}
+		}
 	</script>
 
 </body>

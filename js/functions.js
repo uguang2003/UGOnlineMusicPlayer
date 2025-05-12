@@ -243,10 +243,48 @@ $(function () {
 
     // 退出登录
     $("#sheet").on("click", ".login-out", function () {
+        // 保存用户退出状态 - 彻底清空所有用户相关的本地存储数据
         playerSavedata('uid', '');
         playerSavedata('ulist', '');
-        layer.msg('已退出');
+        playerSavedata('uname', '');
+        playerSavedata('uavatar', '');
+
+        // 清除localStorage中所有可能包含用户信息的项
+        for (var key in localStorage) {
+            if (key.indexOf('mkPlayer2_') === 0) {
+                localStorage.removeItem(key);
+            }
+        }
+
+        // 彻底清除内存中的用户信息
+        rem.uid = null;
+        rem.uname = null;
+        rem.uavatar = null;
+
+        // 清除UI上的用户信息
+        layer.msg('已退出登录');
+
+        // 重新加载歌单列表，清除用户歌单
+        if ($('.user-sheets').length) {
+            $('.user-sheets').remove();
+        }
+
+        // 重新加载系统歌单
+        if (typeof refreshSheetList === 'function') {
+            refreshSheetList();
+        }
+
+        // 更新UG666页面的登录状态
+        if ($("#sync-login-container").length && $("#sync-loggedin-container").length) {
+            $("#sync-login-container").show();
+            $("#sync-loggedin-container").hide();
+        }
+
+        // 调用clearUserlist刷新其他界面元素
         clearUserlist();
+
+        // 强制刷新用户界面的登录状态
+        $("#user-login").html('我的歌单 <span class="login-btn login-in">[点击同步]</span>');
     });
 
     // 播放、暂停按钮的处理
@@ -1106,10 +1144,14 @@ function clearUserlist() {
         // 移除整个用户歌单区域
         $('.user-sheets').remove();
 
-        // 更新UG666页面的登录状态
-        if (typeof checkLoginStatus === 'function') {
-            checkLoginStatus();
+        // 更新UG666页面的登录状态 - 显示立即同步歌单界面
+        if ($("#sync-login-container").length && $("#sync-loggedin-container").length) {
+            $("#sync-login-container").show();
+            $("#sync-loggedin-container").hide();
         }
+
+        // 更新歌单列表页中的用户登录信息
+        $("#sheet .login-out").parent().html('我的歌单 <span class="login-btn login-in">[点击同步]</span>');
 
         // 刷新播放列表
         refreshSheetList();
