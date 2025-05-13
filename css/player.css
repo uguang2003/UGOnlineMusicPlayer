@@ -627,6 +627,26 @@ body {
 }
 
 /* 以下是歌单 css 样式 */
+/* 用户登录条样式 */
+#user-login {
+    position: relative;
+    order: -1;
+    /* 使其在flex布局中排到最前面 */
+    width: 100%;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    background-color: rgba(0, 0, 0, .3);
+    color: #ddd;
+    text-align: center;
+    border-radius: 2px;
+}
+
+/* 为sheet容器添加flex布局 */
+#sheet {
+    display: flex;
+    flex-direction: column;
+}
+
 /* 歌单中的一项 */
 .sheet-item {
     position: relative;
@@ -682,6 +702,7 @@ body {
 
 .login-btn {
     cursor: pointer;
+    color: #31c27c;
 }
 
 .login-btn:hover {

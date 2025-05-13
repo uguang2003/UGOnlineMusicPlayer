@@ -1247,6 +1247,15 @@ function syncPlaylist() {
         return false;
     }
 
+    // 显示加载提示
+    var loadingMsg = layer.msg('正在同步歌单，请稍候...', { icon: 16, shade: [0.25, '#000'], time: 0 });
+
+    // 调试日志
+    if (mkPlayer.debug) {
+        console.log("正在同步用户歌单...");
+        console.log("用户ID: " + uid);
+    }
+
     // 调用同步歌单功能
     ajaxUserList(uid);
 

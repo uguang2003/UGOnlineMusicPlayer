@@ -44,14 +44,59 @@ $(function () {
       $("#about").fadeIn();
       $("#sheet").hide();
       $("#main-list").hide();
-
-      // 默认展开帮助区域，改为自动显示，提高用户体验
-      setTimeout(function () {
-        if ($(".help-content").is(":hidden")) {
-          $(".help-title").click();
-        }
-      }, 500);
     } else if (action === "sheet") {
+      // 确保在点击播放列表时更新用户信息
+      if (playerReaddata('uid')) {
+        // 获取用户信息
+        var uid = playerReaddata('uid');
+        var uname = playerReaddata('uname');
+
+        // 首先检查用户歌单是否已加载到播放列表页面
+        if ($('.user-sheets').length === 0 && playerReaddata('ulist')) {
+          // 用户已登录但用户歌单区域不存在，创建用户歌单区域
+          var userCardHtml = '<div class="sheet-group user-sheets">' +
+            '<div class="sheet-group-title"><i class="layui-icon layui-icon-user"></i> ' +
+            uname + ' 的网易云歌单</div>' +
+            '<div class="sheet-group-content clear-fix"></div>' +
+            '</div>';
+          rem.sheetList.append(userCardHtml);
+
+          // 加载用户歌单
+          var userList = playerReaddata('ulist');
+          if (userList && userList.length > 0) {
+            // 添加用户歌单到歌单列表中
+            for (var i = 0; i < userList.length; i++) {
+              // 检查歌单是否已经存在于musicList中
+              var isExist = false;
+              for (var j = 0; j < musicList.length; j++) {
+                if (musicList[j].id == userList[i].id) {
+                  isExist = true;
+                  break;
+                }
+              }
+
+              // 如果歌单不存在，添加到musicList
+              if (!isExist) {
+                musicList.push(userList[i]);
+              }
+
+              // 添加歌单到UI
+              var sheetIndex = musicList.length - 1;
+              var sheetHtml = '<div class="sheet-item" data-no="' + sheetIndex + '">' +
+                '<img class="sheet-cover" src="' + (userList[i].cover || "images/player_cover.png") + '">' +
+                '<p class="sheet-name">' + userList[i].name + '</p>' +
+                '</div>';
+              $('.user-sheets .sheet-group-content').append(sheetHtml);
+            }
+          }
+        }
+
+        // 然后再更新登录条信息
+        if ($("#user-login").length && $("#user-login").text().indexOf('已同步') === -1) {
+          $("#user-login").html('已同步 ' + uname + ' 的歌单 <span class="login-btn login-refresh">[刷新]</span> <span class="login-btn login-out">[退出]</span>');
+        }
+      }
+
       $("#sheet").fadeIn();
       $("#about").hide();
       $("#main-list").hide();
@@ -74,15 +119,16 @@ $(function () {
     // 切换帮助内容的显示状态
     $content.slideToggle(300);
 
-    // 更改帮助标题的文字提示
+    // 切换expanded类，以便CSS能正确显示"点击查看"或"点击隐藏"文本
+    $(this).toggleClass("expanded");
+
+    // 更改图标颜色
     if ($content.is(":visible")) {
       $(this).find(".layui-icon").css("color", "#31c27c");
       $(this).attr("data-shown", "true");
-      $(this).find(".help-title-text").text("点击隐藏");
     } else {
       $(this).find(".layui-icon").css("color", "");
       $(this).attr("data-shown", "false");
-      $(this).find(".help-title-text").text("点击查看");
     }
   });
 });
@@ -158,6 +204,12 @@ window.checkLoginStatus = function () {
 };
 
 $(document).on('click', '.login-refresh', function () {
+  // 调用播放列表页面中刷新按钮使用的相同方法
+  playerSavedata('ulist', '');
+  layer.msg('刷新歌单');
+  clearUserlist();
+  
+  // 延迟后更新UG666页面显示
   setTimeout(function () {
     $(document).trigger('showUG666Playlists');
   }, 800);
@@ -208,6 +260,9 @@ function checkLoginStatus() {
 
 // 页面加载时初始化
 $(document).ready(function () {
+  // 初始化隐藏帮助内容
+  $(".help-content").hide();
+
   // 初始化检查登录状态
   checkLoginStatus();
 
@@ -293,28 +348,72 @@ $(document).ready(function () {
       type: "POST",
       url: "api.php",
       data: {
-        "id": uid,
-        "source": "netease",
-        "types": "userlist"
+        "uid": uid,           // 修正：使用uid而不是id
+        "types": "userinfo"   // 修正：首先获取用户信息
       },
       dataType: "json",
       success: function (data) {
-        layer.closeAll('loading');
-        if (data.code == 200) {
-          // 保存用户信息和歌单
+        if (data.code == 200 && data.profile) {
+          // 保存用户基本信息
           playerSavedata('uid', uid);
-          playerSavedata('ulist', data.playlist);
-          if (data.profile) {
-            playerSavedata('uname', data.profile.nickname);
-            playerSavedata('uavatar', data.profile.avatarUrl);
-          }
+          playerSavedata('uname', data.profile.nickname);
+          playerSavedata('uavatar', data.profile.avatarUrl);
 
-          // 显示成功消息并更新UI
-          layer.msg('歌单同步成功！');
+          // 更新登录状态以同步到播放列表页面
           checkLoginStatus();
-          $(document).trigger('showUG666Playlists');
+
+          // 直接调用播放列表中的同步逻辑，确保数据同步到播放列表页面
+          ajaxUserList(uid);
+
+          // 继续请求用户歌单
+          $.ajax({
+            type: "POST",
+            url: "api.php",
+            data: {
+              "uid": uid,
+              "types": "userlist"
+            },
+            dataType: "json",
+            success: function (playlistData) {
+              layer.closeAll('loading');
+              if (playlistData.code == 200) {
+                // 修改：处理歌单数据为正确的格式
+                var formattedPlaylists = [];
+                if (playlistData.playlist && playlistData.playlist.length > 0) {
+                  // 格式化用户歌单为正确的格式
+                  for (var i = 0; i < playlistData.playlist.length; i++) {
+                    var playlist = playlistData.playlist[i];
+                    formattedPlaylists.push({
+                      id: playlist.id,                     // 歌单ID
+                      name: playlist.name,                 // 歌单名称
+                      cover: playlist.coverImgUrl + "?param=200y200", // 歌单封面
+                      creatorID: uid,                      // 创建者ID
+                      creatorName: playlist.creator.nickname, // 创建者名称
+                      creatorAvatar: playlist.creator.avatarUrl, // 创建者头像
+                      item: []                             // 歌曲项（初始为空）
+                    });
+                  }
+                }
+                // 保存格式化后的用户歌单
+                playerSavedata('ulist', formattedPlaylists);
+
+                // 显示成功消息并更新UI
+                layer.msg('歌单同步成功！');
+                checkLoginStatus();
+                $(document).trigger('showUG666Playlists');
+              } else {
+                layer.msg('歌单获取失败：' + (playlistData.msg || '未知错误'));
+              }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+              layer.closeAll('loading');
+              layer.msg('歌单获取失败，请稍后再试');
+              console.error(XMLHttpRequest, textStatus, errorThrown);
+            }
+          });
         } else {
-          layer.msg('歌单同步失败：' + (data.msg || '未知错误'));
+          layer.closeAll('loading');
+          layer.msg('用户信息获取失败：' + (data.msg || '未知错误'));
         }
       },
       error: function (XMLHttpRequest, textStatus, errorThrown) {

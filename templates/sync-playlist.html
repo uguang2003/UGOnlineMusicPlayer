@@ -2,7 +2,7 @@
   <h2>同步歌单</h2>
   <div class="sync-container">
     <!-- 未登录状态 -->
-    <div id="sync-login-container" class="sheet-item">
+    <div id="sync-login-container" style="display: none;">
       <div class="sheet-title-bar">
         <i class="layui-icon layui-icon-template-1"></i> 输入网易云音乐用户ID同步歌单
       </div>
@@ -24,7 +24,7 @@
     </div>
 
     <!-- 已登录状态 -->
-    <div id="sync-loggedin-container" class="sheet-item">
+    <div id="sync-loggedin-container" style="display: none;">
       <div class="sheet-title-bar">
         <i class="layui-icon layui-icon-user"></i> 已同步网易云音乐歌单
       </div>
@@ -48,10 +48,9 @@
     </div>
 
     <!-- 帮助提示 -->
-    <div class="sheet-item help-item">
+    <div class="help-section">
       <div class="sheet-title-bar help-title">
         <i class="layui-icon layui-icon-help"></i> 如何获取网易云音乐用户ID
-        <span class="help-title-text">点击查看</span>
       </div>
       <div class="help-content">
         <p>1. 打开网易云音乐官网 <a href="https://music.163.com/" target="_blank">https://music.163.com/</a></p>
@@ -62,3 +61,31 @@
     </div>
   </div>
 </div>
+
+<script>
+  // 初始化同步歌单视图状态
+  $(function () {
+    // 检查是否已登录
+    if (playerReaddata('uid')) {
+      // 已登录状态
+      $("#sync-login-container").hide();
+      $("#sync-loggedin-container").show();
+
+      // 更新用户信息
+      var uid = playerReaddata('uid');
+      var uname = playerReaddata('uname');
+      var uavatar = playerReaddata('uavatar');
+
+      $("#user-avatar").attr("src", uavatar || "images/player_cover.png");
+      $("#logged-user-name").text(uname || "用户");
+      $("#logged-user-id").text(uid || "");
+
+      // 立即加载歌单而不等待刷新
+      loadUserPlaylistsForUG666();
+    } else {
+      // 未登录状态
+      $("#sync-login-container").show();
+      $("#sync-loggedin-container").hide();
+    }
+  });
+</script>

@@ -330,6 +330,11 @@
   transform: translateY(-50%);
 }
 
+/* 为展开状态添加新的样式 */
+.help-title.expanded:after {
+  content: '点击隐藏';
+}
+
 .help-content {
   display: none;
   /* 默认隐藏帮助内容 */
