@@ -302,6 +302,7 @@ body {
     border-radius: 35px;
     padding: 0 15px;
     border: 1px solid rgba(150, 150, 150, .5);
+    background-color: #31c27c;
 }
 
 .placard-btn a:hover {
@@ -1148,12 +1149,24 @@ body {
 #layer-form-content .search-input {
     margin-bottom: 10px;
     position: relative;
+    display: flex;
+}
+
+#layer-form-content .search-input .layui-input {
+    flex: 1;
+    margin-right: 10px;
+    height: 38px;
 }
 
 #layer-form-content .search-input .layui-btn {
-    position: absolute;
-    top: 0;
-    right: 0;
+    background-color: #31c27c;
+    border: none;
+}
+
+#layer-form-content {
+    padding: 20px;
+    max-height: 180px;
+    /* 限制高度，避免过长 */
 }
 
 #layer-form-content .source-radio {
@@ -1167,4 +1180,29 @@ body {
 
 #layer-form-content .source-radio .layui-form-radio {
     margin: 0;
+}
+
+/* 确保弹窗中的关闭按钮显示 */
+.layui-layer-setwin .layui-layer-close1 {
+    display: block !important;
+    cursor: pointer;
+}
+
+/* 改进公告弹窗样式 */
+#layer-placard-content {
+    padding: 15px 25px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#layer-placard-content>li {
+    padding: 8px 0;
+    line-height: 1.5;
+    font-size: 14px;
+    list-style: decimal;
+    margin-left: 20px;
+}
+
+#layer-placard-content a {
+    font-weight: 500;
 }

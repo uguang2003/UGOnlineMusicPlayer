@@ -1,0 +1,64 @@
+<div class="about-section">
+  <h2>同步歌单</h2>
+  <div class="sync-container">
+    <!-- 未登录状态 -->
+    <div id="sync-login-container" class="sheet-item">
+      <div class="sheet-title-bar">
+        <i class="layui-icon layui-icon-template-1"></i> 输入网易云音乐用户ID同步歌单
+      </div>
+      <div class="login-box">
+        <img src="images/player_cover.png" class="sheet-cover">
+        <div class="login-form">
+          <div class="layui-form-item">
+            <input type="text" id="uid" class="layui-input" placeholder="请输入网易云音乐的用户ID">
+          </div>
+          <p>* 网易云音乐个人主页网址中的数字即为您的用户ID</p>
+          <p>* 例如：https://music.163.com/#/user/home?id=123456789 中的123456789</p>
+        </div>
+      </div>
+      <div class="login-btn-area">
+        <button class="layui-btn placard-btn-inner" onclick="syncPlaylist()">
+          <i class="layui-icon layui-icon-template-1"></i> 立即同步歌单
+        </button>
+      </div>
+    </div>
+
+    <!-- 已登录状态 -->
+    <div id="sync-loggedin-container" class="sheet-item">
+      <div class="sheet-title-bar">
+        <i class="layui-icon layui-icon-user"></i> 已同步网易云音乐歌单
+      </div>
+      <div class="user-info">
+        <img src="images/player_cover.png" id="user-avatar" class="sheet-cover">
+        <div class="user-details">
+          <div class="user-name">欢迎您，<span id="logged-user-name">用户</span></div>
+          <p>用户ID：<span id="logged-user-id"></span></p>
+        </div>
+      </div>
+      <div class="user-actions">
+        <button class="layui-btn placard-btn-inner login-refresh">
+          <i class="layui-icon layui-icon-refresh"></i> 刷新歌单
+        </button>
+        <button class="layui-btn placard-btn-inner login-out">
+          <i class="layui-icon layui-icon-logout"></i> 退出登录
+        </button>
+      </div>
+      <!-- 歌单列表区域 -->
+      <div class="user-playlist-list"></div>
+    </div>
+
+    <!-- 帮助提示 -->
+    <div class="sheet-item help-item">
+      <div class="sheet-title-bar help-title">
+        <i class="layui-icon layui-icon-help"></i> 如何获取网易云音乐用户ID
+        <span class="help-title-text">点击查看</span>
+      </div>
+      <div class="help-content">
+        <p>1. 打开网易云音乐官网 <a href="https://music.163.com/" target="_blank">https://music.163.com/</a></p>
+        <p>2. 登录您的账号，点击右上角头像进入个人中心</p>
+        <p>3. 此时浏览器地址栏中 <span style="color:#31c27c">/user/home?id=</span> 后面的数字就是您的网易云用户ID</p>
+        <p>4. 复制该ID，粘贴到上方输入框中，点击"立即同步歌单"按钮即可</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -4,39 +4,44 @@
  * 编写：mengkun(https://mkblog.cn)
  * 时间：2018-3-11
  *************************************************/
-// 判断是否是移动设备
-var isMobile = {
+/**
+ * 辅助函数模块
+ * 所有与搜索、下载和UI交互相关的函数
+ */
+
+// 设置移动设备检测对象
+const isMobile = {
     Android: function () {
-        return navigator.userAgent.match(/Android/i) ? true : false;
+        return !!navigator.userAgent.match(/Android/i);
     },
     BlackBerry: function () {
-        return navigator.userAgent.match(/BlackBerry/i) ? true : false;
+        return !!navigator.userAgent.match(/BlackBerry/i);
     },
     iOS: function () {
-        return navigator.userAgent.match(/iPhone|iPad|iPod/i) ? true : false;
+        return !!navigator.userAgent.match(/iPhone|iPad|iPod/i);
     },
     Windows: function () {
-        return navigator.userAgent.match(/IEMobile/i) ? true : false;
+        return !!navigator.userAgent.match(/IEMobile/i);
     },
     Screen: function () {
-        return document.documentElement.clientWidth < 900 ? true : false;
+        return document.documentElement.clientWidth < 900;
     },
     any: function () {
-        return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Windows() || isMobile.Screen());
+        return (this.Android() || this.BlackBerry() || this.iOS() || this.Windows() || this.Screen());
     }
 };
 
-// 初始化layui
-var layer;
-var form;
+// 初始化layui组件
+let layer, form;
 layui.use(['layer', 'form'], function () {
     layer = layui.layer;
     form = layui.form;
+
     if (mkPlayer.placard) {
         layer.config({
             shade: [0.25, '#000'],
             shadeClose: true
-        })
+        });
 
         window.onload = function () {
             // 检查用户是否设置了不再显示公告
@@ -49,19 +54,66 @@ layui.use(['layer', 'form'], function () {
 
 // 添加"显示公告"功能
 function showPlacard() {
-    layer.open({
-        btn: ['我知道了', '不再提醒'],
-        title: '公告',
-        maxWidth: 320,
-        content: $('#layer-placard-box').html(),
-        btn2: function (index, layero) {
-            // 保存用户不再提醒的选择
-            playerSavedata('hideplacard', true);
-            return true;
-        }
-    });
+    if (typeof Templates !== 'undefined') {
+        Templates.showInLayer('placard', {
+            btn: ['我知道了', '不再提醒'],
+            title: '公告',
+            maxWidth: 320,
+            btn2: function () {
+                playerSavedata('hideplacard', true);
+                return true;
+            }
+        });
+    } else {
+        layer.open({
+            btn: ['我知道了', '不再提醒'],
+            title: '公告',
+            maxWidth: 320,
+            content: $('#layer-placard-box').html(),
+            btn2: function () {
+                playerSavedata('hideplacard', true);
+                return true;
+            }
+        });
+    }
 }
 
+// 展现搜索弹窗
+function searchBox() {
+    if (typeof Templates !== 'undefined') {
+        Templates.showInLayer('search-form', {
+            type: 1,
+            title: false,
+            shade: [0.25, '#000'],
+            shadeClose: true,
+            offset: 'auto',
+            area: '360px',
+            success: function () {
+                // 恢复上一次的输入
+                $("#search-wd").focus().val(rem.wd || '');
+                if (form) form.render();
+            }
+        });
+    } else {
+        layer.open({
+            type: 1,
+            title: false,
+            shade: [0.25, '#000'],
+            shadeClose: true,
+            offset: 'auto',
+            area: '360px',
+            success: function () {
+                // 恢复上一次的输入
+                $("#search-wd").focus().val(rem.wd);
+                $("#music-source input[name='source'][value='" + rem.source + "']").prop("checked", "checked");
+                form.render();
+            },
+            content: $('#layer-form-box').html()
+        });
+    }
+}
+
+// 页面初始化
 $(function () {
     if (mkPlayer.debug) {
         console.warn('播放器调试模式已开启，正常使用时请在 js/player.js 中按说明关闭调试模式');
@@ -251,7 +303,7 @@ $(function () {
 
         // 清除localStorage中所有可能包含用户信息的项
         for (var key in localStorage) {
-            if (key.indexOf('mkPlayer2_') === 0) {
+            if (key.indexOf('UGPlayer_') === 0) {
                 localStorage.removeItem(key);
             }
         }
@@ -424,26 +476,6 @@ function musicInfo(list, index) {
             'url: ""');
         // 'url: "' + music.url + '"');
     }
-}
-
-// 展现搜索弹窗
-function searchBox() {
-    layer.open({
-        type: 1,
-        title: false, // 不显示标题
-        shade: [0.25, , '#000'],    // 遮罩颜色深度
-        shadeClose: true,
-        offset: 'auto',
-        area: '360px',
-        success: function () {
-            // 恢复上一次的输入
-            $("#search-wd").focus().val(rem.wd);
-            $("#music-source input[name='source'][value='" + rem.source + "']").prop("checked", "checked");
-            form.render();
-        },
-        content: $('#layer-form-box').html(),
-        cancel: function () { }
-    });
 }
 
 // 搜索提交
@@ -1185,7 +1217,7 @@ function refreshSheet() {
 // 播放器本地存储信息
 // 参数：键值、数据
 function playerSavedata(key, data) {
-    key = 'mkPlayer2_' + key;    // 添加前缀，防止串用
+    key = 'UGPlayer_' + key;    // 添加前缀，防止串用
     data = JSON.stringify(data);
     // 存储，IE6~7 不支持HTML5本地存储
     if (window.localStorage) {
@@ -1198,7 +1230,7 @@ function playerSavedata(key, data) {
 // 返回：数据
 function playerReaddata(key) {
     if (!window.localStorage) return '';
-    key = 'mkPlayer2_' + key;
+    key = 'UGPlayer_' + key;
     return JSON.parse(localStorage.getItem(key));
 }
 

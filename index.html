@@ -11,415 +11,32 @@
 	<meta name="referrer" content="no-referrer">
 	<meta http-equiv="Cache-Control" content="no-siteapp">
 
-	<!-- 强制移动设备以app模式打开页面(即在移动设备下全屏，仅支持部分浏览器) -->
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-touch-fullscreen" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black">
-	<meta name="full-screen" content="yes"><!--UC强制全屏-->
-	<meta name="browsermode" content="application"><!--UC应用模式-->
-	<meta name="x5-fullscreen" content="true"><!--QQ强制全屏-->
-	<meta name="x5-page-mode" content="app"><!--QQ应用模式-->
+	<meta name="full-screen" content="yes">
+	<meta name="browsermode" content="application">
+	<meta name="x5-fullscreen" content="true">
+	<meta name="x5-page-mode" content="app">
 
 	<title>UG的音乐盒</title>
 	<meta name="description"
 		content="UG的音乐盒是一个以H5 + JavaScript + php为基础开发的在线听歌房，原作者孟坤（MK），除了可以在线听歌，还可以免费下载各大音乐网站的收费歌曲，欢迎各位音乐爱好者前来体验。" />
 	<meta name="keywords" content="UGOnlinePlayer,MKOnlinePlayer,在线听歌房,热门歌曲下载,网易云音乐免费下载,QQ音乐免费下载,酷狗音乐免费下载" />
 
-	<!-- 不支持IE8及以下版本浏览器 -->
 	<!--[if lte IE 8]>
         <script>window.location.href="plugns/killie/"</script>
     <![endif]-->
 
-	<!-- favicon图标 -->
 	<link rel="shortcut icon" href="favicon.ico">
-
-	<!-- jQuery文件 -->
-	<script src="js/jquery.min.js"></script>
-
-	<!-- layui样式文件 -->
 	<link rel="stylesheet" href="plugns/layui/css/layui.css">
-
-	<!-- 滚动条美化样式文件 -->
-	<link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.min.css">
-
-	<!-- 播放器样式表文件 -->
-	<link rel="stylesheet" type="text/css" href="css/player.css">
-
-	<!-- 小屏幕样式修复 -->
-	<link rel="stylesheet" type="text/css" href="css/small.css">
-
-	<!-- 自定义css样式 -->
-	<style>
-		#layer-placard-content {
-			padding: 0 15px;
-		}
-
-		#layer-placard-content>li {
-			padding: 4px 0;
-			line-height: 1.5;
-			font-size: 13px;
-			list-style: decimal;
-		}
-
-		/* UG666页面样式 */
-		.about-content {
-			padding: 20px;
-			color: #fff;
-			max-width: 800px;
-			margin: 0 auto;
-			height: 90%;
-			/* 添加固定高度以启用滚动条 */
-			overflow: auto;
-			/* 确保内容溢出时显示滚动条 */
-		}
-
-		.about-section {
-			margin-bottom: 35px;
-			/* 增加更多的底部间距 */
-			background: rgba(0, 0, 0, 0.3);
-			padding: 20px;
-			border-radius: 8px;
-			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-			border: 1px solid rgba(255, 255, 255, 0.1);
-			clear: both;
-			/* 确保元素不会浮动叠加 */
-			position: relative;
-			/* 建立层叠上下文 */
-			z-index: 1;
-			/* 确保正常层叠顺序 */
-		}
-
-		.about-section:before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			height: 3px;
-			background: linear-gradient(to right, rgba(49, 194, 124, 0.7), rgba(49, 194, 124, 0.2));
-			border-radius: 8px 8px 0 0;
-		}
-
-		.about-section>h2:first-child {
-			margin-top: 5px;
-		}
-
-		.about-section:last-child {
-			margin-bottom: 10px;
-		}
-
-		.about-section h2 {
-			margin-bottom: 15px;
-			font-size: 22px;
-			color: #31c27c;
-			border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-			padding-bottom: 10px;
-		}
-
-		.about-section:nth-child(2) {
-			display: block;
-			padding: 20px;
-			overflow: hidden;
-		}
-
-		/* 优化同步歌单区域内容布局 */
-		.about-section:nth-child(2) {
-			padding: 20px;
-		}
-
-		.about-avatar {
-			text-align: center;
-			margin-bottom: 15px;
-		}
-
-		.about-avatar img {
-			width: 100px;
-			height: 100px;
-			border-radius: 50%;
-			border: 3px solid rgba(255, 255, 255, 0.2);
-		}
-
-		.about-info p {
-			margin-bottom: 10px;
-			line-height: 1.6;
-		}
-
-		.about-info a,
-		.about-section a {
-			color: #31c27c;
-			text-decoration: none;
-		}
-
-		.about-info a:hover,
-		.about-section a:hover {
-			text-decoration: underline;
-		}
-
-		.about-notice {
-			text-align: center;
-		}
-
-		.placard-btn-inner {
-			background-color: #31c27c;
-			border: none;
-		}
-
-		/* 同步歌单容器优化 */
-		.sync-container {
-			display: block;
-			width: 100%;
-			background: none;
-			border: none;
-			box-shadow: none;
-			padding: 0;
-			margin: 0 auto;
-			max-width: 98%;
-		}
-
-		/* 优化已登录状态和未登录状态的样式 */
-		#sync-login-container,
-		#sync-loggedin-container,
-		.sync-container .sheet-item {
-			margin-left: auto;
-			margin-right: auto;
-			width: 100% !important;
-			box-sizing: border-box;
-		}
-
-		/* 调整同步歌单容器的内部间距 */
-		.sync-container {
-			padding: 0;
-		}
-
-		/* 优化内部卡片项目 */
-		.sync-container .sheet-item {
-			display: block;
-			float: none;
-			width: 100%;
-			background: none;
-			border: none;
-			box-shadow: none;
-			margin-bottom: 20px;
-			overflow: hidden;
-			padding: 0;
-		}
-
-		/* 确保最后一个项目没有底部边距 */
-		.sync-container .sheet-item:last-child {
-			margin-bottom: 0;
-		}
-
-		/* 标题栏样式 */
-		.sync-container .sheet-title-bar {
-			background-color: transparent !important;
-			padding: 12px 0 !important;
-			margin: 0 0 10px 0 !important;
-			font-weight: 500;
-			border-bottom: 1px solid rgba(49, 194, 124, 0.3);
-			text-align: left;
-		}
-
-		/* 内容区域样式 */
-		.sync-container .sheet-item>div:not(.sheet-title-bar) {
-			padding: 10px 0;
-		}
-
-		/* 按钮样式优化 */
-		.sync-container .layui-btn {
-			transition: all 0.3s ease;
-		}
-
-		.sync-container .layui-btn:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-		}
-
-		/* 输入框样式优化 */
-		.sync-container .layui-input {
-			background: rgba(30, 30, 30, 0.6) !important;
-			border: 1px solid rgba(255, 255, 255, 0.1) !important;
-			color: #fff !important;
-			border-radius: 4px;
-			transition: all 0.3s ease;
-		}
-
-		.sync-container .layui-input:focus {
-			border-color: rgba(49, 194, 124, 0.5) !important;
-			box-shadow: 0 0 5px rgba(49, 194, 124, 0.3);
-		}
-
-		/* 优化表单区域布局 */
-		.sync-container .layui-form-item {
-			margin-bottom: 15px;
-		}
-
-		/* 按钮容器居中且有足够上下间距 */
-		.sync-container .sheet-item>div:last-child {
-			margin-top: 20px;
-			margin-bottom: 10px;
-			text-align: center;
-		}
-
-		/* 优化帮助提示区域的文本布局 */
-		.sync-container .sheet-item p {
-			line-height: 1.8;
-			margin-bottom: 8px;
-		}
-
-		/* 帮助区域文本居中对齐 */
-		.sync-container .sheet-item div[style*="text-align: left; padding: 15px;"] {
-			padding: 15px 25px !important;
-		}
-
-		/* 帮助提示样式 */
-		.help-title {
-			position: relative;
-			transition: all 0.3s ease;
-		}
-
-		.help-title:hover {
-			background-color: rgba(49, 194, 124, 0.3) !important;
-		}
-
-		.help-title:after {
-			content: '点击查看';
-			font-size: 12px;
-			color: rgba(255, 255, 255, 0.6);
-			position: absolute;
-			right: 15px;
-			top: 50%;
-			transform: translateY(-50%);
-		}
-
-		.help-content {
-			margin-top: 10px;
-			padding: 15px;
-			background: rgba(0, 0, 0, 0.2);
-			border-radius: 4px;
-			border-left: 3px solid rgba(49, 194, 124, 0.5);
-			transition: all 0.3s ease;
-		}
-
-		/* 移动设备适配 */
-		@media screen and (max-width: 768px) {
-			.about-content {
-				padding: 15px 10px;
-				height: 85vh;
-				/* 调整高度适应移动设备 */
-			}
-
-			.about-section {
-				padding: 15px;
-				margin-bottom: 20px;
-				/* 减少底部间距 */
-			}
-
-			.about-section h2 {
-				font-size: 18px;
-				/* 减小标题字体 */
-				margin-bottom: 10px;
-			}
-
-			/* 优化同步歌单布局 */
-			#sync-login-container>div,
-			#sync-loggedin-container>div {
-				display: block !important;
-				/* 强制块级显示 */
-				flex-direction: column !important;
-				align-items: center !important;
-			}
-
-			/* 调整登录区域的图片和输入区布局 */
-			#sync-login-container>div:first-of-type img {
-				width: 60px !important;
-				height: 60px !important;
-				margin: 0 auto 15px auto !important;
-				display: block;
-			}
-
-			#sync-login-container>div:first-of-type>div,
-			#sync-loggedin-container>div:first-of-type>div {
-				width: 100% !important;
-				margin-left: 0 !important;
-			}
-
-			/* 已登录状态头像调整 */
-			#user-avatar {
-				width: 60px !important;
-				height: 60px !important;
-				margin: 0 auto 15px auto !important;
-				display: block;
-			}
-
-			/* 调整按钮布局 */
-			#sync-loggedin-container>div:last-child {
-				display: flex !important;
-				flex-wrap: wrap !important;
-				justify-content: center !important;
-				align-items: center !important;
-			}
-
-			.login-refresh,
-			.login-out {
-				margin: 5px !important;
-				min-width: 140px !important;
-				max-width: 170px !important;
-			}
-
-			/* 调整帮助内容显示 */
-			.help-content p {
-				font-size: 13px !important;
-				line-height: 1.5 !important;
-			}
-
-			/* 标题栏文本溢出处理 */
-			.sheet-title-bar {
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				padding-right: 60px !important;
-				/* 为"点击查看"文本留出空间 */
-			}
-		}
-
-		/* 超小屏幕适配 */
-		@media screen and (max-width: 480px) {
-			.about-section {
-				padding: 12px;
-				margin-bottom: 15px;
-			}
-
-			.sync-container .layui-btn {
-				font-size: 13px !important;
-				height: 36px !important;
-				line-height: 36px !important;
-			}
-
-			/* 强制按钮全宽 */
-			.login-refresh,
-			.login-out,
-			.sync-container button[onclick="syncPlaylist()"] {
-				width: 100% !important;
-				max-width: 180px !important;
-			}
-		}
-
-		/* 处理横向滚动问题 */
-		.about-content p {
-			word-break: break-word;
-			overflow-wrap: break-word;
-		}
-
-		/* 优化链接在移动设备上的点击区域 */
-		.about-section a {
-			padding: 2px 0;
-			display: inline-block;
-		}
-	</style>
+	<link rel="stylesheet" href="css/jquery.mCustomScrollbar.min.css">
+	<link rel="stylesheet" href="css/player.css">
+	<link rel="stylesheet" href="css/small.css">
+	<link rel="stylesheet" href="css/custom/ug666.css">
 </head>
 
 <body>
-
 	<div id="blur-img"></div>
 
 	<!-- 头部logo -->
@@ -433,19 +50,12 @@
 				<span>歌曲热评/评论</span>
 			</a>
 		</div>
-		<!-- <div class="placard-btn">
-			<a href="javascript:showPlacard();" title="查看公告">
-				<i class="layui-icon layui-icon-notice"></i>
-				<span>公告</span>
-			</a>
-		</div> -->
-	</div> <!--class="header"-->
+	</div>
 
 	<!-- 中间主体区域 -->
 	<div class="center">
 		<div class="container">
 			<div class="btn-bar">
-				<!-- tab按钮区 -->
 				<div class="btn-box" id="btn-area">
 					<span class="btn" data-action="player" hidden>播放器</span>
 					<span class="btn" data-action="playing" title="正在播放列表">正在播放</span>
@@ -453,16 +63,11 @@
 					<span class="btn" data-action="search" title="点击搜索音乐">歌曲搜索</span>
 					<span class="btn" data-action="about" title="UG666">UG666</span>
 				</div>
-			</div> <!--class="btn-bar"-->
+			</div>
 
 			<div class="data-area">
-				<!--歌曲歌单-->
 				<div id="sheet" class="data-box" hidden></div>
-
-				<!--音乐播放列表-->
 				<div id="main-list" class="music-list data-box"></div>
-
-				<!--UG666页面-->
 				<div id="about" class="data-box" hidden>
 					<div class="about-content">
 						<div class="about-background">
@@ -474,121 +79,26 @@
 									</button>
 								</div>
 							</div>
-							<div class="about-section">
-								<h2>同步歌单</h2>
-								<div class="sync-container">
-									<!-- 未登录状态 -->
-									<div id="sync-login-container" class="sheet-item"
-										style="width: 100%; text-align: left; padding: 15px; display: none;">
-										<div class="sheet-title-bar"
-											style="margin: 0 0 15px 0; text-align: left; padding-left: 15px; background-color: rgba(49, 194, 124, 0.2);">
-											<i class="layui-icon layui-icon-template-1" style="margin-right: 5px;"></i> 输入网易云音乐用户ID同步歌单
-										</div>
-										<div style="display: flex; align-items: center; margin-bottom: 10px;">
-											<img src="images/player_cover.png" class="sheet-cover"
-												style="width: 80px; height: 80px; margin: 0 20px 0 0;">
-											<div style="flex: 1;">
-												<div class="layui-form-item" style="margin-bottom: 10px;">
-													<input type="text" id="uid" class="layui-input" placeholder="请输入网易云音乐的用户ID"
-														style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2);">
-												</div>
-												<p style="color: #bdbdbe; font-size: 12px; margin-bottom: 5px;">* 网易云音乐个人主页网址中的数字即为您的用户ID</p>
-												<p style="color: #bdbdbe; font-size: 12px;">* 例如：https://music.163.com/#/user/home?id=123456789
-													中的123456789</p>
-											</div>
-										</div>
-										<div style="text-align: center; margin-top: 15px;">
-											<button class="layui-btn placard-btn-inner" onclick="syncPlaylist()"
-												style="width: 200px; height: 40px; border-radius: 20px;">
-												<i class="layui-icon layui-icon-template-1"></i> 立即同步歌单
-											</button>
-										</div>
-									</div>
-
-									<!-- 已登录状态 -->
-									<div id="sync-loggedin-container" class="sheet-item"
-										style="width: 100%; text-align: left; padding: 15px; display: none;">
-										<div class="sheet-title-bar"
-											style="margin: 0 0 15px 0; text-align: left; padding-left: 15px; background-color: rgba(49, 194, 124, 0.2);">
-											<i class="layui-icon layui-icon-user" style="margin-right: 5px;"></i> 已同步网易云音乐歌单
-										</div>
-										<div style="display: flex; align-items: center; margin-bottom: 20px;">
-											<img src="images/player_cover.png" id="user-avatar" class="sheet-cover"
-												style="width: 80px; height: 80px; margin: 0 20px 0 0; border-radius: 50%; border: 2px solid rgba(49, 194, 124, 0.5);">
-											<div style="flex: 1;">
-												<div style="font-size: 18px; margin-bottom: 10px; color: #fff;">
-													欢迎您，<span id="logged-user-name">用户</span>
-												</div>
-												<p style="color: #bdbdbe; font-size: 12px; margin-bottom: 5px;">
-													用户ID：<span id="logged-user-id"></span>
-												</p>
-											</div>
-										</div>
-										<div
-											style="text-align: center; margin-top: 15px;">
-											<button class="layui-btn placard-btn-inner login-refresh"
-												style="width: 150px; height: 40px; border-radius: 20px; margin: 0 10px 10px 10px;">
-												<i class="layui-icon layui-icon-refresh"></i> 刷新歌单
-											</button>
-											<button class="layui-btn placard-btn-inner login-out"
-												style="width: 150px; height: 40px; border-radius: 20px; background-color: rgba(255,255,255,0.2); margin: 0 10px 10px 10px;">
-												<i class="layui-icon layui-icon-logout"></i> 退出登录
-											</button>
-										</div>
-									</div>
-
-									<!-- 帮助提示 -->
-									<div class="sheet-item help-item" style="width: 100%; text-align: center; padding: 15px;">
-										<div class="sheet-title-bar help-title"
-											style="margin: 0; text-align: left; padding-left: 15px; background-color: rgba(49, 194, 124, 0.2); cursor: pointer;">
-											<i class="layui-icon layui-icon-help" style="margin-right: 5px;"></i> 如何获取网易云音乐用户ID
-										</div>
-										<div class="help-content"
-											style="text-align: left; padding: 15px; color: #bdbdbe; line-height: 1.8; display: none;">
-											<p>1. 打开网易云音乐官网 <a href="https://music.163.com/" target="_blank"
-													style="color: #31c27c;">https://music.163.com/</a></p>
-											<p>2. 登录您的账号，点击右上角头像进入个人中心</p>
-											<p>3. 此时浏览器地址栏中 <span style="color: #31c27c;">/user/home?id=</span> 后面的数字就是您的网易云用户ID</p>
-											<p>4. 复制该ID，粘贴到上方输入框中，点击"立即同步歌单"按钮即可</p>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="about-section">
-								<h2>关于我</h2>
-								<div class="about-avatar">
-									<img src="https://ug666.top/images/me.jpg" alt="UG头像">
-								</div>
-								<div class="about-info">
-									<p>大家好，我是UG，一名热爱音乐的开发者。</p>
-									<p>我的博客: <a href="https://ug666.top" target="_blank">UGBlog</a></p>
-								</div>
-							</div>
-
-							<div class="about-section">
-								<h2>关于本站</h2>
-								<p>UG音乐盒是我基于MKOnlinePlayer修改的在线音乐播放器，支持多个音乐平台的歌曲搜索和播放。</p>
-								<p>本站技术栈: HTML5, CSS3, JavaScript, PHP, layui</p>
-							</div>
+							<!-- 这里将通过JavaScript动态加载模板内容 -->
+							<div id="sync-playlist-container"></div>
+							<div id="user-info-container"></div>
 						</div>
 					</div>
 				</div>
-			</div> <!--class="data-area"-->
+			</div>
 
 			<!-- 右侧封面及歌词展示 -->
 			<div class="player" id="player">
-				<!--歌曲封面-->
 				<div class="cover">
 					<img src="images/player_cover.png" class="music-cover" id="music-cover">
 				</div>
-				<!--滚动歌词-->
 				<div class="lyric">
 					<ul id="lyric"></ul>
 				</div>
 				<div id="music-info" title="点击查看歌曲信息"></div>
 			</div>
-		</div> <!--class="container"-->
-	</div> <!--class="center"-->
+		</div>
+	</div>
 
 	<!-- 播放器底部区域 -->
 	<div class="footer">
@@ -598,7 +108,7 @@
 				<a href="javascript:;" class="player-btn btn-play" title="暂停/继续"></a>
 				<a href="javascript:;" class="player-btn btn-next" title="下一首"></a>
 				<a href="javascript:;" class="player-btn btn-order" title="循环控制"></a>
-			</div> <!--class="con-btn"-->
+			</div>
 
 			<div class="vol">
 				<div class="quiet">
@@ -609,285 +119,30 @@
 						<div id="volume-progress" class="mkpgb-area"></div>
 					</div>
 				</div>
-			</div> <!--class="footer"-->
+			</div>
 
 			<div class="progress">
 				<div class="progress-box">
 					<div id="music-progress" class="mkpgb-area"></div>
 					<div class="audio-time">00:00/00:00</div>
 				</div>
-			</div> <!--class="progress"-->
-		</div> <!--class="container"-->
-	</div> <!--class="footer"-->
+			</div>
+		</div>
+	</div>
 
-	<!-- layui插件 -->
+	<!-- JS依赖 -->
+	<script src="js/jquery.min.js"></script>
 	<script src="plugns/layui/layui.js"></script>
-
-	<!-- 播放器主体功能模块 -->
 	<script src="js/player.js"></script>
-
-	<!-- 播放器数据加载模块 -->
 	<script src="js/ajax.js"></script>
-
-	<!-- 播放器歌词解析模块 -->
 	<script src="js/lyric.js"></script>
-
-	<!-- 音乐列表配置 -->
 	<script src="js/musicList.js"></script>
-
-	<!-- 封装函数及ui交互模块 -->
 	<script src="js/functions.js"></script>
-
-	<!-- 滚动条美化插件 -->
 	<script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
-
-	<!-- 背景模糊化插件 -->
 	<script src="js/background-blur.min.js"></script>
-
-	<!-- 自定义js -->
-	<script>
-		$(function () {
-			// 处理所有选项卡的点击事件，确保正确显示/隐藏内容
-			$(".btn").click(function () {
-				var action = $(this).data("action");
-
-				// 搜索按钮有特殊处理，不在这里处理
-				if (action === "search") return;
-
-				// 移除其他选项卡的激活状态
-				$('.btn-box .active').removeClass('active');
-				// 激活当前选项卡
-				$(this).addClass('active');
-
-				// 处理播放器显示/隐藏
-				if ($(".btn[data-action='player']").css('display') !== 'none') {
-					$("#player").hide();
-				} else if ($("#player").css('display') == 'none') {
-					$("#player").fadeIn();
-				}
-
-				// 根据不同选项卡显示对应内容，隐藏其他内容
-				if (action === "about") {
-					$("#about").fadeIn();
-					$("#sheet").hide();
-					$("#main-list").hide();
-				} else if (action === "sheet") {
-					$("#sheet").fadeIn();
-					$("#about").hide();
-					$("#main-list").hide();
-				} else if (action === "playing") {
-					loadList(1); // 显示正在播放列表
-					$("#main-list").fadeIn();
-					$("#about").hide();
-					$("#sheet").hide();
-				} else if (action === "player") {
-					$("#player").fadeIn();
-					$("#about").hide();
-					$("#sheet").hide();
-					$("#main-list").hide();
-				}
-			});
-
-			// 帮助提示内容显示/隐藏逻辑 - 修改为点击事件
-			$(".help-title").click(function () {
-				var $content = $(this).siblings(".help-content");
-				// 切换帮助内容的显示状态
-				$content.slideToggle(300);
-				// 切换图标颜色
-				if ($content.is(":visible")) {
-					$(this).find(".layui-icon").css("color", "#31c27c");
-				} else {
-					$(this).find(".layui-icon").css("color", "");
-				}
-			});
-		});
-	</script>
-
-	<!-- 搜索弹窗 -->
-	<script type="text/html" id="layer-form-box">
-    <div id="layer-form-content">
-        <form class="layui-form" onSubmit="return searchSubmit()" action="" id="search-area">
-            <div class="search-input">
-                <input type="text" name="wd" id="search-wd" required  lay-verify="required" placeholder="搜索歌手、歌名、专辑" autocomplete="on" class="layui-input">
-                <button class="layui-btn" lay-submit type="submit">搜 索</button>
-            </div>
-            <!--div class="source-radio" id="music-source">
-                <label><input type="radio" name="source" value="netease" checked title="网易云"></label>
-                <label><input type="radio" name="source" value="kugou" title="酷狗"></label>
-                <label><input type="radio" name="source" value="tencent" title="QQ"></label>
-                <div hidden>致敬永远存在的虾米音乐 start</div>
-                <label><input type="radio" name="source" value="xiami" title="虾米" disabled></label>
-                <div hidden>end</div>
-                <label><input type="radio" name="source" value="baidu" title="百度"></label>
-            </div-->
-        </form>
-    </div>
-	</script>
-
-	<!-- 公告html -->
-	<script type="text/html" id="layer-placard-box">
-    <ul id="layer-placard-content">
-				<li>点击进入<a href="https://ug666.top" style="cursor: pointer; color: #0366d6;">UGBlog</a></li>
-        <li>由于本站歌曲和封面图片较多，所以第一次加载会比较慢，耐心稍等一会就行。</li>
-        <li>PC端可使用快捷键控制，Ctrl+左方向键=上一首、Ctrl+右方向键=下一首、空格键=播放/暂停。</li>
-        <li>移动端（手机、平板用户）请双击播放，第一次点击是加载，第二点击是播放，为防止误操作。</li>
-    </ul>
-	</script>
-
-	<!-- 登录状态管理 -->
-	<script>
-		// 检查用户登录状态并显示相应界面
-		function checkLoginStatus() {
-			// 获取保存的用户信息
-			var savedUid = playerReaddata('uid');
-			var savedUname = playerReaddata('uname');
-			var savedUavatar = playerReaddata('uavatar');  // 获取保存的用户头像URL
-
-			if (savedUid) {
-				// 用户已登录，显示已登录状态
-				$("#sync-loggedin-container").show();
-				$("#sync-login-container").hide();
-
-				// 更新用户信息
-				$("#logged-user-name").text(savedUname || "用户");
-				$("#logged-user-id").text(savedUid);
-
-				// 使用保存的用户头像（如果有）
-				if (savedUavatar) {
-					$("#user-avatar").attr("src", savedUavatar);
-				} else {
-					// 没有保存的头像，使用默认头像
-					$("#user-avatar").attr("src", "images/avatar.png");
-				}
-			} else {
-				// 用户未登录，显示登录界面
-				$("#sync-login-container").show();
-				$("#sync-loggedin-container").hide();
-			}
-		}
-
-		// 页面加载时检查登录状态
-		$(document).ready(function () {
-			// 初始化检查登录状态
-			checkLoginStatus();
-
-			// 给UG666标签页中的登录/登出按钮绑定事件
-			// 登出按钮点击事件 - 绑定到document上，使任何页面中的登出按钮都能正确响应
-			$(document).on("click", ".login-out", function () {
-				// 保存用户退出状态 - 彻底清空所有用户相关的本地存储数据
-				playerSavedata('uid', '');
-				playerSavedata('ulist', '');
-				playerSavedata('uname', '');
-				playerSavedata('uavatar', '');
-
-				// 清除localStorage中所有可能包含用户信息的项
-				for (var key in localStorage) {
-					if (key.indexOf('mkPlayer2_') === 0) {
-						localStorage.removeItem(key);
-					}
-				}
-
-				// 彻底清除内存中的用户信息
-				rem.uid = null;
-				rem.uname = null;
-				rem.uavatar = null;
-
-				// 清除UI上的用户信息
-				layer.msg('已退出登录');
-
-				// 重新加载歌单列表，清除用户歌单
-				if ($('.user-sheets').length) {
-					$('.user-sheets').remove();
-				}
-
-				$("#user-login").html('我的歌单 <span class="login-btn login-in">[点击同步]</span>')
-
-				// 重新加载系统歌单
-				refreshSheetList();
-
-				// 直接强制显示登录面板、隐藏已登录面板(使用show/hide方法，不只是设置CSS)
-				$("#sync-login-container").show();
-				$("#sync-loggedin-container").hide();
-
-				// 调用clearUserlist刷新其他界面元素
-				clearUserlist();
-
-				// 确保切换后刷新UI状态(强制重新检查)
-				setTimeout(function () {
-					checkLoginStatus();
-				}, 100);
-			});
-
-			// 刷新按钮点击事件
-			$(document).on("click", ".login-refresh", function () {
-				playerSavedata('ulist', '');
-				layer.msg('正在刷新歌单...');
-
-				// 调用clearUserlist刷新其他界面元素
-				clearUserlist();
-
-				// 更新登录状态UI
-				checkLoginStatus();
-			});
-
-			// 修改原有的syncPlaylist函数，使其在成功登录后更新UI
-			var originalSyncPlaylist = window.syncPlaylist;
-			// 重新定义syncPlaylist函数
-			window.syncPlaylist = function () {
-				// 记录当前页面状态 - 现在只用于调试
-				var currentPage = "";
-				if ($("#about").is(":visible")) {
-					currentPage = "about";
-				} else if ($("#sheet").is(":visible")) {
-					currentPage = "sheet";
-				} else if ($("#main-list").is(":visible")) {
-					currentPage = "list";
-				} else if ($("#player").is(":visible")) {
-					currentPage = "player";
-				}
-
-				if (mkPlayer.debug) {
-					console.log("同步歌单，当前页面: " + currentPage);
-				}
-
-				// 调用原始的同步函数
-				var result = originalSyncPlaylist.apply(this, arguments);
-
-				// 直接检查登录状态并更新UI，不做页面切换
-				checkLoginStatus();
-
-				return result;
-			};
-		});
-
-		// 在登录状态管理脚本的末尾添加
-		// 刷新歌单列表函数
-		function refreshSheetList() {
-			// 清空现有歌单
-			$('.system-sheets .sheet-group-content').empty();
-
-			// 重新加载系统歌单
-			for (var i = 1; i < 3; i++) {  // 只加载系统歌单(正在播放和播放历史)
-				var sheetHtml = '<div class="sheet-item" data-no="' + i + '">' +
-					'<img class="sheet-cover" src="' + (musicList[i].cover || "images/player_cover.png") + '">' +
-					'<p class="sheet-name">' + (musicList[i].name || "读取中...") + '</p>' +
-					'</div>';
-				$('.system-sheets .sheet-group-content').append(sheetHtml);
-			}
-
-			// 加载其他系统歌单
-			for (var i = 3; i < musicList.length; i++) {
-				if (!musicList[i].creatorID) { // 只加载系统歌单
-					var sheetHtml = '<div class="sheet-item" data-no="' + i + '">' +
-						'<img class="sheet-cover" src="' + (musicList[i].cover || "images/player_cover.png") + '">' +
-						'<p class="sheet-name">' + (musicList[i].name || "读取中...") + '</p>' +
-						'</div>';
-					$('.system-sheets .sheet-group-content').append(sheetHtml);
-				}
-			}
-		}
-	</script>
-
+	<script src="js/custom/templates.js"></script>
+	<script src="js/custom/ug666.js"></script>
+	<script src="js/custom/template-adapter.js"></script>
 </body>
 
 </html>

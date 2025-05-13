@@ -1,0 +1,593 @@
+/* UG666页面样式 */
+
+/* 公告内容样式 */
+#layer-placard-content {
+  padding: 15px 25px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+#layer-placard-content>li {
+  padding: 8px 0;
+  line-height: 1.5;
+  font-size: 14px;
+  list-style: decimal;
+  margin-left: 20px;
+}
+
+#layer-placard-content a {
+  font-weight: 500;
+}
+
+/* UG666页面样式 */
+.about-content {
+  padding: 20px;
+  color: #fff;
+  max-width: 800px;
+  margin: 0 auto;
+  height: 90%;
+  /* 添加固定高度以启用滚动条 */
+  overflow: auto;
+  /* 确保内容溢出时显示滚动条 */
+}
+
+.about-section {
+  margin-bottom: 35px;
+  /* 增加更多的底部间距 */
+  background: rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  clear: both;
+  /* 确保元素不会浮动叠加 */
+  position: relative;
+  /* 建立层叠上下文 */
+  z-index: 1;
+  /* 确保正常层叠顺序 */
+}
+
+.about-section:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(to right, rgba(49, 194, 124, 0.7), rgba(49, 194, 124, 0.2));
+  border-radius: 8px 8px 0 0;
+}
+
+.about-section>h2:first-child {
+  margin-top: 5px;
+}
+
+.about-section:last-child {
+  margin-bottom: 10px;
+}
+
+.about-section h2 {
+  margin-bottom: 15px;
+  font-size: 22px;
+  color: #31c27c;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+}
+
+.about-section:nth-child(2) {
+  display: block;
+  padding: 20px;
+  overflow: hidden;
+}
+
+/* 优化同步歌单区域内容布局 */
+.about-section:nth-child(2) {
+  padding: 20px;
+}
+
+.about-avatar {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.about-avatar img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.about-info p {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.about-info a,
+.about-section a {
+  color: #31c27c;
+  text-decoration: none;
+}
+
+.about-info a:hover,
+.about-section a:hover {
+  text-decoration: underline;
+}
+
+.about-notice {
+  text-align: center;
+}
+
+.placard-btn-inner {
+  background-color: #31c27c !important;
+  border: none !important;
+}
+
+/* 同步歌单容器优化 */
+.sync-container {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 98%;
+}
+
+/* 优化已登录状态和未登录状态的样式 */
+#sync-login-container,
+#sync-loggedin-container,
+.sync-container .sheet-item {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* 调整同步歌单容器的内部间距 */
+.sync-container {
+  padding: 0;
+}
+
+/* 优化内部卡片项目 */
+.sync-container .sheet-item {
+  display: block;
+  float: none;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+  overflow: hidden;
+  padding: 15px;
+  transition: all 0.3s ease;
+}
+
+.sync-container .sheet-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  border-color: rgba(49, 194, 124, 0.3);
+}
+
+/* 确保最后一个项目没有底部边距 */
+.sync-container .sheet-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 标题栏样式 */
+.sync-container .sheet-title-bar {
+  background-color: transparent !important;
+  padding: 12px 15px !important;
+  margin: 0 0 15px 0 !important;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(49, 194, 124, 0.3);
+  text-align: left;
+  position: relative;
+  font-size: 16px;
+  color: #fff;
+}
+
+.sync-container .sheet-title-bar .layui-icon {
+  margin-right: 8px;
+  color: #31c27c;
+  vertical-align: middle;
+}
+
+/* 登录表单容器优化 */
+.login-box {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+}
+
+.login-box .sheet-cover {
+  width: 80px;
+  height: 80px;
+  margin: 0 15px 0 0;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  object-fit: cover;
+}
+
+.login-form {
+  flex: 1;
+}
+
+.login-form p {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 5px;
+}
+
+.login-btn-area {
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* 用户信息展示优化 */
+.user-info {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+}
+
+.user-info .sheet-cover {
+  width: 80px;
+  height: 80px;
+  margin: 0 15px 0 0;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  object-fit: cover;
+}
+
+.user-details {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.user-details p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.user-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.user-actions button {
+  margin: 5px;
+  flex: 1;
+  min-width: 140px;
+  max-width: 200px;
+}
+
+/* 内容区域样式 */
+.sync-container .sheet-item>div:not(.sheet-title-bar) {
+  padding: 10px 15px;
+}
+
+/* 按钮样式优化 */
+.sync-container .layui-btn {
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.sync-container .layui-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 输入框样式优化 */
+.sync-container .layui-input {
+  background: rgba(30, 30, 30, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  height: 38px;
+}
+
+.sync-container .layui-input:focus {
+  border-color: rgba(49, 194, 124, 0.5) !important;
+  box-shadow: 0 0 5px rgba(49, 194, 124, 0.3);
+}
+
+/* 优化表单区域布局 */
+.sync-container .layui-form-item {
+  margin-bottom: 15px;
+}
+
+/* 帮助区域样式优化 */
+.help-title {
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.help-title:hover {
+  background-color: rgba(49, 194, 124, 0.2) !important;
+}
+
+.help-title:after {
+  content: '点击查看';
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.help-content {
+  display: none;
+  /* 默认隐藏帮助内容 */
+  margin-top: 10px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border-left: 3px solid rgba(49, 194, 124, 0.5);
+  transition: all 0.3s ease;
+}
+
+.help-content p {
+  margin-bottom: 10px;
+  line-height: 1.8;
+}
+
+.help-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* UG666歌单列表样式 */
+.user-playlist-list {
+  margin-top: 20px;
+  max-height: 260px;
+  overflow-y: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.user-playlist-list .sheet-item {
+  width: 25%;
+  float: left;
+  text-align: center;
+  margin-bottom: 15px;
+  position: relative;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 5px;
+  transition: all 0.3s ease;
+}
+
+.user-playlist-list .sheet-item:hover {
+  transform: translateY(-5px);
+}
+
+.user-playlist-list .sheet-cover {
+  width: 100px;
+  height: 100px;
+  margin: 10px auto;
+  cursor: pointer;
+  display: block;
+  border-radius: 5px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.user-playlist-list .sheet-cover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+.user-playlist-list .sheet-name {
+  max-width: 120px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #fff;
+  cursor: pointer;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+.user-playlist-list .sheet-name:hover {
+  background: rgba(49, 194, 124, 0.3);
+}
+
+/* 搜索弹窗样式优化 */
+.layui-layer-close {
+  display: block !important;
+  /* 确保关闭按钮显示 */
+}
+
+.layui-layer-title {
+  background-color: #31c27c !important;
+  color: #fff !important;
+}
+
+#layer-form-content {
+  padding: 20px;
+  max-height: 180px;
+  /* 限制高度 */
+  overflow-y: auto;
+}
+
+#search-area {
+  padding: 0;
+  margin: 0;
+}
+
+.search-input {
+  position: relative;
+  display: flex;
+  margin-bottom: 15px;
+}
+
+.search-input .layui-input {
+  flex: 1;
+  margin-right: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(150, 150, 150, 0.3);
+  color: #333;
+  height: 38px;
+  border-radius: 2px;
+}
+
+.search-input .layui-btn {
+  background-color: #31c27c;
+  border: none;
+}
+
+/* 移动设备适配 */
+@media screen and (max-width: 768px) {
+  .about-content {
+    padding: 15px 10px;
+    height: 85vh;
+    /* 调整高度适应移动设备 */
+  }
+
+  .about-section {
+    padding: 15px;
+    margin-bottom: 20px;
+    /* 减少底部间距 */
+  }
+
+  .about-section h2 {
+    font-size: 18px;
+    /* 减小标题字体 */
+    margin-bottom: 10px;
+  }
+
+  /* 登录表单移动端优化 */
+  .login-box {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .login-box .sheet-cover {
+    margin: 0 auto 15px;
+  }
+
+  /* 用户信息移动端优化 */
+  .user-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .user-info .sheet-cover {
+    margin: 0 auto 15px;
+  }
+
+  .user-details {
+    text-align: center;
+  }
+
+  /* 标题栏文本溢出处理 */
+  .sheet-title-bar {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 60px !important;
+    /* 为"点击查看"文本留出空间 */
+  }
+
+  /* 歌单列表移动端优化 */
+  .user-playlist-list .sheet-item {
+    width: 33.33%;
+  }
+
+  .user-playlist-list .sheet-name {
+    max-width: 100px;
+  }
+}
+
+/* 超小屏幕适配 */
+@media screen and (max-width: 480px) {
+  .about-section {
+    padding: 12px;
+    margin-bottom: 15px;
+  }
+
+  .sync-container .layui-btn {
+    font-size: 13px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+  }
+
+  /* 强制按钮全宽 */
+  .login-refresh,
+  .login-out,
+  .sync-container button[onclick="syncPlaylist()"] {
+    width: 100% !important;
+    max-width: 180px !important;
+  }
+
+  /* 超小屏幕歌单列表优化 */
+  .user-playlist-list .sheet-item {
+    width: 50%;
+  }
+}
+
+/* 处理横向滚动问题 */
+.about-content p {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* 优化链接在移动设备上的点击区域 */
+.about-section a {
+  padding: 2px 0;
+  display: inline-block;
+}
+
+/* 弹窗中关闭按钮样式优化 */
+.layui-layer-setwin .layui-layer-close1 {
+  background-position: 1px -40px !important;
+  cursor: pointer;
+}
+
+/* 公告弹窗样式优化 */
+.layui-layer-page .layui-layer-content {
+  overflow: auto !important;
+}
+
+/* 搜索弹窗样式额外优化 */
+.layui-layer-page[type="page"] .layui-layer-content {
+  overflow: visible !important;
+}
+
+@media screen and (max-width: 500px) {
+  .user-playlist-list .sheet-item {
+    width: 33.33%;
+  }
+
+  .user-playlist-list .sheet-name {
+    max-width: 100px;
+  }
+}
+
+@media screen and (max-width: 350px) {
+  .user-playlist-list .sheet-item {
+    width: 50%;
+  }
+}
