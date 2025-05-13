@@ -251,6 +251,48 @@ switch($types)   // 根据请求的 Api，执行相应操作
     
         break;
     
+    case 'like':  // 喜欢/取消喜欢歌曲功能
+        $id = getParam('id');  // 歌曲id
+        $like = getParam('like', '1');  // 1表示喜欢，0表示取消喜欢
+        
+        // 这个功能需要用户登录网易云音乐，所以检查cookie
+        if($netease_cookie) {
+            // 使用curl直接调用网易云音乐API，不修改Meting.php
+            $url = 'https://music.163.com/api/song/like';
+            $post_data = [
+                'trackId' => $id,
+                'like' => $like === '1' ? 'true' : 'false'
+            ];
+            
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post_data));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_COOKIE, $netease_cookie);
+            curl_setopt($ch, CURLOPT_REFERER, 'https://music.163.com/');
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36');
+            
+            $result = curl_exec($ch);
+            curl_close($ch);
+            
+            $response = [
+                'code' => 200,
+                'msg' => $like === '1' ? '已添加到我喜欢的音乐' : '已从我喜欢的音乐中移除',
+                'result' => json_decode($result)
+            ];
+            
+            echojson(json_encode($response));
+        } else {
+            // 返回错误信息，提示需要设置cookie
+            $data = json_encode([
+                'code' => 301,
+                'msg' => '请先在api.php中设置您的网易云音乐cookie'
+            ]);
+            echojson($data);
+        }
+        break;
+        
     case 'download':    // 下载歌曲
         
         $url = getParam('url');

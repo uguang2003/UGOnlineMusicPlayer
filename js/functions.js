@@ -382,6 +382,17 @@ $(function () {
     $(".btn-order").click(function () {
         orderChange();
     });
+
+    // "喜欢"按钮点击事件
+    $(".btn-like").click(function () {
+        toggleLike();
+    });
+
+    // "喜欢"按钮点击事件
+    $(".btn-state-liked").click(function () {
+        toggleDisLike();
+    });
+
     // 上一首歌
     $(".btn-prev").click(function () {
         prevMusic();

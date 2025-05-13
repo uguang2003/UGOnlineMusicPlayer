@@ -707,11 +707,6 @@ body {
     color: #31c27c;
 }
 
-/* 歌单列表分组样式 */
-#sheet {
-    /* 原有样式保持不变 */
-}
-
 /* 系统歌单和用户歌单分组样式 */
 .sheet-group {
     background-color: rgba(0, 0, 0, 0.3);
@@ -911,7 +906,7 @@ body {
 /* 控制按钮(上一首、播放、下一首)区域 */
 .con-btn {
     float: left;
-    width: 130px;
+    width: 180px;
     height: 100%;
     position: relative;
     margin: 0 10px;
@@ -934,13 +929,13 @@ body {
     width: 19px;
     height: 29px;
     margin-top: -14.5px;
-    left: 36%;
+    left: 30%;
     margin-left: -10.5px;
 }
 
 .btn-next {
     background-position: 0 -52px;
-    right: 30%;
+    right: 45%;
     width: 19px;
     height: 20px;
     margin-top: -10px;
@@ -949,7 +944,7 @@ body {
 .btn-order {
     background-position: 0 -173px;
     background-size: 450%;
-    right: 0;
+    right: 20%;
     width: 25px;
     height: 25px;
     margin-top: -10px;
@@ -969,10 +964,31 @@ body {
     margin-top: -9px;
 }
 
+/* 为"喜欢"按钮添加样式 */
+.btn-like {
+    background-position: 0px -82px;
+    background-size: 500%;
+    width: 23px;
+    height: 21px;
+    margin-top: -9px;
+    left: 95%;
+    margin-left: -10px;
+}
+
+.btn-state-liked {
+    background-position: -25px -82px;
+    background-size: 500%;
+    width: 23px;
+    height: 21px;
+    margin-top: -9px;
+    left: 95%;
+    margin-left: -10px;
+}
+
 /* 音乐进度条区域 */
 .progress {
     width: auto;
-    margin-left: 150px;
+    margin-left: 200px;
     margin-right: 200px;
     height: 100%;
     position: relative;
@@ -991,10 +1007,11 @@ body {
 /* 音量控制区域 */
 .vol {
     float: right;
-    width: 200px;
+    width: 15%;
     height: 100%;
     right: 0;
     position: relative;
+    min-width: 160px;
 }
 
 .quiet {
