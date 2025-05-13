@@ -154,24 +154,47 @@ $(function () {
     addListhead();  // 列表头
     addListbar("loading");  // 列表加载中
 
+    // 防止快速切换页面导致的页面闪烁问题
+    var isPageSwitching = false;
+    var pageDebounceTimeout;
+
     // 顶部按钮点击处理
     $(".btn").click(function () {
-        switch ($(this).data("action")) {
+        // 如果页面正在切换中，则忽略点击
+        if (isPageSwitching) return false;
+
+        // 设置切换状态为true，防止多次点击
+        isPageSwitching = true;
+
+        // 清除之前的定时器，防止快速点击导致的冲突
+        clearTimeout(pageDebounceTimeout);
+
+        var action = $(this).data("action");
+
+        switch (action) {
             case "player":    // 播放器
                 dataBox("player");
                 break;
             case "search":  // 搜索
                 searchBox();
+                isPageSwitching = false; // 搜索不影响页面切换，立即重置状态
+                return; // 搜索框不需要防抖处理，直接返回
                 break;
-
             case "playing": // 正在播放
                 loadList(1); // 显示正在播放列表
                 break;
-
             case "sheet":   // 播放列表
                 dataBox("sheet");    // 在主界面显示出音乐专辑
                 break;
+            case "about":   // UG666页面
+                dataBox("about");    // 显示UG666页面
+                break;
         }
+
+        // 500毫秒后重置切换状态，允许下一次点击
+        pageDebounceTimeout = setTimeout(function () {
+            isPageSwitching = false;
+        }, 500);
     });
 
     // 列表项双击播放
@@ -997,17 +1020,33 @@ function sheetBar() {
 // 选择要显示哪个数据区
 // 参数：要显示的数据区（list、sheet、player）
 function dataBox(choose) {
+    // 停止所有正在进行的jQuery动画，防止页面切换冲突
+    $("#main-list").stop(true, true);
+    $("#sheet").stop(true, true);
+    $("#about").stop(true, true);
+    $("#player").stop(true, true);
+
+    // 移除按钮激活状态
     $('.btn-box .active').removeClass('active');
+
+    // 根据选择显示对应页面
     switch (choose) {
         case "list":    // 显示播放列表
+            // 立即隐藏其他页面，不使用动画
+            $("#sheet").hide();
+            $("#about").hide();
+
+            // 处理播放器显示
             if ($(".btn[data-action='player']").css('display') !== 'none') {
                 $("#player").hide();
             } else if ($("#player").css('display') == 'none') {
-                $("#player").fadeIn();
+                $("#player").show(); // 直接显示，不使用淡入
             }
-            $("#main-list").fadeIn();
-            $("#sheet").fadeOut();
-            $("#about").fadeOut(); // 确保关闭about页面
+
+            // 显示播放列表
+            $("#main-list").show(); // 直接显示，不使用淡入
+
+            // 激活对应的按钮
             if (rem.dislist == 1 || rem.dislist == rem.playlist) {  // 正在播放
                 $(".btn[data-action='playing']").addClass('active');
             } else if (rem.dislist == 0) {  // 搜索
@@ -1016,30 +1055,47 @@ function dataBox(choose) {
             break;
 
         case "sheet":   // 显示专辑
+            // 立即隐藏其他页面，不使用动画
+            $("#main-list").hide();
+            $("#about").hide();
+
+            // 处理播放器显示
             if ($(".btn[data-action='player']").css('display') !== 'none') {
                 $("#player").hide();
             } else if ($("#player").css('display') == 'none') {
-                $("#player").fadeIn();
+                $("#player").show(); // 直接显示，不使用淡入
             }
-            $("#sheet").fadeIn();
-            $("#main-list").fadeOut();
-            $("#about").fadeOut(); // 确保关闭about页面
+
+            // 显示歌单页面
+            $("#sheet").show(); // 直接显示，不使用淡入
+
+            // 激活对应的按钮
             $(".btn[data-action='sheet']").addClass('active');
             break;
 
         case "player":  // 显示播放器
-            $("#player").fadeIn();
-            $("#sheet").fadeOut();
-            $("#main-list").fadeOut();
-            $("#about").fadeOut(); // 确保关闭about页面
+            // 立即隐藏其他页面，不使用动画
+            $("#sheet").hide();
+            $("#main-list").hide();
+            $("#about").hide();
+
+            // 显示播放器
+            $("#player").show(); // 直接显示，不使用淡入
+
+            // 激活对应的按钮
             $(".btn[data-action='player']").addClass('active');
             break;
 
         case "about":  // 显示UG666页面
-            $("#player").fadeIn();
-            $("#sheet").fadeOut();
-            $("#main-list").fadeOut();
-            $("#about").fadeIn();
+            // 立即隐藏其他页面，不使用动画
+            $("#sheet").hide();
+            $("#main-list").hide();
+
+            // 显示播放器（始终可见）和UG666页面
+            $("#player").show(); // 直接显示，不使用淡入
+            $("#about").show(); // 直接显示，不使用淡入
+
+            // 激活对应的按钮
             $(".btn[data-action='about']").addClass('active');
             break;
     }
@@ -1158,11 +1214,26 @@ function initList() {
     $('.btn-box .active').removeClass('active');
     $(".btn[data-action='playing']").addClass('active');
 
-    // 确保播放器可见
-    $("#player").show();
-
-    // 显示主列表区域
-    $("#main-list").show();
+    // 处理移动端的初始化，防止页面重叠
+    if (rem.isMobile) {
+        // 在移动端，如果显示播放器按钮，则默认进入播放器页面，而不是列表页面
+        if ($(".btn[data-action='player']").css('display') !== 'none') {
+            // 显示播放器，隐藏列表
+            $("#player").show();
+            $("#main-list").hide();
+            // 激活播放器按钮
+            $(".btn[data-action='playing']").removeClass('active');
+            $(".btn[data-action='player']").addClass('active');
+        } else {
+            // 显示列表，确保播放器也可见（位于列表下方）
+            $("#player").show();
+            $("#main-list").show();
+        }
+    } else {
+        // 非移动端按原逻辑处理
+        $("#player").show();
+        $("#main-list").show();
+    }
 
     // 加载正在播放列表的内容
     rem.mainList.html('');   // 清空列表中原有的元素

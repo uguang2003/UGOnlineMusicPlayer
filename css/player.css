@@ -631,8 +631,6 @@ body {
 #user-login {
     position: relative;
     order: -1;
-    /* 使其在flex布局中排到最前面 */
-    width: 100%;
     padding: 10px 15px;
     margin-bottom: 15px;
     background-color: rgba(0, 0, 0, .3);
