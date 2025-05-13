@@ -5,7 +5,8 @@
         autocomplete="on" class="layui-input">
       <button class="layui-btn" lay-submit type="submit">搜 索</button>
     </div>
-    <div class="source-radio" id="music-source">
+    <!-- 隐藏的音源单选按钮组，用于存储当前选中的音源 -->
+    <div class="source-radio" id="music-source" style="display:none;">
       <label><input type="radio" name="source" value="netease" checked title="网易云"></label>
       <label><input type="radio" name="source" value="kugou" title="酷狗"></label>
       <label><input type="radio" name="source" value="tencent" title="QQ"></label>
@@ -14,5 +15,67 @@
       <div hidden>end</div>
       <label><input type="radio" name="source" value="baidu" title="百度"></label>
     </div>
+    <!-- 单行音源选择器 -->
+    <div class="source-simple-selector">
+      <span class="source-btn active" data-source="netease">网易云</span>
+      <span class="source-btn" data-source="kugou">酷狗</span>
+      <span class="source-btn" data-source="tencent">QQ</span>
+      <span class="source-btn" data-source="baidu">百度</span>
+    </div>
   </form>
 </div>
+<style>
+  .source-simple-selector {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .source-btn {
+    flex: 1;
+    text-align: center;
+    cursor: pointer;
+    color: #666;
+    padding: 5px 0;
+    margin: 0 2px;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+
+  .source-btn:hover {
+    color: #1E9FFF;
+  }
+
+  .source-btn.active {
+    color: #fff;
+    background-color: #1E9FFF;
+  }
+</style>
+<script>
+  // 添加音源选择按钮的点击事件
+  $(document).on('click', '.source-btn', function (e) {
+    // 阻止事件冒泡，防止点击时关闭搜索弹窗
+    e.stopPropagation();
+
+    var source = $(this).data('source');
+
+    // 更新按钮状态
+    $('.source-btn').removeClass('active');
+    $(this).addClass('active');
+
+    // 选中对应的单选按钮 - 这对searchSubmit函数很重要
+    $("#music-source input[name='source'][value='" + source + "']").prop("checked", "checked");
+
+    // 更新layui表单
+    if (typeof form !== 'undefined') form.render();
+
+    // 如果有搜索内容，直接提交搜索
+    if ($("#search-wd").val().trim()) {
+      // 不再自动提交搜索，让用户主动点击搜索按钮
+      // searchSubmit();
+    } else {
+      // 如果没有搜索内容，将焦点放到搜索框
+      $("#search-wd").focus();
+    }
+  });
+</script>
