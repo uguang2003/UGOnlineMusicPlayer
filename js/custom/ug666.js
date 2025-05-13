@@ -155,20 +155,27 @@ function loadUserPlaylistsForUG666() {
       return;
     }
 
-    var html = '';
+    // 使用网格导航样式替代原来的样式，但加入图片
+    var html = '<div class="nav-grid">';
+
     playlists.forEach(function (playlist) {
-      html += '<div class="sheet-item" data-id="' + playlist.id + '">' +
-        '<img src="' + (playlist.cover || 'images/player_cover.png') + '" onerror="this.src=\'images/player_cover.png\'" class="sheet-cover">' +
-        '<p class="sheet-name" title="' + playlist.name + '">' + playlist.name + '</p>' +
+      html += '<div class="nav-grid-item" data-id="' + playlist.id + '">' +
+        '<img class="nav-grid-img" src="' + (playlist.cover || "images/player_cover.png") + '" onerror="this.src=\'images/player_cover.png\'">' +
+        '<div class="nav-grid-name" title="' + playlist.name + '">' + playlist.name + '</div>' +
         '</div>';
     });
 
+    html += '</div>';
+
     $list.html(html);
 
-    // 绑定点击事件，修复点击后无法进入对应歌单的问题
-    $list.find('.sheet-item').on('click', function () {
+    // 绑定点击事件，点击后进入对应歌单
+    $list.find('.nav-grid-item').on('click', function () {
       var pid = $(this).data('id');
       var idx = -1;
+
+      // 添加点击时的激活状态效果
+      $(this).addClass('active').siblings().removeClass('active');
 
       for (var i = 0; i < musicList.length; i++) {
         if (musicList[i].id == pid) {
@@ -179,7 +186,7 @@ function loadUserPlaylistsForUG666() {
 
       if (idx !== -1) {
         $(".btn[data-action='sheet']").click();
-        loadSheet(idx);
+        loadList(idx);
       } else {
         console.error('无法找到对应的歌单 ID:', pid);
         layer.msg('无法加载歌单，请刷新后重试');
@@ -208,7 +215,7 @@ $(document).on('click', '.login-refresh', function () {
   playerSavedata('ulist', '');
   layer.msg('刷新歌单');
   clearUserlist();
-  
+
   // 延迟后更新UG666页面显示
   setTimeout(function () {
     $(document).trigger('showUG666Playlists');

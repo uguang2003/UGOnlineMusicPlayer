@@ -81,25 +81,7 @@
       };
     }
 
-    // 添加初始化函数，用于在页面加载时自动加载所有模板
-    function initTemplates() {
-      if (typeof window.Templates !== 'undefined') {
-        // 预加载常用模板
-        window.Templates.load('search-form');
-        window.Templates.load('placard');
-
-        // 渲染初始模板
-        if ($("#sync-playlist-container").length) {
-          window.Templates.render('sync-playlist', 'sync-playlist-container');
-        }
-
-        if ($("#user-info-container").length) {
-          window.Templates.render('user-info', 'user-info-container');
-        }
-      }
-    }
-
-    // 页面加载完成后初始化模板
-    initTemplates();
+    // 注意：模板的初始化加载已移至templates.js中集中处理，
+    // 避免重复加载和渲染模板，造成多次HTTP请求
   });
 })();

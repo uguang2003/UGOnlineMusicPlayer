@@ -78,15 +78,19 @@ const Templates = {
   }
 };
 
-// 页面加载完成后加载必要的模板
+// 页面加载完成后加载和渲染模板
 $(function () {
-  // 预加载常用模板
-  Templates.load('search-form');
-  Templates.load('placard');
-
-  // 渲染页面固定模板
-  Templates.render('sync-playlist', 'sync-playlist-container');
-  Templates.render('user-info', 'user-info-container');
+  // 预加载所有模板，避免重复请求
+  Promise.all([
+    Templates.load('search-form'),
+    Templates.load('placard'),
+    Templates.load('sync-playlist'),
+    Templates.load('user-info')
+  ]).then(() => {
+    // 渲染页面固定模板（此时使用缓存，不会发起新请求）
+    Templates.render('sync-playlist', 'sync-playlist-container');
+    Templates.render('user-info', 'user-info-container');
+  });
 });
 
 // 导出模板模块

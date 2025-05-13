@@ -11,7 +11,7 @@ var mkPlayer = {
     comments: true, // 是否开启歌曲评论功能
     method: "POST",     // 数据传输方式(POST/GET)
     dataType: "json",   // 服务器返回的数据格式(json/jsonp)
-    defaultlist: 3,    // 默认要显示的播放列表编号
+    defaultlist: 1,    // 默认要显示的播放列表编号，设为1，直接显示正在播放列表
     autoplay: false,    // 是否自动播放(true/false) *此选项在移动端可能无效
     coverbg: true,      // 是否开启封面背景(true/false) *开启后会有些卡
     mcoverbg: true,     // 是否开启[移动端]封面背景(true/false)

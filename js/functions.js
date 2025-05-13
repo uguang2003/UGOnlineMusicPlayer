@@ -1007,6 +1007,7 @@ function dataBox(choose) {
             }
             $("#main-list").fadeIn();
             $("#sheet").fadeOut();
+            $("#about").fadeOut(); // 确保关闭about页面
             if (rem.dislist == 1 || rem.dislist == rem.playlist) {  // 正在播放
                 $(".btn[data-action='playing']").addClass('active');
             } else if (rem.dislist == 0) {  // 搜索
@@ -1022,6 +1023,7 @@ function dataBox(choose) {
             }
             $("#sheet").fadeIn();
             $("#main-list").fadeOut();
+            $("#about").fadeOut(); // 确保关闭about页面
             $(".btn[data-action='sheet']").addClass('active');
             break;
 
@@ -1029,7 +1031,16 @@ function dataBox(choose) {
             $("#player").fadeIn();
             $("#sheet").fadeOut();
             $("#main-list").fadeOut();
+            $("#about").fadeOut(); // 确保关闭about页面
             $(".btn[data-action='player']").addClass('active');
+            break;
+
+        case "about":  // 显示UG666页面
+            $("#player").fadeIn();
+            $("#sheet").fadeOut();
+            $("#main-list").fadeOut();
+            $("#about").fadeIn();
+            $(".btn[data-action='about']").addClass('active');
             break;
     }
 }
@@ -1136,10 +1147,50 @@ function initList() {
         return true;
     }
 
-    // 首页显示默认列表
-    if (mkPlayer.defaultlist >= musicList.length) mkPlayer.defaultlist = 1;  // 超出范围，显示正在播放列表
+    // 首先确保所有页面隐藏，避免闪烁问题
+    $("#sheet").hide();
+    $("#about").hide();
 
-    if (musicList[mkPlayer.defaultlist].isloading !== true) loadList(mkPlayer.defaultlist);
+    // 直接加载"正在播放"列表
+    rem.dislist = 1;  // 设置当前显示的列表为"正在播放"
+
+    // 激活"正在播放"按钮
+    $('.btn-box .active').removeClass('active');
+    $(".btn[data-action='playing']").addClass('active');
+
+    // 确保播放器可见
+    $("#player").show();
+
+    // 显示主列表区域
+    $("#main-list").show();
+
+    // 加载正在播放列表的内容
+    rem.mainList.html('');   // 清空列表中原有的元素
+    addListhead();      // 向列表中加入列表头
+
+    if (musicList[1].item.length == 0) {
+        addListbar("nodata");   // 列表中没有数据
+    } else {
+        // 逐项添加数据
+        for (var i = 0; i < musicList[1].item.length; i++) {
+            var tmpMusic = musicList[1].item[i];
+            addItem(i + 1, tmpMusic.name, tmpMusic.artist, tmpMusic.album);
+            tmpMusic.url = ""; // 清空URL以便重新加载
+        }
+
+        // 历史记录和正在播放列表允许清空
+        addListbar("clear");    // 清空列表
+
+        // 刷新列表，添加正在播放样式
+        if (rem.playlist !== undefined) {
+            refreshList();
+        } else if (mkPlayer.autoplay == true) {
+            pause();  // 设置了自动播放，则自动播放
+        }
+    }
+
+    // 列表滚动到顶部
+    listToTop();
 
     // 显示最后一项登陆条
     sheetBar();
