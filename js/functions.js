@@ -971,7 +971,7 @@ function addSheet(no, name, cover) {
 
     var html = '<div class="sheet-item" data-no="' + no + '">' +
         '    <img class="sheet-cover" src="' + cover + '">' +
-        '    <p class="sheet-name">' + name + '</p>' +
+        '    <p class="sheet-name" title="' + name + '">' + name + '</p>' +
         '</div>';
     rem.sheetList.append(html);
 }
@@ -1128,14 +1128,14 @@ function initList() {
             // 用户歌单添加到用户区域
             var sheetHtml = '<div class="sheet-item" data-no="' + i + '">' +
                 '<img class="sheet-cover" src="' + (musicList[i].cover || "images/player_cover.png") + '">' +
-                '<p class="sheet-name">' + (musicList[i].name || "读取中...") + '</p>' +
+                '<p class="sheet-name" title="' + (musicList[i].name || "读取中...") + '">' + (musicList[i].name || "读取中...") + '</p>' +
                 '</div>';
             $('.user-sheets .sheet-group-content').append(sheetHtml);
         } else {
             // 系统歌单添加到系统区域
             var sheetHtml = '<div class="sheet-item" data-no="' + i + '">' +
                 '<img class="sheet-cover" src="' + (musicList[i].cover || "images/player_cover.png") + '">' +
-                '<p class="sheet-name">' + (musicList[i].name || "读取中...") + '</p>' +
+                '<p class="sheet-name" title="' + (musicList[i].name || "读取中...") + '">' + (musicList[i].name || "读取中...") + '</p>' +
                 '</div>';
             $('.system-sheets .sheet-group-content').append(sheetHtml);
         }

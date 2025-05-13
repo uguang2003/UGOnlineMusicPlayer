@@ -511,6 +511,7 @@ function ajaxPlayList(lid, id, callback) {
             // 改变前端列表
             $(".sheet-item[data-no='" + id + "'] .sheet-cover").attr('src', tempList.cover);    // 专辑封面
             $(".sheet-item[data-no='" + id + "'] .sheet-name").html(tempList.name);     // 专辑名字
+            $(".sheet-item[data-no='" + id + "'] .sheet-name").attr('title', tempList.name);    // 更新title属性
 
             // 调试信息输出
             if (mkPlayer.debug) {

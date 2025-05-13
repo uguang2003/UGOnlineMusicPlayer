@@ -177,6 +177,9 @@ function loadUserPlaylistsForUG666() {
       // 添加点击时的激活状态效果
       $(this).addClass('active').siblings().removeClass('active');
 
+      // 显示加载中提示
+      layer.msg('正在加载歌单...', { icon: 16, shade: [0.1, '#fff'], time: 0 });
+
       for (var i = 0; i < musicList.length; i++) {
         if (musicList[i].id == pid) {
           idx = i;
@@ -185,9 +188,29 @@ function loadUserPlaylistsForUG666() {
       }
 
       if (idx !== -1) {
-        $(".btn[data-action='sheet']").click();
-        loadList(idx);
+        // 检查歌单是否已加载歌曲内容
+        if (musicList[idx].item.length === 0) {
+          // 未加载歌单内容，使用与sheet页面相同的逻辑
+          if (musicList[idx].id) {
+            // ajax加载数据
+            ajaxPlayList(musicList[idx].id, idx, function (loadedIdx) {
+              // 加载完成后切换到列表显示
+              layer.closeAll();
+              dataBox("list"); // 切换到列表视图
+              loadList(loadedIdx); // 加载歌曲列表
+            });
+          } else {
+            layer.closeAll();
+            layer.msg('加载失败，歌单ID无效');
+          }
+        } else {
+          // 已有歌单内容，直接显示
+          layer.closeAll();
+          dataBox("list"); // 切换到列表视图
+          loadList(idx); // 加载歌曲列表
+        }
       } else {
+        layer.closeAll();
         console.error('无法找到对应的歌单 ID:', pid);
         layer.msg('无法加载歌单，请刷新后重试');
       }
@@ -459,7 +482,7 @@ function refreshSheetList() {
   for (var i = 1; i < 3; i++) {  // 只加载系统歌单(正在播放和播放历史)
     var sheetHtml = '<div class="sheet-item" data-no="' + i + '">' +
       '<img class="sheet-cover" src="' + (musicList[i].cover || "images/player_cover.png") + '">' +
-      '<p class="sheet-name">' + (musicList[i].name || "读取中...") + '</p>' +
+      '<p class="sheet-name" title="' + (musicList[i].name || "读取中...") + '">' + (musicList[i].name || "读取中...") + '</p>' +
       '</div>';
     $('.system-sheets .sheet-group-content').append(sheetHtml);
   }
@@ -469,7 +492,7 @@ function refreshSheetList() {
     if (!musicList[i].creatorID) { // 只加载系统歌单
       var sheetHtml = '<div class="sheet-item" data-no="' + i + '">' +
         '<img class="sheet-cover" src="' + (musicList[i].cover || "images/player_cover.png") + '">' +
-        '<p class="sheet-name">' + (musicList[i].name || "读取中...") + '</p>' +
+        '<p class="sheet-name" title="' + (musicList[i].name || "读取中...") + '">' + (musicList[i].name || "读取中...") + '</p>' +
         '</div>';
       $('.system-sheets .sheet-group-content').append(sheetHtml);
     }
