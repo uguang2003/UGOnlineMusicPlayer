@@ -141,17 +141,31 @@ function loadUserPlaylistsForUG666() {
   var $list = $("#sync-loggedin-container .user-playlist-list");
 
   if (!userPlaylistsData) {
-    $list.html('<div style="text-align:center;color:#bdbdbe;padding:20px;">暂无歌单数据</div>');
-    console.error('用户歌单数据为空');
+    $list.html('<div style="text-align:center;color:#bdbdbe;padding:20px;">暂无歌单数据，请点击刷新按钮</div>');
+    console.log('用户歌单数据未找到，可能是首次同步或尚未完成同步');
+
+    // 检查用户ID是否存在但歌单数据未加载
+    var uid = playerReaddata('uid');
+    if (uid) {
+      layer.msg('正在获取歌单数据...', { icon: 16, time: 1500 });
+      // 自动尝试加载用户歌单
+      refreshUserPlaylists(uid);
+    }
     return;
   }
 
   try {
-    var playlists = userPlaylistsData; // 直接使用 playerReaddata 返回的数据，因为它已经被解析过了
+    var playlists = userPlaylistsData; // 直接使用 playerReaddata 返回的数据
 
     if (!Array.isArray(playlists) || playlists.length === 0) {
-      $list.html('<div style="text-align:center;color:#bdbdbe;padding:20px;">暂无歌单数据</div>');
-      console.warn('用户歌单数据为空或不是数组:', playlists);
+      $list.html('<div style="text-align:center;color:#bdbdbe;padding:20px;">暂无歌单数据，请点击刷新按钮</div>');
+      console.log('用户歌单数据为空或格式不正确:', JSON.stringify(playlists).substring(0, 100) + '...');
+
+      // 如果有用户ID但数据异常，尝试重新获取
+      var uid = playerReaddata('uid');
+      if (uid) {
+        refreshUserPlaylists(uid);
+      }
       return;
     }
 
@@ -217,7 +231,105 @@ function loadUserPlaylistsForUG666() {
     });
   } catch (e) {
     console.error('处理用户歌单数据时发生错误:', e, userPlaylistsData);
-    $list.html('<div style="text-align:center;color:#bdbdbe;padding:20px;">歌单数据异常</div>');
+    $list.html('<div style="text-align:center;color:#bdbdbe;padding:20px;">歌单数据异常，请刷新重试</div>');
+
+    // 显示详细错误
+    if (mkPlayer.debug) {
+      $list.append('<div style="text-align:center;color:#ff5252;padding:10px;font-size:12px;">错误详情：' + e.message + '</div>');
+    }
+  }
+}
+
+/**
+ * 刷新用户歌单数据
+ * @param {string} uid 用户ID
+ */
+function refreshUserPlaylists(uid) {
+  // 确保有用户ID
+  if (!uid) {
+    uid = playerReaddata('uid');
+    if (!uid) {
+      console.error('无法刷新歌单：未找到用户ID');
+      return false;
+    }
+  }
+
+  // 显示加载提示
+  var loadingMsg = layer.msg('正在获取歌单数据...', { icon: 16, time: 0 });
+
+  // 请求用户歌单数据
+  $.ajax({
+    type: "POST",
+    url: "api.php",
+    data: {
+      "uid": uid,
+      "types": "userlist",
+      "force_refresh": "1" // 强制刷新，不使用缓存
+    },
+    dataType: "json",
+    success: function (data) {
+      layer.close(loadingMsg);
+
+      if (data.code == 200 && data.playlist && data.playlist.length > 0) {
+        // 格式化用户歌单
+        var formattedPlaylists = [];
+        for (var i = 0; i < data.playlist.length; i++) {
+          var playlist = data.playlist[i];
+          formattedPlaylists.push({
+            id: playlist.id,
+            name: playlist.name,
+            cover: playlist.coverImgUrl + "?param=200y200",
+            creatorID: uid,
+            creatorName: playlist.creator.nickname,
+            creatorAvatar: playlist.creator.avatarUrl,
+            item: []
+          });
+        }
+
+        // 保存歌单数据
+        playerSavedata('ulist', formattedPlaylists);
+
+        // 更新内存中的musicList
+        updateMusicListWithUserPlaylists(formattedPlaylists);
+
+        // 显示成功消息
+        layer.msg('歌单数据已更新');
+
+        // 触发更新事件
+        $(document).trigger('showUG666Playlists');
+      } else {
+        layer.msg('获取歌单失败: ' + (data.msg || '未知错误'));
+        console.error('获取歌单失败:', data);
+      }
+    },
+    error: function (xhr, status, error) {
+      layer.close(loadingMsg);
+      layer.msg('网络错误，请稍后再试');
+      console.error('网络请求失败:', status, error);
+    }
+  });
+
+  return true;
+}
+
+/**
+ * 更新内存中的musicList，添加用户歌单
+ * @param {Array} playlists 用户歌单数组
+ */
+function updateMusicListWithUserPlaylists(playlists) {
+  if (!Array.isArray(playlists) || playlists.length === 0) return;
+
+  // 移除现有的用户歌单（通过creatorID判断）
+  var uid = playerReaddata('uid');
+  for (var i = musicList.length - 1; i >= 3; i--) {
+    if (musicList[i].creatorID && musicList[i].creatorID == uid) {
+      musicList.splice(i, 1);
+    }
+  }
+
+  // 添加新的用户歌单
+  for (var i = 0; i < playlists.length; i++) {
+    musicList.push(playlists[i]);
   }
 }
 

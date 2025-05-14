@@ -283,6 +283,7 @@ switch($types)   // 根据请求的 Api，执行相应操作
     case 'like':  // 喜欢/取消喜欢歌曲功能
         $id = getParam('id');  // 歌曲id
         $like = getParam('like', '1');  // 1表示喜欢，0表示取消喜欢
+        $clear_cache = getParam('clear_cache', '0');  // 是否清除缓存
         
         // 这个功能需要用户登录网易云音乐，所以检查cookie
         if($netease_cookie) {
@@ -346,6 +347,11 @@ switch($types)   // 根据请求的 Api，执行相应操作
                 if (isset($json_result['code']) && $json_result['code'] === 200) {
                     // 操作成功，清除"我喜欢"歌单的缓存
                     clearLikedPlaylistCache($netease_cookie);
+                    
+                    // 如果请求要求清除缓存，则执行清除操作
+                    if ($clear_cache === '1') {
+                        clearAllUserCaches(extractUserIdFromCookie($netease_cookie));
+                    }
                     
                     $response = [
                         'code' => 200,
@@ -828,17 +834,14 @@ function clearLikedPlaylistCache($netease_cookie) {
     $uid = extractUserIdFromCookie($netease_cookie);
     
     if (!$uid) {
-        // 如果无法提取用户ID，尝试扫描目录删除所有歌单缓存
-        $files = scandir(CACHE_PATH);
-        foreach ($files as $file) {
-            if (is_file(CACHE_PATH . $file) && 
-                (strpos($file, 'netease_playlist_') === 0 || 
-                 strpos($file, 'netease_userlist_') === 0)) {
-                @unlink(CACHE_PATH . $file);
-            }
+        // 如果无法提取用户ID，只尝试清除未指定UID的相关缓存
+        if(file_exists(CACHE_PATH . 'netease_userlist_.json')) {
+            @unlink(CACHE_PATH . 'netease_userlist_.json');
         }
         return;
     }
+    
+    // 只清除与此用户相关的缓存:
     
     // 1. 清除用户歌单列表缓存
     $userlistCache = CACHE_PATH . 'netease_userlist_' . $uid . '.json';
@@ -846,14 +849,37 @@ function clearLikedPlaylistCache($netease_cookie) {
         @unlink($userlistCache);
     }
     
-    // 2. 尝试读取用户歌单列表，获取"我喜欢"歌单ID
+    // 2. 获取用户的"我喜欢"歌单ID
     $likedPlaylistId = getLikedPlaylistId($uid, $netease_cookie);
     
     if ($likedPlaylistId) {
-        // 3. 清除"我喜欢"歌单的缓存
+        // 3. 只清除"我喜欢"歌单的缓存
         $likedPlaylistCache = CACHE_PATH . 'netease_playlist_' . $likedPlaylistId . '.json';
         if (file_exists($likedPlaylistCache)) {
             @unlink($likedPlaylistCache);
+        }
+    }
+}
+
+/**
+ * 清除用户所有缓存
+ * @param $uid 用户ID
+ */
+function clearAllUserCaches($uid) {
+    if (!defined('CACHE_PATH') || !is_dir(CACHE_PATH)) {
+        return; // 如果没有定义缓存路径或目录不存在，直接返回
+    }
+    
+    // 获取缓存目录中的所有文件
+    $files = scandir(CACHE_PATH);
+    
+    foreach ($files as $file) {
+        // 检查文件名是否包含用户ID
+        if (strpos($file, 'netease_userlist_' . $uid) !== false || strpos($file, 'netease_playlist_' . $uid) !== false) {
+            $filePath = CACHE_PATH . $file;
+            if (is_file($filePath)) {
+                @unlink($filePath); // 删除文件
+            }
         }
     }
 }

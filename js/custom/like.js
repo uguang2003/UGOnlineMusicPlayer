@@ -103,7 +103,8 @@ function addOrRemoveLike(songId, isAdd) {
     "source": "netease",
     "id": songId,
     "like": isAdd ? "1" : "0",
-    "cookie": netease_cookie  // 在请求参数中直接添加cookie
+    "cookie": netease_cookie, // 在请求参数中直接添加cookie
+    "clear_cache": "1"        // 添加清除缓存参数
   };
 
   // 发送请求
@@ -124,7 +125,7 @@ function addOrRemoveLike(songId, isAdd) {
       if (result.code === 200) {
         layer.msg(result.msg, { icon: 1 });
 
-        // 只有在API调用成功后才更新按钮状态
+        // 立即更新按钮状态，不等待API回调
         if (isAdd) {
           // 添加到我喜欢 - 更新为已喜欢状态
           $(".btn-like").addClass('btn-state-liked');
@@ -135,7 +136,10 @@ function addOrRemoveLike(songId, isAdd) {
           $(".btn-like").attr('title', '添加到我喜欢');
         }
 
-        // 新增：刷新用户歌单数据
+        // 清除服务器和本地的歌单缓存
+        clearAllCaches();
+
+        // 刷新用户歌单数据
         refreshUserLikedPlaylist();
       } else {
         layer.msg(result.msg, { icon: 2 });
@@ -153,6 +157,76 @@ function addOrRemoveLike(songId, isAdd) {
   });
 }
 
+// 清除所有相关缓存（服务器端和本地）
+function clearAllCaches() {
+  // 清除服务器端缓存
+  $.ajax({
+    url: 'api.php',
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      "types": "cache",
+      "minute": 0,  // 设置为0表示清除所有缓存文件
+      "force_clear": 1 // 强制清除
+    },
+    async: true,
+    success: function (data) {
+      console.log("服务器缓存清理结果：", data);
+    },
+    error: function () {
+      console.error("服务器缓存清理失败");
+    }
+  });
+
+  // 清除本地存储的歌单缓存
+  var uid = playerReaddata('uid');
+  if (uid) {
+    clearUserPlaylistCache(uid);
+  }
+}
+
+// 仅清除用户相关的歌单缓存
+function clearUserPlaylistCache(uid) {
+  // 清除用户歌单列表缓存，但不删除其他系统歌单缓存
+  var userData = playerReaddata('ulist');
+  if (userData && Array.isArray(userData)) {
+    // 获取用户所有歌单的ID
+    var userPlaylistIds = userData.map(function (playlist) {
+      return playlist.id;
+    });
+
+    // 只清除这些歌单的缓存
+    for (var i = 0; i < userPlaylistIds.length; i++) {
+      var playlistId = userPlaylistIds[i];
+      // 清除localStorage中的缓存
+      if (localStorage["mkplayer_playlist_" + playlistId]) {
+        localStorage.removeItem("mkplayer_playlist_" + playlistId);
+      }
+      // 只清除特定歌单的缓存，而不是所有以UGPlayer_开头的本地存储
+      if (localStorage["UGPlayer_playlist_" + playlistId]) {
+        localStorage.removeItem("UGPlayer_playlist_" + playlistId);
+      }
+    }
+  }
+
+  // 清除用户歌单列表的缓存
+  playerSavedata('ulist', '');
+
+  // 尝试清除服务器上特定的用户歌单缓存
+  if (uid) {
+    $.ajax({
+      url: 'api.php',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        "types": "clear_user_cache",
+        "uid": uid
+      },
+      async: true
+    });
+  }
+}
+
 // 刷新用户的"我喜欢"歌单
 function refreshUserLikedPlaylist() {
   // 获取用户ID
@@ -162,11 +236,11 @@ function refreshUserLikedPlaylist() {
     return false;
   }
 
-  // 通知用户正在刷新歌单
+  // 通知用户正在刷新歌单数据
   layer.msg('正在刷新歌单数据...', { icon: 16, time: 1500 });
 
-  // 清除相关缓存
-  playerSavedata('ulist', '');
+  // 只清除用户相关的歌单缓存，而不是所有歌单
+  clearUserPlaylistCache(uid);
 
   // 调用API强制刷新歌单数据
   $.ajax({
@@ -203,6 +277,9 @@ function refreshUserLikedPlaylist() {
         // 重新获取用户歌单数据
         clearUserlist();
 
+        // 如果当前有播放列表是用户的歌单，并且是"我喜欢"列表，则刷新它
+        refreshCurrentPlayingList();
+
         // 触发歌单更新事件
         $(document).trigger('showUG666Playlists');
 
@@ -224,6 +301,142 @@ function refreshUserLikedPlaylist() {
   return true;
 }
 
+// 刷新当前正在播放的列表
+function refreshCurrentPlayingList() {
+  // 记住当前正在播放的歌曲ID，在刷新后用于定位
+  var currentPlayingSongId = null;
+  if (rem.playlist !== undefined && rem.playid !== undefined &&
+    musicList[1] && musicList[1].item && musicList[1].item[rem.playid]) {
+    currentPlayingSongId = musicList[1].item[rem.playid].id;
+  }
+
+  // 如果正在播放列表是用户的歌单，尤其是"我喜欢"歌单
+  if (rem.playlist !== undefined && typeof rem.playlist === 'number') {
+    var playlistType = rem.playlist;
+
+    // 获取用户歌单数据
+    var userData = playerReaddata('ulist');
+    if (userData && Array.isArray(userData) && userData.length > 0) {
+      // 检查当前播放的是否是用户歌单或"我喜欢"歌单
+      if (playlistType === 0) { // 0表示"我喜欢"歌单
+        // 清除当前播放列表的缓存
+        if (musicList[playlistType]) {
+          // 重新载入歌单
+          loadList(playlistType);
+
+          // 如果之前有播放的歌曲，尝试找到相同ID的歌曲并继续播放
+          if (currentPlayingSongId !== null) {
+            // 等待歌单加载完成后查找歌曲
+            setTimeout(function () {
+              // 查找歌曲在新歌单中的位置
+              var newIndex = -1;
+              if (musicList[playlistType] && musicList[playlistType].item) {
+                for (var i = 0; i < musicList[playlistType].item.length; i++) {
+                  if (musicList[playlistType].item[i].id == currentPlayingSongId) {
+                    newIndex = i;
+                    break;
+                  }
+                }
+              }
+
+              // 如果找到了歌曲，更新播放ID
+              if (newIndex != -1) {
+                rem.playid = newIndex;
+                // 更新播放进度条和界面
+                loadedmetadata();
+              }
+            }, 1000);
+          }
+        }
+      }
+    }
+  }
+
+  // 检查并更新正在播放列表中的歌曲状态
+  updateNowPlayingListStatus(currentPlayingSongId);
+}
+
+// 更新正在播放列表中歌曲的"我喜欢"状态
+function updateNowPlayingListStatus(currentPlayingSongId) {
+  // 确保"正在播放"列表存在
+  if (!musicList[1] || !musicList[1].item || !musicList[1].item.length) {
+    return false;
+  }
+
+  // 获取用户的"我喜欢"歌单
+  var userPlaylists = playerReaddata('ulist');
+  if (!userPlaylists || !userPlaylists.length) {
+    return false;
+  }
+
+  // "我喜欢"歌单通常是第一个歌单
+  var likedPlaylist = userPlaylists[0];
+  if (!likedPlaylist || !likedPlaylist.item || !likedPlaylist.item.length) {
+    return false;
+  }
+
+  // 创建一个歌曲ID的映射，方便快速查找歌曲是否在"我喜欢"中
+  var likedSongsMap = {};
+  for (var i = 0; i < likedPlaylist.item.length; i++) {
+    likedSongsMap[likedPlaylist.item[i].id] = true;
+  }
+
+  // 记住当前的播放状态
+  var currentPlaylistIndex = rem.playlist;
+  var currentPlayId = rem.playid;
+  var currentPosition = 0;
+
+  if (currentPlayingSongId !== null) {
+    // 查找当前歌曲在"正在播放"列表中的新位置
+    for (var i = 0; i < musicList[1].item.length; i++) {
+      if (musicList[1].item[i].id == currentPlayingSongId) {
+        currentPosition = i;
+
+        // 如果找到了当前播放的歌曲，但是其索引与rem.playid不一致，则更新rem.playid
+        if (rem.playlist === 1 && rem.playid !== i) {
+          console.log("匹配到当前播放歌曲，索引从", rem.playid, "更新为", i);
+          rem.playid = i;
+
+          // 更新播放进度条和界面
+          setTimeout(function () {
+            refreshList();
+            loadedmetadata();
+          }, 100);
+        }
+        break;
+      }
+    }
+  }
+
+  // 遍历"正在播放"列表中的所有歌曲，更新喜欢状态
+  for (var i = 0; i < musicList[1].item.length; i++) {
+    var song = musicList[1].item[i];
+    // 只检查网易云音乐的歌曲
+    if (song.source === 'netease') {
+      // 检查歌曲是否在"我喜欢"列表中
+      if (likedSongsMap[song.id]) {
+        // 如果在列表中，标记为已喜欢
+        song.liked = true;
+      } else {
+        // 如果不在列表中，标记为未喜欢
+        song.liked = false;
+      }
+    }
+  }
+
+  // 刷新当前歌曲在界面上的"喜欢"状态
+  updateLikeButtonState();
+
+  // 如果当前正在播放列表是在显示中，则刷新界面
+  if (rem.dislist === 1) {
+    setTimeout(function () {
+      refreshList();
+    }, 200);
+  }
+
+  return true;
+}
+
 // 检查歌曲是否在"我喜欢"歌单列表中
 function checkSongInLikedList(songId) {
   // 从本地存储获取用户歌单
@@ -240,9 +453,13 @@ function checkSongInLikedList(songId) {
     var uid = playerReaddata('uid');
     if (uid) {
       // 如果有用户ID但没有加载歌曲，尝试加载歌单内容
-      loadUserPlaylist(0, function () {
-        // 加载完成后重新检查
-        updateLikeButtonState();
+      // 注意：这里不应直接使用loadList，因为那会切换当前显示的列表
+      // 相反，我们应该通过ajax请求来获取歌单数据
+      loadLikedPlaylistSilently(uid, function () {
+        // 数据加载完成后再次检查状态并更新UI
+        setTimeout(function () {
+          updateLikeButtonState();
+        }, 1000);
       });
     }
     return false;
@@ -256,6 +473,94 @@ function checkSongInLikedList(songId) {
   }
 
   return false; // 没找到，表示歌曲不在"我喜欢"列表中
+}
+
+// 静默加载"我喜欢"歌单数据而不切换界面
+function loadLikedPlaylistSilently(uid, callback) {
+  // 检查是否已有缓存
+  var likedPlaylistId = null;
+  var userPlaylists = playerReaddata('ulist');
+
+  if (userPlaylists && userPlaylists.length > 0) {
+    likedPlaylistId = userPlaylists[0].id;
+  }
+
+  if (!likedPlaylistId) {
+    // 如果无法获取歌单ID，无法加载
+    console.error("无法获取'我喜欢'歌单ID");
+    if (typeof callback === 'function') callback();
+    return;
+  }
+
+  // 使用ajax获取歌单内容，但不切换显示
+  $.ajax({
+    url: 'api.php',
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      "types": "playlist",
+      "id": likedPlaylistId
+    },
+    success: function (data) {
+      // 处理返回的歌单数据
+      if (data && data.playlist && data.playlist.tracks) {
+        // 获取歌单中的歌曲
+        var tracks = data.playlist.tracks;
+        var formattedTracks = [];
+
+        // 格式化歌曲数据为播放器需要的格式
+        for (var i = 0; i < tracks.length; i++) {
+          var track = tracks[i];
+          var artist = '';
+
+          // 获取艺术家名称
+          if (track.ar && track.ar.length) {
+            for (var j = 0; j < track.ar.length; j++) {
+              artist += (j === 0 ? '' : '/') + track.ar[j].name;
+            }
+          } else {
+            artist = '未知艺术家';
+          }
+
+          formattedTracks.push({
+            id: track.id,
+            name: track.name,
+            artist: artist,
+            album: track.al ? track.al.name : '未知专辑',
+            source: 'netease',
+            url_id: track.id,
+            pic_id: track.al ? track.al.pic_str || track.al.pic : '',
+            lyric_id: track.id,
+            pic: track.al ? track.al.picUrl : '',
+            url: ''  // URL会在播放时获取
+          });
+        }
+
+        // 更新"我喜欢"歌单数据而不改变界面
+        if (userPlaylists && userPlaylists.length > 0) {
+          userPlaylists[0].item = formattedTracks;
+          playerSavedata('ulist', userPlaylists);
+
+          // 如果当前已经加载了音乐列表，刷新当前显示的列表（确保喜欢状态正确显示）
+          if (musicList && musicList.length > 0) {
+            for (var i = 3; i < musicList.length; i++) {
+              if (musicList[i].id === likedPlaylistId) {
+                musicList[i].item = formattedTracks;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      // 执行回调
+      if (typeof callback === 'function') callback();
+    },
+    error: function (xhr, status, error) {
+      console.error("获取'我喜欢'歌单数据失败", error);
+      if (typeof callback === 'function') callback();
+    }
+  });
 }
 
 // 更新"喜欢"按钮状态
