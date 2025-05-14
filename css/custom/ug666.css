@@ -563,6 +563,38 @@
   .user-playlist-list .sheet-name {
     max-width: 100px;
   }
+
+  /* Cookie设置按钮移动端优化 */
+  .cookie-btn-area {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  #open-cookie-btn,
+  .open-cookie-btn {
+    width: 100%;
+    max-width: 200px;
+    margin: 5px auto;
+  }
+
+  /* 用户操作按钮在小屏幕上垂直堆叠 */
+  .user-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .user-actions button {
+    width: 100%;
+    max-width: 200px;
+    margin: 5px 0;
+  }
+
+  /* 弹窗在移动端的调整 */
+  .layui-layer {
+    width: 95% !important;
+    left: 2.5% !important;
+    margin-left: 0 !important;
+  }
 }
 
 /* 超小屏幕适配 */
@@ -589,6 +621,67 @@
   /* 超小屏幕歌单列表优化 */
   .user-playlist-list .sheet-item {
     width: calc(50% - 5px);
+  }
+
+  /* Cookie设置相关元素的超小屏幕优化 */
+  #open-cookie-btn,
+  .open-cookie-btn {
+    font-size: 13px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    max-width: 180px;
+  }
+
+  /* 弹窗内文本区域在小屏幕上的适配 */
+  #popup-netease-cookie {
+    min-height: 80px;
+  }
+
+  /* 弹窗适配 */
+  .layui-layer-title {
+    font-size: 14px !important;
+    height: 38px !important;
+    line-height: 38px !important;
+  }
+
+  /* 帮助弹窗在小屏幕上的文本适配 */
+  .layui-layer ol,
+  .layui-layer ul {
+    padding-left: 20px;
+  }
+
+  .layui-layer li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+    font-size: 13px;
+  }
+}
+
+/* 极小屏幕适配（老款iPhone SE等） */
+@media screen and (max-width: 320px) {
+  .about-section {
+    padding: 10px;
+  }
+
+  .sync-container .sheet-title-bar {
+    padding: 8px 10px !important;
+    font-size: 14px;
+  }
+
+  /* 按钮文字缩小 */
+  .sync-container .layui-btn {
+    font-size: 12px !important;
+    padding: 0 10px;
+  }
+
+  /* 帮助内容在极小屏幕上的优化 */
+  .help-content {
+    padding: 10px;
+  }
+
+  .help-content p {
+    font-size: 12px;
+    line-height: 1.5;
   }
 }
 

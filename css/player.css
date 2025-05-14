@@ -929,13 +929,13 @@ body {
     width: 19px;
     height: 29px;
     margin-top: -14.5px;
-    left: 30%;
+    left: 32%;
     margin-left: -10.5px;
 }
 
 .btn-next {
     background-position: 0 -52px;
-    right: 45%;
+    right: 40%;
     width: 19px;
     height: 20px;
     margin-top: -10px;
@@ -944,7 +944,7 @@ body {
 .btn-order {
     background-position: 0 -173px;
     background-size: 450%;
-    right: 20%;
+    right: 15%;
     width: 25px;
     height: 25px;
     margin-top: -10px;
