@@ -16,6 +16,7 @@ UGOnlineMusicPlayer是一款开源的在线音乐播放器。具有音乐搜索�
 - 💬 音乐热评查看
 - 📱 响应式设计，支持手机端访问
 - 🌈 美观的用户界面
+- 🖥️ 提供Windows桌面应用版本，支持全局快捷键和系统托盘
 
 ## 安装使用
 
@@ -80,11 +81,32 @@ UGOnlineMusicPlayer/
 ├── images/              # 图片资源目录
 ├── js/                  # JavaScript文件目录
 ├── plugins/             # 插件目录
-└── temp/                # 临时文件目录
+├── temp/                # 临时文件目录
+└── UGOnlineMusicPlayer-Electron/ # 桌面应用版本目录
 ```
 
 ## 浏览器兼容性
 本播放器设计支持 IE9及以上的现代浏览器。并且已在 Chrome、Firefox、IE11 等浏览器测试使用正常。
+
+## 桌面应用版本
+
+除了Web版本，我们还提供了基于Electron的Windows桌面应用版本。桌面版具有以下特点：
+
+- 独立的桌面应用体验，无需浏览器
+- 最小化到系统托盘功能，点击关闭按钮不会退出程序
+- 全局快捷键支持，可在任何应用中控制音乐播放
+  - `Ctrl+Alt+右箭头` - 下一首
+  - `Ctrl+Alt+左箭头` - 上一首
+  - `Ctrl+Alt+空格` - 播放/暂停
+- 优化的文件下载体验，直接使用系统对话框保存文件
+
+### 安装桌面版
+
+从[发布页面](https://github.com/username/UGOnlineMusicPlayer-Electron/releases)下载最新版本的安装包，运行安装程序按照提示完成安装。
+
+### 构建桌面版
+
+如果您想自己构建桌面应用，请参考 [UGOnlineMusicPlayer-Electron/README.md](UGOnlineMusicPlayer-Electron/README.md) 的详细说明.
 
 ## 相关链接
 - 原版项目: [mengkunsoft/MKOnlineMusicPlayer](https://github.com/mengkunsoft/MKOnlineMusicPlayer)

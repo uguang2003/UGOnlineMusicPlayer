@@ -1,0 +1,66 @@
+{
+  "name": "ugonlinemusicplayer-electron",
+  "version": "1.0.0",
+  "description": "UG在线音乐播放器的桌面应用版本",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:win32": "electron-builder --win --ia32",
+    "dist:win64": "electron-builder --win --x64",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "keywords": [
+    "music",
+    "player",
+    "electron"
+  ],
+  "author": "UG",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^29.0.1",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.ug.musicplayer",
+    "productName": "UG在线音乐播放器",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "resources/icon.ico",
+      "artifactName": "${productName}_Setup_${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "UG音乐播放器",
+      "license": "LICENSE.txt",
+      "allowElevation": true,
+      "runAfterFinish": true,
+      "installerIcon": "resources/icon.ico",
+      "uninstallerIcon": "resources/icon.ico"
+    }
+  }
+}
