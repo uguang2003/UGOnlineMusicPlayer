@@ -272,6 +272,17 @@
   max-width: 200px;
 }
 
+.user-actions .button-row {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.user-actions .login-out {
+  background-color: #FF5722 !important;
+  border-color: #FF5722 !important;
+}
+
 /* 内容区域样式 */
 .sync-container .sheet-item>div:not(.sheet-title-bar) {
   padding: 10px 15px;
@@ -577,16 +588,32 @@
     margin: 5px auto;
   }
 
-  /* 用户操作按钮在小屏幕上垂直堆叠 */
+  /* 用户操作按钮在小屏幕上的布局优化 */
   .user-actions {
+    display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
   }
 
-  .user-actions button {
+  .user-actions .button-row {
+    display: flex;
     width: 100%;
-    max-width: 200px;
-    margin: 5px 0;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .user-actions .login-refresh,
+  .user-actions .open-cookie-btn {
+    flex: 1;
+    margin: 0 5px;
+    max-width: none;
+  }
+
+  .user-actions .login-out {
+    width: 100%;
+    max-width: none;
+    margin: 0;
   }
 
   /* 弹窗在移动端的调整 */
@@ -608,6 +635,21 @@
     font-size: 13px !important;
     height: 36px !important;
     line-height: 36px !important;
+  }
+
+  /* 调整按钮样式 */
+  .user-actions .button-row {
+    margin-bottom: 8px;
+  }
+
+  .user-actions .login-refresh,
+  .user-actions .open-cookie-btn {
+    font-size: 12px !important;
+    padding: 0 5px !important;
+  }
+
+  .user-actions .login-out {
+    font-size: 13px !important;
   }
 
   /* 强制按钮全宽 */

@@ -261,9 +261,7 @@ $(function () {
         $(".list-loadmore").removeClass('list-loadmore');
         $(".list-loadmore").html('加载中...');
         ajaxSearch();
-    });
-
-    // 点击专辑显示专辑歌曲
+    });    // 点击专辑显示专辑歌曲
     $("#sheet").on("click", ".sheet-cover,.sheet-name", function () {
         var num = parseInt($(this).parent().data("no"));
         // 是用户列表，但是还没有加载数据
@@ -273,7 +271,17 @@ $(function () {
             ajaxPlayList(musicList[num].id, num, loadList);
             return true;
         }
+
+        // 加载歌单列表
         loadList(num);
+
+        // 在移动端，高亮"正在播放"按钮
+        if (rem.isMobile) {
+            // 移除所有高亮
+            $(".btn-box .btn").removeClass("active");
+            // 添加正在播放标签高亮
+            $(".btn[data-action='playing']").addClass("active");
+        }
     });
 
     // 点击同步云音乐
@@ -810,6 +818,14 @@ function loadList(list) {
     rem.dislist = list;     // 记录当前显示的列表
 
     dataBox("list");    // 在主界面显示出播放列表
+
+    // 在移动端，确保"正在播放"按钮高亮
+    if (rem.isMobile) {
+        // 移除所有高亮
+        $(".btn-box .btn").removeClass("active");
+        // 添加正在播放标签高亮
+        $(".btn[data-action='playing']").addClass("active");
+    }
 
     // 调试信息输出
     if (mkPlayer.debug) {
