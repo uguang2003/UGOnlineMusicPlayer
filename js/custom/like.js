@@ -1,11 +1,28 @@
+// 添加防连点状态变量
+var likeButtonClicking = false;
+
 // "喜欢"按钮点击事件
 $(".btn-like").click(function () {
+  // 检查按钮是否处于点击冷却期
+  if (likeButtonClicking) {
+    layer.msg('操作太频繁，请稍候再试');
+    return false;
+  }
+
+  // 设置按钮为点击状态
+  likeButtonClicking = true;
+
   // 检查按钮是否已经是"喜欢"状态
   if ($(this).hasClass('btn-state-liked')) {
     toggleDisLike();
   } else {
     toggleLike();
   }
+
+  // 3秒后恢复按钮可点击状态
+  setTimeout(function () {
+    likeButtonClicking = false;
+  }, 3000);
 });
 
 /**

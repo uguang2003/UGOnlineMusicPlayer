@@ -13,14 +13,14 @@
             <input type="text" id="uid" class="layui-input" placeholder="请输入网易云音乐的用户ID">
           </div>
           <p>* 网易云音乐个人主页网址中的数字即为您的用户ID</p>
-          <p>* 例如：https://music.163.com/#/user/home?id=123456789 中的123456789</p>
+          <p>* 例如：https://music.163.com/#/user/home?id=1375752642 中的1375752642</p>
 
           <!-- 添加网易云cookie设置按钮 -->
-          <div class="cookie-btn-area">
+          <!-- <div class="cookie-btn-area">
             <button class="layui-btn layui-btn-sm" id="open-cookie-btn">
               <i class="layui-icon layui-icon-set"></i> 设置网易云Cookie
             </button>
-          </div>
+          </div> -->
         </div>
       </div>
       <div class="login-btn-area">
@@ -58,7 +58,7 @@
     </div>
 
     <!-- 帮助提示 -->
-    <div class="help-section">
+    <!-- <div class="help-section">
       <div class="sheet-title-bar help-title">
         <i class="layui-icon layui-icon-help"></i> 如何获取网易云音乐用户ID
       </div>
@@ -68,7 +68,7 @@
         <p>3. 此时浏览器地址栏中 <span style="color:#31c27c">/user/home?id=</span> 后面的数字就是您的网易云用户ID</p>
         <p>4. 复制该ID，粘贴到上方输入框中，点击"立即同步歌单"按钮即可</p>
       </div>
-    </div>
+    </div> -->
   </div>
 </div>
 
@@ -100,6 +100,45 @@
 
     // 获取保存的网易云Cookie
     var savedCookie = playerReaddata('netease_cookie') || '';
+
+    // 清除所有缓存按钮点击事件
+    $(".clear-cache-btn").click(function () {
+      layer.confirm('确定要清除所有缓存吗？这将删除所有歌单和歌曲信息的缓存文件。', {
+        btn: ['确定', '取消']
+      }, function (index) {
+        layer.close(index);
+        layer.load(1, { shade: [0.1, '#fff'] });
+
+        // 发送清除所有缓存的请求
+        $.ajax({
+          url: 'api.php',
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            "types": "clear_all_cache",
+            "source": "netease"
+          },
+          success: function (result) {
+            layer.closeAll('loading');
+            if (result && result.code === 200) {
+              layer.msg('成功清除所有缓存文件：' + result.deleted + '个', { icon: 1 });
+              // 清除缓存后刷新歌单
+              loadUserPlaylistsForUG666();
+            } else if (result && result.code === 206) {
+              layer.msg(result.msg, { icon: 1 });
+              // 部分清除成功也刷新歌单
+              loadUserPlaylistsForUG666();
+            } else {
+              layer.msg(result.msg || '清除缓存失败', { icon: 2 });
+            }
+          },
+          error: function () {
+            layer.closeAll('loading');
+            layer.msg('请求失败，请检查网络连接', { icon: 2 });
+          }
+        });
+      });
+    });
 
     // 打开Cookie设置按钮点击事件
     $("#open-cookie-btn, .open-cookie-btn").click(function () {

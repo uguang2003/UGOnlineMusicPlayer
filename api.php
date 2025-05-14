@@ -521,6 +521,49 @@ switch($types)   // 根据请求的 Api，执行相应操作
         }
         break;
     
+    case 'clear_all_cache':  // 清除所有缓存
+        if(!defined('CACHE_PATH') || !is_dir(CACHE_PATH)) {
+            // 如果没有定义缓存路径或目录不存在
+            $response = [
+                'code' => 404,
+                'msg' => '缓存目录不存在',
+                'deleted' => 0
+            ];
+            echojson(json_encode($response));
+            break;
+        }
+        
+        $files = scandir(CACHE_PATH);
+        $deletedCount = 0;
+        $failedFiles = [];
+        
+        foreach ($files as $file) {
+            $filePath = CACHE_PATH.$file;
+            // 跳过目录和非json文件
+            if (is_file($filePath) && pathinfo($filePath, PATHINFO_EXTENSION) === 'json') {
+                if (unlink($filePath)) {
+                    $deletedCount++;
+                } else {
+                    $failedFiles[] = $file;
+                }
+            }
+        }
+        
+        $response = [
+            'code' => 200,
+            'msg' => "成功清除{$deletedCount}个缓存文件",
+            'deleted' => $deletedCount
+        ];
+        
+        if (!empty($failedFiles)) {
+            $response['code'] = 206; // 部分成功
+            $response['msg'] .= "，但有".count($failedFiles)."个文件删除失败";
+            $response['failed_files'] = $failedFiles;
+        }
+        
+        echojson(json_encode($response));
+        break;
+        
     case 'cache':
         $minute = getParam('minute', 30);   // 删除几分钟之前的文件
 
