@@ -1,0 +1,28 @@
+appId: com.ug.musicplayer.minimal
+productName: UG音乐播放器极简版
+asar: true
+compression: maximum
+# 仅包含必要文件
+files:
+  - main.js
+  - preload.js
+  - package.json
+  - resources/icon.ico
+# 最小化打包配置
+win:
+  target: portable
+  icon: resources/icon.ico
+  artifactName: "${productName}_${version}.exe"
+# 禁用不必要的功能
+buildDependenciesFromSource: true
+npmRebuild: false
+# 禁用代码签名
+forceCodeSigning: false
+# 禁用日志
+extraMetadata:
+  main: main.js
+# 减少缓存问题
+directories:
+  output: dist
+# 禁用原生模块重建
+electronDist: null

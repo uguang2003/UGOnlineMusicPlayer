@@ -1,0 +1,33 @@
+{
+  "name": "ugonlinemusicplayer-minimal",
+  "version": "1.0.0",
+  "description": "UG在线音乐播放器的极简桌面版",
+  "main": "main-minimal.js",
+  "author": "UG",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^29.0.1",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.ug.musicplayer.minimal",
+    "productName": "UG音乐播放器极简版",
+    "asar": true,
+    "compression": "maximum",
+    "files": [
+      "main-minimal.js",
+      "preload-minimal.js",
+      "resources/icon.ico"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "portable",
+      "icon": "resources/icon.ico",
+      "artifactName": "UG音乐播放器极简版_${version}.exe"
+    },
+    "buildDependenciesFromSource": true,
+    "npmRebuild": false
+  }
+}
