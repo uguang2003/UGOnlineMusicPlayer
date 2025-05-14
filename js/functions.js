@@ -538,23 +538,45 @@ function thisDownload(obj) {
 
 // 获取并设置评论
 function comments(obj) {
+    // 清除之前的定时器
     clearTimeout(rem.commentsTime);
-    $(".banner_text span").text("歌曲热评/评论");
+
+    // 如果存在之前的评论请求，中止它
+    if (rem.commentXhr && rem.commentXhr.readyState !== 4) {
+        rem.commentXhr.abort();
+    }
+
+    // 存储当前播放的歌曲ID，用于后续验证
+    rem.currentCommentSongId = obj.id;
+
+    // 立即清空评论区域显示"加载中..."，防止显示上一首歌的评论
+    $(".banner_text span").text("评论加载中...");
     $(".banner_text a").attr("href", "javascript:;");
     $(".banner_text a").removeAttr("target");
     $(".banner_text img").hide();
-    $.ajax({
+
+    // 停止上一首歌的评论切换动画
+    rem.comments = [];
+
+    // 保存AJAX请求对象以便可以中止
+    rem.commentXhr = $.ajax({
         type: mkPlayer.method,
         url: mkPlayer.api,
         data: "types=comments&id=" + obj.id + "&source=" + obj.source,
         dataType: mkPlayer.dataType,
         success: function (jsonData) {
+            // 如果请求完成时，当前播放的歌曲已经改变，则放弃处理结果
+            if (rem.currentCommentSongId !== obj.id) {
+                return;
+            }
+
             if (jsonData.hot_comment && jsonData.hot_comment.length) {
                 rem.comments = jsonData.hot_comment;
             } else if (jsonData.comment && jsonData.comment.length) {
                 rem.comments = jsonData.comment;
             } else {
                 rem.comments = [];
+                $(".banner_text span").text("没有找到相关评论");
                 return;
             }
             if (obj.source === 'netease') {
@@ -567,10 +589,19 @@ function comments(obj) {
                 $(".banner_text a").attr("href", "https://www.xiami.com/song/" + obj.id + "#comments");
             } else if (obj.source === 'baidu') {
 
-            }
-            $(".banner_text a").attr("target", "_blank");
+            } $(".banner_text a").attr("target", "_blank");
+
+            // 先显示第一条评论，不等待图片加载
+            $(".banner_text span").text(rem.comments[0].content);
+
+            // 预加载评论头像并开始轮播
             var avatarDom = new Image();
             (function nextComment(commentsIndex) {
+                // 如果当前播放的歌曲ID与开始请求评论时的ID不同，说明已经切换歌曲，终止评论轮播
+                if (rem.currentCommentSongId !== obj.id) {
+                    return;
+                }
+
                 if (commentsIndex === undefined || commentsIndex === rem.comments.length - 1) {
                     commentsIndex = 0;
                 } else {
@@ -578,10 +609,29 @@ function comments(obj) {
                 }
 
                 var avatarSrc = (rem.comments[commentsIndex].user.avatar ? rem.comments[commentsIndex].user.avatar : "images/avatar.png") + '?t=' + Math.random();
-                avatarDom.src = avatarSrc;
-                avatarDom.onload = function () {
+                avatarDom.src = avatarSrc; avatarDom.onload = function () {
+                    // 再次检查当前歌曲是否已变更
+                    if (rem.currentCommentSongId !== obj.id) {
+                        return;
+                    }
+
                     $(".banner_text span").text(rem.comments[commentsIndex].content);
                     $(".banner_text img").show().attr("src", avatarSrc);
+
+                    rem.commentsTime = setTimeout(function () {
+                        nextComment(commentsIndex)
+                    }, 5000)
+                }
+
+                // 添加超时处理，防止图片加载失败时评论轮播卡住
+                avatarDom.onerror = function () {
+                    // 图片加载失败时仍然显示评论，只是不显示头像
+                    if (rem.currentCommentSongId !== obj.id) {
+                        return;
+                    }
+
+                    $(".banner_text span").text(rem.comments[commentsIndex].content);
+                    $(".banner_text img").hide();
 
                     rem.commentsTime = setTimeout(function () {
                         nextComment(commentsIndex)
@@ -590,6 +640,11 @@ function comments(obj) {
             })()
         },   //success
         error: function (XMLHttpRequest, textStatus, errorThrown) {
+            // 检查是否是用户主动中止的请求
+            if (textStatus === 'abort') {
+                return;
+            }
+            $(".banner_text span").text("评论加载失败");
             layer.msg('歌曲评论获取失败 - ' + XMLHttpRequest.status);
             console.error(XMLHttpRequest + textStatus + errorThrown);
         }   // error

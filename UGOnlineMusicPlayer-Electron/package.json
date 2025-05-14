@@ -56,7 +56,6 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "UG音乐播放器",
-      "license": "LICENSE.txt",
       "allowElevation": true,
       "runAfterFinish": true,
       "installerIcon": "resources/icon.ico",
