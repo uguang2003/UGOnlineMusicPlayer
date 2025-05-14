@@ -147,24 +147,153 @@
       // 根据屏幕宽度确定弹窗宽度
       var screenWidth = $(window).width();
       var layerWidth = screenWidth < 500 ? '95%' : '600px';
-      var layerArea = screenWidth < 500 ? [layerWidth, '350px'] : ['600px', '400px'];
+
+      // 自适应高度而不是固定高度，增加小屏幕设备的最小高度
+      var layerArea = screenWidth < 500 ? [layerWidth, 'auto'] : ['600px', 'auto'];
 
       layer.open({
         type: 1,
         title: '设置网易云音乐Cookie',
         area: layerArea,
+        maxHeight: screenWidth < 500 ? '85%' : '80%', // 增加最大高度限制
+        // 内容垂直居中且自适应大小
+        offset: 'auto',
+        // 增加弹窗内边距控制，避免内容贴边
+        skin: 'layui-layer-molv',
         content: `
-          <div style="padding: 20px;">
-            <textarea id="popup-netease-cookie" class="layui-textarea" placeholder="请输入您的网易云音乐Cookie" style="min-height: ${screenWidth < 400 ? '80px' : '120px'}">${savedCookie}</textarea>
-            <p style="margin-top: 10px;">* 设置Cookie可让您使用"喜欢"功能并获取更好的音乐体验</p>
-            <p>* 如果音乐无法播放，也可尝试添加Cookie解决</p>
-            <div style="margin-top: 15px; ${screenWidth < 500 ? 'text-align: center;' : ''}">
-              <button class="layui-btn" id="popup-save-cookie-btn" style="${screenWidth < 500 ? 'width: 100%; margin-bottom: 10px;' : ''}">保存Cookie</button>
-              <button class="layui-btn layui-btn-primary" id="popup-cookie-help-btn" style="${screenWidth < 500 ? 'width: 100%;' : ''}">如何获取Cookie?</button>
+          <div style="padding: 15px; max-width: 100%;">
+            <div class="layui-form-item">
+              <button class="layui-btn layui-btn-fluid layui-btn-normal" id="login-netease-btn" style="height: auto; padding: 10px 15px; line-height: 1.5; font-size: ${screenWidth < 400 ? '14px' : '16px'};">
+                <i class="layui-icon layui-icon-login-wechat"></i> 登录网易云音乐
+              </button>
+            </div>
+            
+            <div class="layui-form-item" style="margin-top: 20px;">
+              <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                <div style="flex-grow: 1; height: 1px; background-color: #e6e6e6;"></div>
+                <div style="margin: 0 10px; font-size: ${screenWidth < 400 ? '12px' : '14px'}; color: #999;">或手动输入Cookie</div>
+                <div style="flex-grow: 1; height: 1px; background-color: #e6e6e6;"></div>
+              </div>
+              
+              <textarea id="popup-netease-cookie" class="layui-textarea" placeholder="请输入您的网易云音乐Cookie" style="min-height: ${screenWidth < 400 ? '100px' : '120px'}; font-size: ${screenWidth < 400 ? '13px' : '14px'};">${savedCookie}</textarea>
+            </div>
+            
+            <div style="margin-top: 12px; font-size: ${screenWidth < 400 ? '12px' : '13px'}; color: #666; line-height: 1.6;">
+              <p><i class="layui-icon layui-icon-tips" style="font-size: 14px; color: #FF9800;"></i> 设置Cookie可让您使用"喜欢"功能并获取更好的音乐体验</p>
+              <p><i class="layui-icon layui-icon-tips" style="font-size: 14px; color: #FF9800;"></i> 如果音乐无法播放，也可尝试添加Cookie解决</p>
+            </div>
+            
+            <div class="layui-row" style="margin-top: 20px;">
+              <div class="${screenWidth < 500 ? 'layui-col-xs12' : 'layui-col-xs6'}" style="${screenWidth < 500 ? 'margin-bottom: 10px;' : ''}">
+                <button class="layui-btn ${screenWidth < 500 ? 'layui-btn-fluid' : ''}" id="popup-save-cookie-btn">
+                  <i class="layui-icon layui-icon-ok"></i> 保存Cookie
+                </button>
+              </div>
+              <div class="${screenWidth < 500 ? 'layui-col-xs12' : 'layui-col-xs6'}" style="${screenWidth < 500 ? '' : 'text-align: right;'}">
+                <button class="layui-btn layui-btn-primary ${screenWidth < 500 ? 'layui-btn-fluid' : ''}" id="popup-cookie-help-btn">
+                  <i class="layui-icon layui-icon-help"></i> 如何获取Cookie?
+                </button>
+              </div>
             </div>
           </div>
         `,
         success: function (layero, index) {
+          // 网易云登录按钮点击事件
+          $("#login-netease-btn").click(function () {
+            // 打开网易云音乐登录页面
+            var loginWindow = window.open('https://music.163.com/', '_blank');
+
+            // 弹出确认对话框询问用户是否已完成登录
+            layer.confirm(
+              '<div style="padding: 10px 0;">' +
+              '<p>请在新打开的窗口中登录网易云音乐。</p>' +
+              '<p>登录步骤：</p>' +
+              '<ol style="margin-left: 20px; line-height: 1.8;">' +
+              '<li>在打开的网易云页面右上角点击"登录"</li>' +
+              '<li>完成登录过程</li>' +
+              '<li>确认页面显示您已登录成功</li>' +
+              '<li>然后回到此窗口点击"已登录"按钮</li>' +
+              '</ol>' +
+              '<p style="color:#ff5722;margin-top:10px;">注意：如果您已经登录，请直接点击"已登录"按钮</p>' +
+              '</div>',
+              {
+                btn: ['已登录', '取消'],
+                title: '网易云音乐登录指引'
+              },
+              function (confirmIndex) {
+                layer.close(confirmIndex);
+
+                // 显示加载状态
+                var loadingIndex = layer.load(1, { shade: [0.1, '#fff'] });
+
+                // 尝试获取Cookie
+                $.ajax({
+                  url: 'api.php',
+                  type: 'POST',
+                  dataType: 'json',
+                  data: {
+                    "types": "get_cookie",
+                    "source": "netease"
+                  },
+                  success: function (result) {
+                    layer.close(loadingIndex);
+
+                    if (result && result.code === 200 && result.cookie) {
+                      // 成功获取Cookie
+                      $("#popup-netease-cookie").val(result.cookie);
+                      playerSavedata('netease_cookie', result.cookie);
+
+                      // 显示成功消息
+                      layer.msg('已成功获取网易云Cookie', { icon: 1 });
+
+                      // 如果有用户信息，一并保存
+                      if (result.userId) {
+                        playerSavedata('uid', result.userId);
+                      }
+                      if (result.nickname) {
+                        playerSavedata('uname', result.nickname);
+                      }
+
+                      // 延时刷新页面以更新登录状态
+                      setTimeout(function () {
+                        window.location.reload();
+                      }, 1500);
+                    } else {
+                      // 获取失败，显示重试对话框
+                      layer.confirm(
+                        '<div style="padding: 10px 0;">' +
+                        '<p>无法自动获取Cookie，可能是因为：</p>' +
+                        '<ol style="margin-left: 20px; line-height: 1.8;">' +
+                        '<li>您尚未完成网易云音乐的登录</li>' +
+                        '<li>浏览器限制了Cookie的访问</li>' +
+                        '</ol>' +
+                        '<p style="margin-top: 10px;">您可以：</p>' +
+                        '<ul style="margin-left: 20px; line-height: 1.8;">' +
+                        '<li>确认已在网易云音乐页面完成登录后重试</li>' +
+                        '<li>或者按"如何获取Cookie"按钮，手动获取并填写</li>' +
+                        '</ul>' +
+                        '</div>',
+                        {
+                          btn: ['重新尝试', '取消'],
+                          title: '获取Cookie失败'
+                        },
+                        function (retryIndex) {
+                          // 用户选择重试
+                          layer.close(retryIndex);
+                          $("#login-netease-btn").click();
+                        }
+                      );
+                    }
+                  },
+                  error: function () {
+                    layer.close(loadingIndex);
+                    layer.msg('请求失败，请检查网络连接', { icon: 2 });
+                  }
+                });
+              }
+            );
+          });
+
           // 保存Cookie按钮点击事件
           $("#popup-save-cookie-btn").click(function () {
             var cookie = $("#popup-netease-cookie").val().trim();
