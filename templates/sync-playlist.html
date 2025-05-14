@@ -105,40 +105,58 @@
 
     // 清除所有缓存按钮点击事件
     $(".clear-cache-btn").click(function () {
-      layer.confirm('确定要清除所有缓存吗？这将删除所有歌单和歌曲信息的缓存文件。', {
-        btn: ['确定', '取消']
-      }, function (index) {
-        layer.close(index);
-        layer.load(1, { shade: [0.1, '#fff'] });
+      // 弹出密码输入框
+      layer.prompt({
+        formType: 1,  // 密码类型
+        value: '',
+        title: '请输入管理员密码',
+        area: ['300px', '150px'],
+        btn: ['确认', '取消']
+      }, function (value, index, elem) {
+        // 验证密码
+        if (value === 'UG666') {
+          layer.close(index);
 
-        // 发送清除所有缓存的请求
-        $.ajax({
-          url: 'api.php',
-          type: 'POST',
-          dataType: 'json',
-          data: {
-            "types": "clear_all_cache",
-            "source": "netease"
-          },
-          success: function (result) {
-            layer.closeAll('loading');
-            if (result && result.code === 200) {
-              layer.msg('成功清除所有缓存文件：' + result.deleted + '个', { icon: 1 });
-              // 清除缓存后刷新歌单
-              loadUserPlaylistsForUG666();
-            } else if (result && result.code === 206) {
-              layer.msg(result.msg, { icon: 1 });
-              // 部分清除成功也刷新歌单
-              loadUserPlaylistsForUG666();
-            } else {
-              layer.msg(result.msg || '清除缓存失败', { icon: 2 });
-            }
-          },
-          error: function () {
-            layer.closeAll('loading');
-            layer.msg('请求失败，请检查网络连接', { icon: 2 });
-          }
-        });
+          // 密码正确，询问确认
+          layer.confirm('确定要清除所有缓存吗？这将删除所有歌单和歌曲信息的缓存文件。', {
+            btn: ['确定', '取消']
+          }, function (confirmIndex) {
+            layer.close(confirmIndex);
+            layer.load(1, { shade: [0.1, '#fff'] });
+
+            // 发送清除所有缓存的请求
+            $.ajax({
+              url: 'api.php',
+              type: 'POST',
+              dataType: 'json',
+              data: {
+                "types": "clear_all_cache",
+                "source": "netease"
+              },
+              success: function (result) {
+                layer.closeAll('loading');
+                if (result && result.code === 200) {
+                  layer.msg('成功清除所有缓存文件：' + result.deleted + '个', { icon: 1 });
+                  // 清除缓存后刷新歌单
+                  loadUserPlaylistsForUG666();
+                } else if (result && result.code === 206) {
+                  layer.msg(result.msg, { icon: 1 });
+                  // 部分清除成功也刷新歌单
+                  loadUserPlaylistsForUG666();
+                } else {
+                  layer.msg(result.msg || '清除缓存失败', { icon: 2 });
+                }
+              },
+              error: function () {
+                layer.closeAll('loading');
+                layer.msg('请求失败，请检查网络连接', { icon: 2 });
+              }
+            });
+          });
+        } else {
+          layer.close(index);
+          layer.msg('密码错误，无法清除缓存', { icon: 2 });
+        }
       });
     });
 
