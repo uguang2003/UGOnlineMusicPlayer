@@ -16,9 +16,9 @@ function loadTemplate(containerId, templatePath) {
 
 // 页面加载完成后执行
 $(function () {
-  // 加载模板内容
-  loadTemplate('sync-playlist-container', 'templates/sync-playlist.html');
-  loadTemplate('user-info-container', 'templates/user-info.html');
+  // 注释掉重复加载模板的代码，因为templates.js已经处理了这部分
+  // loadTemplate('sync-playlist-container', 'templates/sync-playlist.html');
+  // loadTemplate('user-info-container', 'templates/user-info.html');
 
   // 处理所有选项卡的点击事件，确保正确显示/隐藏内容
   $(".btn").click(function () {
