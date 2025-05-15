@@ -1,6 +1,6 @@
 {
   "name": "ugonlinemusicplayer-capacitor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "UG在线音乐播放器的Android应用版本",
   "main": "index.js",
   "scripts": {

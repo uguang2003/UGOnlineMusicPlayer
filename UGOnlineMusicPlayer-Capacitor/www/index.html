@@ -27,10 +27,20 @@
       background-color: #000;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       position: fixed;
-      left: 0;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    #app-container {
+      position: absolute;
       top: 0;
-      right: 0;
-      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: none;
     }
 
     #app-frame {
@@ -40,9 +50,6 @@
       position: absolute;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
-      display: none;
       overflow: hidden;
     }
 
@@ -58,7 +65,7 @@
       align-items: center;
       background-color: #000;
       color: #fff;
-      z-index: 100;
+      z-index: 9999;
       padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
@@ -67,12 +74,25 @@
       flex-direction: column;
       align-items: center;
       margin-bottom: 30px;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
 
     .logo {
       width: 80px;
       height: 80px;
       margin-bottom: 15px;
+      animation: pulse 2s infinite;
     }
 
     .logo-container h1 {
@@ -114,7 +134,7 @@
       color: #fff;
       text-align: center;
       padding: 20px;
-      z-index: 200;
+      z-index: 9999;
       padding: calc(20px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
     }
 
@@ -132,17 +152,46 @@
       border-radius: 5px;
       font-size: 16px;
       cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     .retry-button:hover {
       background-color: #1ed760;
     }
+
+    .error-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #000;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      z-index: 9999;
+    }
+
+    .error-icon {
+      font-size: 50px;
+      margin-bottom: 20px;
+      color: #ff5252;
+    }
   </style>
 </head>
 
 <body>
-  <!-- 主要iframe，用于加载UG音乐播放器 -->
-  <iframe id="app-frame" src="about:blank" allow="autoplay; clipboard-write"></iframe>
+  <!-- 主容器 -->
+  <div id="app-container">
+    <!-- 主iframe，用于加载UG音乐播放器 -->
+    <iframe id="app-frame" src="about:blank"></iframe>
+  </div>
+
   <!-- 加载动画 -->
   <div id="loader" class="loader">
     <div class="logo-container">
@@ -152,7 +201,7 @@
     <div class="progress-container">
       <div id="loading-progress" class="progress-bar"></div>
     </div>
-    <p id="loading-text">正在加载UG音乐播放器...</p>
+    <p id="loading-text">正在启动UG音乐播放器...</p>
   </div>
 
   <!-- 离线状态 -->
@@ -163,6 +212,16 @@
     <button id="retry-button" class="retry-button">重试</button>
   </div>
 
+  <!-- 错误状态 -->
+  <div id="error-screen" class="error-screen">
+    <div class="error-icon">⚠️</div>
+    <h2>加载失败</h2>
+    <p>无法加载UG音乐播放器</p>
+    <button id="error-retry-button" class="retry-button">重试</button>
+  </div>
+
+  <!-- 先加载核心脚本 -->
+  <script src="js/bridge.js"></script>
   <script src="js/app.js"></script>
 </body>
 
