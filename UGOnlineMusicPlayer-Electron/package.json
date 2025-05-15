@@ -1,6 +1,6 @@
 {
   "name": "ugonlinemusicplayer-electron",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "UG在线音乐播放器的桌面应用版本",
   "main": "main.js",
   "scripts": {
