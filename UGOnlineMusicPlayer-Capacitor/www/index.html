@@ -3,7 +3,11 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta http-equiv="Content-Security-Policy"
     content="default-src * 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src * 'self' 'unsafe-inline'; media-src * blob: 'self' 'unsafe-inline'; img-src * 'self' data: content:;">
   <title>UG音乐播放器</title>
@@ -12,6 +16,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html,
@@ -20,7 +25,12 @@
       height: 100%;
       overflow: hidden;
       background-color: #000;
-      font-family: Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      position: fixed;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
     }
 
     #app-frame {
@@ -30,7 +40,10 @@
       position: absolute;
       top: 0;
       left: 0;
+      right: 0;
+      bottom: 0;
       display: none;
+      overflow: hidden;
     }
 
     .loader {
@@ -46,22 +59,45 @@
       background-color: #000;
       color: #fff;
       z-index: 100;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
-    .spinner {
-      width: 60px;
-      height: 60px;
-      margin-bottom: 20px;
-      border: 5px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 1s linear infinite;
+    .logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 30px;
     }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 15px;
+    }
+
+    .logo-container h1 {
+      font-size: 24px;
+      font-weight: 500;
+      margin: 0;
+      color: #fff;
+    }
+
+    .progress-container {
+      width: 80%;
+      max-width: 300px;
+      height: 8px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #1db954;
+      border-radius: 4px;
+      transition: width 0.3s ease;
     }
 
     .offline-screen {
@@ -79,6 +115,7 @@
       text-align: center;
       padding: 20px;
       z-index: 200;
+      padding: calc(20px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
     }
 
     .offline-icon {
@@ -106,11 +143,16 @@
 <body>
   <!-- 主要iframe，用于加载UG音乐播放器 -->
   <iframe id="app-frame" src="about:blank" allow="autoplay; clipboard-write"></iframe>
-
   <!-- 加载动画 -->
   <div id="loader" class="loader">
-    <div class="spinner"></div>
-    <p>正在加载UG音乐播放器...</p>
+    <div class="logo-container">
+      <img src="images/logo.ico" alt="UG音乐播放器" class="logo">
+      <h1>UG音乐播放器</h1>
+    </div>
+    <div class="progress-container">
+      <div id="loading-progress" class="progress-bar"></div>
+    </div>
+    <p id="loading-text">正在加载UG音乐播放器...</p>
   </div>
 
   <!-- 离线状态 -->

@@ -18,26 +18,59 @@ document.addEventListener('DOMContentLoaded', function () {
       showOfflineScreen();
     }
   }
-
   // 加载Web应用
   function loadWebApp() {
     offlineScreen.style.display = 'none';
     loader.style.display = 'flex';
+
+    // 获取进度条元素
+    const progressBar = document.getElementById('loading-progress');
+    const loadingText = document.getElementById('loading-text');
+    let progress = 0;
+
+    // 模拟加载进度
+    const progressInterval = setInterval(function () {
+      progress += 2;
+      // 最多加载到95%，等待实际加载完成再到100%
+      if (progress >= 95) {
+        clearInterval(progressInterval);
+      } else {
+        progressBar.style.width = progress + '%';
+        if (progress < 30) {
+          loadingText.textContent = '正在连接服务器...';
+        } else if (progress < 60) {
+          loadingText.textContent = '加载资源中...';
+        } else if (progress < 90) {
+          loadingText.textContent = '准备音乐播放器...';
+        }
+      }
+    }, 300);
 
     // 设置加载超时处理
     clearTimeout(loadingTimeout);
     loadingTimeout = setTimeout(function () {
       // 如果30秒后还没加载完，显示错误
       if (loader.style.display !== 'none') {
+        clearInterval(progressInterval);
         showLoadError();
       }
-    }, 30000);
-
-    // 配置iframe加载事件
+    }, 30000);    // 配置iframe加载事件
     appFrame.onload = function () {
+      // 完成进度条动画
+      const progressBar = document.getElementById('loading-progress');
+      progressBar.style.width = '100%';
+      document.getElementById('loading-text').textContent = '加载完成，正在启动...';
+
       setTimeout(function () {
         loader.style.display = 'none';
         appFrame.style.display = 'block';
+
+        // 优化Android上的显示
+        if (navigator.userAgent.toLowerCase().indexOf('android') > -1) {
+          document.body.style.height = window.innerHeight + 'px';
+          appFrame.style.height = window.innerHeight + 'px';
+        }
+
         clearTimeout(loadingTimeout);
       }, 1000); // 添加短暂延迟，确保页面已完全渲染
     };
@@ -121,9 +154,21 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
   }, false);
-
   // 初始化应用
   function initApp() {
+    // 初始化屏幕尺寸
+    const isAndroid = navigator.userAgent.toLowerCase().indexOf('android') > -1;
+    if (isAndroid) {
+      // 解决安卓端加载时样式问题
+      document.body.style.height = window.innerHeight + 'px';
+      appFrame.style.height = window.innerHeight + 'px';
+
+      // 防止Android键盘改变窗口大小导致布局错误
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Keyboard) {
+        window.Capacitor.Plugins.Keyboard.setResizeMode({ mode: 'none' });
+      }
+    }
+
     // 检查网络状态
     checkNetwork();
 
@@ -147,9 +192,16 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
   }
-
   // 当设备就绪时初始化
   document.addEventListener('deviceready', initApp, false);
+
+  // 处理屏幕尺寸变化
+  window.addEventListener('resize', function () {
+    if (navigator.userAgent.toLowerCase().indexOf('android') > -1) {
+      document.body.style.height = window.innerHeight + 'px';
+      appFrame.style.height = window.innerHeight + 'px';
+    }
+  });
 
   // 如果没有触发deviceready事件（浏览器环境），也要初始化
   setTimeout(function () {
