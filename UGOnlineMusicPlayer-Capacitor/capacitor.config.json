@@ -1,0 +1,18 @@
+{
+  "appId": "com.ug666.musicplayer",
+  "appName": "UG音乐播放器",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "allowNavigation": [
+      "music.ug666.top"
+    ]
+  },
+  "android": {
+    "backgroundColor": "#000000",
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  }
+}

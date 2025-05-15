@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>UG音乐播放器 - 离线</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .icon {
+      font-size: 64px;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      margin-bottom: 15px;
+      font-size: 24px;
+    }
+
+    p {
+      margin-bottom: 30px;
+      opacity: 0.8;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .button {
+      padding: 12px 24px;
+      background-color: #1db954;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .button:hover {
+      background-color: #1ed760;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="icon">📶</div>
+    <h1>无网络连接</h1>
+    <p>UG音乐播放器需要互联网连接才能正常工作<br>请检查您的网络设置并重试</p>
+    <a href="index.html" class="button">重试连接</a>
+  </div>
+</body>
+
+</html>
