@@ -1,70 +1,188 @@
 # UGOnlineMusicPlayer 桌面版
 
-> UGOnlineMusicPlayer的Electron桌面应用版本，支持Windows系统。
+![UG音乐播放器桌面版](https://music.ug666.top/favicon.ico)
 
-UGOnlineMusicPlayer桌面版是将原有的[UGOnlineMusicPlayer](https://github.com/username/UGOnlineMusicPlayer)在线音乐播放器打包成了独立的桌面应用程序，使您可以在不打开浏览器的情况下，以原生应用的形式使用该音乐播放器。
+> 全功能音乐播放器的Windows桌面应用版，享受无浏览器的原生体验！
 
-## 功能特点
+## 📌 项目简介
 
-除了继承原有Web版本的全部功能外，桌面版本还新增了以下特性：
+UGOnlineMusicPlayer桌面版是将在线音乐播放器包装成独立桌面应用程序的解决方案，提供了比Web浏览器更优秀的集成体验。通过Electron框架，我们将Web版本的所有功能保留的同时，还加入了许多专为桌面环境开发的特性。
 
-- 🖥️ 独立的桌面应用体验，无需浏览器
-- 🔄 最小化到系统托盘功能，点击关闭按钮不会退出程序
-- ⌨️ 全局快捷键支持，可在任何应用中控制音乐播放
-  - `Ctrl+Alt+右箭头` - 下一首
-  - `Ctrl+Alt+左箭头` - 上一首
-  - `Ctrl+Alt+空格` - 播放/暂停
-- 📥 优化的文件下载体验，直接使用系统对话框保存文件
-- 🔔 下载通知提醒
+![桌面版截图](./screenshots/desktop-preview.png)
 
-## 系统要求
+## ✨ 特色功能
 
-- Windows 7及以上版本
+除了继承Web版的所有功能外，桌面版还拥有以下独特特性：
 
-## 安装使用
+| 功能 | 描述 |
+|------|------|
+| 🖥️ **原生体验** | 独立应用窗口，无浏览器地址栏和工具栏 |
+| 🔄 **系统托盘** | 关闭窗口后继续在后台运行，托盘图标显示播放状态 |
+| ⌨️ **全局快捷键** | 在任何应用中控制音乐播放，无需切换窗口 |
+| 📥 **增强下载** | 使用系统对话框保存文件，更好的下载体验 |
+| 🔔 **系统通知** | 歌曲切换、下载完成时显示系统通知 |
+| 🔌 **离线缓存** | 改进的资源缓存机制，提升加载速度 |
 
-### 直接下载
+### 全局快捷键
 
-从[发布页面](https://github.com/username/UGOnlineMusicPlayer-Electron/releases)下载最新版本的安装包，运行安装程序后按照提示完成安装。
+| 快捷键 | 功能 |
+|------|------|
+| `Ctrl+Alt+→` | 下一首 |
+| `Ctrl+Alt+←` | 上一首 |
+| `Ctrl+Alt+空格` | 播放/暂停 |
+| `Ctrl+Alt+↑` | 增加音量 |
+| `Ctrl+Alt+↓` | 减小音量 |
 
-### 从源码构建
+## 💻 系统要求
 
-如果您想从源码构建应用程序，请按照以下步骤操作：
+- **操作系统**: Windows 7 SP1及以上
+- **处理器**: 1.6GHz及以上双核
+- **内存**: 最少2GB RAM
+- **存储**: 最少200MB可用空间
+- **网络**: 宽带互联网连接
 
-1. 克隆代码仓库
-```bash
-git clone https://github.com/username/UGOnlineMusicPlayer-Electron.git
-cd UGOnlineMusicPlayer-Electron
+## 📥 安装使用
+
+### 方式一：直接下载安装包
+
+1. 访问[发布页面](https://github.com/username/UGOnlineMusicPlayer-Electron/releases)
+2. 下载最新版本的安装包 `UGMusicPlayer-Setup-x.x.x.exe`
+3. 运行安装程序，按照提示完成安装
+4. 启动桌面图标或开始菜单中的"UG音乐播放器"
+
+### 方式二：从源码构建
+
+1. **准备环境**
+   ```bash
+   # 确保已安装Node.js (14+)和Git
+   node -v
+   git --version
+   ```
+
+2. **获取源码**
+   ```bash
+   git clone https://github.com/username/UGOnlineMusicPlayer-Electron.git
+   cd UGOnlineMusicPlayer-Electron
+   ```
+
+3. **安装依赖**
+   ```bash
+   npm install
+   ```
+
+4. **开发模式运行**
+   ```bash
+   npm start
+   ```
+
+5. **构建安装包**
+   ```bash
+   npm run dist
+   ```
+   生成的安装程序位于`dist`目录中
+
+## 🛠️ 开发指南
+
+### 项目结构
+
+```
+UGOnlineMusicPlayer-Electron/
+├── src/                # 源代码目录
+│   ├── main.js         # 主进程代码
+│   ├── preload.js      # 预加载脚本
+│   └── renderer/       # 渲染进程相关文件
+├── resources/          # 资源文件(图标等)
+├── dist/               # 打包输出目录
+├── package.json        # 项目配置
+└── forge.config.js     # Electron Forge配置
 ```
 
-2. 安装依赖
-```bash
-npm install
-```
+### 开发调试
 
-3. 运行应用（开发模式）
-```bash
-npm start
-```
+1. **修改主进程**  
+   编辑`src/main.js`文件，然后运行`npm start`查看效果
 
-4. 构建安装包
-```bash
-npm run dist
-```
-生成的安装程序将位于`dist`目录中。
+2. **修改HTML/CSS/JS**  
+   编辑`src/renderer`目录下的文件
 
-## 开发相关
+3. **调试工具**  
+   开发模式下，可使用Chrome开发者工具进行调试
+   ```javascript
+   // 在main.js中添加此行以打开开发者工具
+   mainWindow.webContents.openDevTools();
+   ```
 
-- 本应用使用Electron框架开发
-- 应用图标位于`resources`目录
-- 使用electron-builder进行打包和分发
+### 自定义配置
 
-## 版权说明
+- **应用设置**: 修改`package.json`中的`productName`、`version`等字段
+- **打包配置**: 编辑`forge.config.js`文件自定义打包选项
+- **图标替换**: 替换`resources`目录中的图标文件
 
-本播放器原版由 [mengkun](https://mkblog.cn) 开发，桌面版由UG开发，您可以随意修改、使用、转载。
+## 🔄 更新日志
 
-播放器中的歌曲来自各大音乐平台，歌曲版权归各大平台享有。请支持正版音乐。
+### v1.2.0 (2025-05-10)
+- 新增全局音量控制快捷键
+- 优化系统托盘菜单
+- 修复部分歌曲无法播放的问题
+- 改进下载文件命名规则
 
-## 致谢
+### v1.1.0 (2025-03-15)
+- 添加窗口大小和位置记忆功能
+- 改进系统通知样式
+- 修复高DPI屏幕显示问题
+- 性能优化，减少内存占用
 
-特别感谢UGOnlineMusicPlayer原作者及各大音乐平台提供的API支持。
+### v1.0.0 (2025-02-01)
+- 首次发布
+
+## 📝 常见问题
+
+<details>
+<summary>应用无法启动或崩溃</summary>
+
+1. 确保系统符合最低配置要求
+2. 检查杀毒软件是否拦截应用
+3. 尝试以管理员权限运行
+4. 完全卸载后重新安装最新版本
+</details>
+
+<details>
+<summary>全局快捷键不起作用</summary>
+
+1. 确认快捷键是否与其他应用冲突
+2. 重启应用尝试重新注册快捷键
+3. 在任务管理器中确认应用进程是否在运行
+</details>
+
+<details>
+<summary>如何完全退出应用？</summary>
+
+点击托盘图标，选择"退出"选项，或使用快捷键`Alt+F4`同时按住`Shift`键。
+</details>
+
+## 📄 许可协议
+
+本项目使用MIT许可证 - 查看[LICENSE](LICENSE)文件了解详情
+
+## 👥 贡献指南
+
+欢迎贡献代码、报告问题或提供改进建议！请遵循以下步骤：
+
+1. Fork本仓库
+2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'Add some amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 创建Pull Request
+
+## 📞 联系我们
+
+有问题或建议？请通过以下方式联系我们：
+
+- 问题反馈：[GitHub Issues](https://github.com/username/UGOnlineMusicPlayer-Electron/issues)
+- 电子邮件：contact@example.com
+
+---
+
+<p align="center">
+  用心聆听，随身相伴 - UG音乐播放器桌面版
+</p>
