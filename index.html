@@ -1,7 +1,12 @@
 <!doctype html>
 <html>
 
-<head>
+<hea <link rel="stylesheet" href="plugns/layui/layui.css">
+	<link rel="stylesheet" href="css/jquery.mCustomScrollbar.min.css">
+	<link rel="stylesheet" href="css/player.css">
+	<link rel="stylesheet" href="css/small.css">
+	<link rel="stylesheet" href="css/custom/ug666.css">
+	<link rel="stylesheet" href="css/custom/player-state.css">
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
@@ -34,128 +39,129 @@
 	<link rel="stylesheet" href="css/player.css">
 	<link rel="stylesheet" href="css/small.css">
 	<link rel="stylesheet" href="css/custom/ug666.css">
-</head>
+	</head>
 
-<body>
-	<div id="blur-img"></div>
+	<body>
+		<div id="blur-img"></div>
 
-	<!-- 头部logo -->
-	<div class="header">
-		<div class="logo" title="Version 2.4; Based on Meting; Powered by Mengkun">
-			♫ UG Music Player
-		</div>
-		<div class="banner_text">
-			<a href="javascript:;">
-				<img src="images/avatar.png">
-				<span>歌曲热评/评论</span>
-			</a>
-		</div>
-	</div>
-
-	<!-- 中间主体区域 -->
-	<div class="center">
-		<div class="container">
-			<div class="btn-bar">
-				<div class="btn-box" id="btn-area">
-					<span class="btn" data-action="player" hidden>播放器</span>
-					<span class="btn" data-action="playing" title="正在播放列表">正在播放</span>
-					<span class="btn" data-action="sheet" title="音乐播放列表">播放列表</span>
-					<span class="btn" data-action="search" title="点击搜索音乐">歌曲搜索</span>
-					<span class="btn" data-action="about" title="UG666">UG666</span>
-				</div>
+		<!-- 头部logo -->
+		<div class="header">
+			<div class="logo" title="Version 2.4; Based on Meting; Powered by Mengkun">
+				♫ UG Music Player
 			</div>
+			<div class="banner_text">
+				<a href="javascript:;">
+					<img src="images/avatar.png">
+					<span>歌曲热评/评论</span>
+				</a>
+			</div>
+		</div>
 
-			<div class="data-area">
-				<div id="sheet" class="data-box" hidden></div>
-				<div id="main-list" class="music-list data-box"></div>
-				<div id="about" class="data-box" hidden>
-					<div class="about-content">
-						<div class="about-background">
-							<div class="about-section">
-								<h2>公告</h2>
-								<div class="about-notice">
-									<button class="layui-btn placard-btn-inner" onclick="showPlacard()">
-										<i class="layui-icon layui-icon-notice"></i> 查看公告
-									</button>
+		<!-- 中间主体区域 -->
+		<div class="center">
+			<div class="container">
+				<div class="btn-bar">
+					<div class="btn-box" id="btn-area">
+						<span class="btn" data-action="player" hidden>播放器</span>
+						<span class="btn" data-action="playing" title="正在播放列表">正在播放</span>
+						<span class="btn" data-action="sheet" title="音乐播放列表">播放列表</span>
+						<span class="btn" data-action="search" title="点击搜索音乐">歌曲搜索</span>
+						<span class="btn" data-action="about" title="UG666">UG666</span>
+					</div>
+				</div>
+
+				<div class="data-area">
+					<div id="sheet" class="data-box" hidden></div>
+					<div id="main-list" class="music-list data-box"></div>
+					<div id="about" class="data-box" hidden>
+						<div class="about-content">
+							<div class="about-background">
+								<div class="about-section">
+									<h2>公告</h2>
+									<div class="about-notice">
+										<button class="layui-btn placard-btn-inner" onclick="showPlacard()">
+											<i class="layui-icon layui-icon-notice"></i> 查看公告
+										</button>
+									</div>
 								</div>
-							</div>
-							<!-- 这里将通过JavaScript动态加载模板内容 -->
-							<div id="sync-playlist-container"></div>
-							<div id="user-info-container"></div>
+								<!-- 这里将通过JavaScript动态加载模板内容 -->
+								<div id="sync-playlist-container"></div>
+								<div id="user-info-container"></div>
 
-							<!-- 缓存管理区域 -->
-							<div class="about-section">
-								<h2>缓存管理</h2>
-								<div class="cache-management">
-									<button class="layui-btn layui-btn-danger clear-cache-btn">
-										<i class="layui-icon layui-icon-delete"></i> 清除所有缓存
-									</button>
-									<p class="cache-tip">清除所有歌单和歌曲缓存，重新获取最新数据</p>
+								<!-- 缓存管理区域 -->
+								<div class="about-section">
+									<h2>缓存管理</h2>
+									<div class="cache-management">
+										<button class="layui-btn layui-btn-danger clear-cache-btn">
+											<i class="layui-icon layui-icon-delete"></i> 清除所有缓存
+										</button>
+										<p class="cache-tip">清除所有歌单和歌曲缓存，重新获取最新数据</p>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
 
-			<!-- 右侧封面及歌词展示 -->
-			<div class="player" id="player">
-				<div class="cover">
-					<img src="images/player_cover.png" class="music-cover" id="music-cover">
+				<!-- 右侧封面及歌词展示 -->
+				<div class="player" id="player">
+					<div class="cover">
+						<img src="images/player_cover.png" class="music-cover" id="music-cover">
+					</div>
+					<div class="lyric">
+						<ul id="lyric"></ul>
+					</div>
+					<div id="music-info" title="点击查看歌曲信息"></div>
 				</div>
-				<div class="lyric">
-					<ul id="lyric"></ul>
-				</div>
-				<div id="music-info" title="点击查看歌曲信息"></div>
 			</div>
 		</div>
-	</div>
 
-	<!-- 播放器底部区域 -->
-	<div class="footer">
-		<div class="container">
-			<div class="con-btn">
-				<a href="javascript:;" class="player-btn btn-prev" title="上一首"></a>
-				<a href="javascript:;" class="player-btn btn-play" title="暂停/继续"></a>
-				<a href="javascript:;" class="player-btn btn-next" title="下一首"></a>
-				<a href="javascript:;" class="player-btn btn-order" title="循环控制"></a>
-				<a href="javascript:;" class="player-btn btn-like" title="添加到我喜欢"></a>
-			</div>
-
-			<div class="vol">
-				<div class="quiet">
-					<a href="javascript:;" class="player-btn btn-quiet" title="静音"></a>
+		<!-- 播放器底部区域 -->
+		<div class="footer">
+			<div class="container">
+				<div class="con-btn">
+					<a href="javascript:;" class="player-btn btn-prev" title="上一首"></a>
+					<a href="javascript:;" class="player-btn btn-play" title="暂停/继续"></a>
+					<a href="javascript:;" class="player-btn btn-next" title="下一首"></a>
+					<a href="javascript:;" class="player-btn btn-order" title="循环控制"></a>
+					<a href="javascript:;" class="player-btn btn-like" title="添加到我喜欢"></a>
 				</div>
-				<div class="volume">
-					<div class="volume-box">
-						<div id="volume-progress" class="mkpgb-area"></div>
+
+				<div class="vol">
+					<div class="quiet">
+						<a href="javascript:;" class="player-btn btn-quiet" title="静音"></a>
+					</div>
+					<div class="volume">
+						<div class="volume-box">
+							<div id="volume-progress" class="mkpgb-area"></div>
+						</div>
+					</div>
+				</div>
+
+				<div class="progress">
+					<div class="progress-box">
+						<div id="music-progress" class="mkpgb-area"></div>
+						<div class="audio-time">00:00/00:00</div>
 					</div>
 				</div>
 			</div>
-
-			<div class="progress">
-				<div class="progress-box">
-					<div id="music-progress" class="mkpgb-area"></div>
-					<div class="audio-time">00:00/00:00</div>
-				</div>
-			</div>
 		</div>
-	</div>
 
-	<!-- JS依赖 -->
-	<script src="js/jquery.min.js"></script>
-	<script src="plugns/layui/layui.js"></script>
-	<script src="js/player.js"></script>
-	<script src="js/ajax.js"></script>
-	<script src="js/lyric.js"></script>
-	<script src="js/musicList.js"></script>
-	<script src="js/functions.js"></script>
-	<script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
-	<script src="js/background-blur.min.js"></script>
-	<script src="js/custom/templates.js"></script>
-	<script src="js/custom/ug666.js"></script>
-	<script src="js/custom/template-adapter.js"></script>
-	<script src="js/custom/like.js"></script>
-</body>
+		<!-- JS依赖 -->
+		<script src="js/jquery.min.js"></script>
+		<script src="plugns/layui/layui.js"></script>
+		<script src="js/player.js"></script>
+		<script src="js/ajax.js"></script>
+		<script src="js/lyric.js"></script>
+		<script src="js/musicList.js"></script>
+		<script src="js/functions.js"></script>
+		<script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
+		<script src="js/background-blur.min.js"></script>
+		<script src="js/custom/templates.js"></script>
+		<script src="js/custom/ug666.js"></script>
+		<script src="js/custom/template-adapter.js"></script>
+		<script src="js/custom/like.js"></script>
+		<script src="js/custom/player-state.js"></script>
+	</body>
 
 </html>
