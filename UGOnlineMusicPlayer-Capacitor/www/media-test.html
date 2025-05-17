@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src * 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src * 'self' 'unsafe-inline'; media-src * blob: 'self' 'unsafe-inline'; img-src * 'self' data: content:;">
+  <title>UG媒体通知测试</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      padding: 20px;
+      background: #121212;
+      color: #ffffff;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: #202020;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .test-section {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #444;
+    }
+
+    .test-section:last-child {
+      border-bottom: none;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+      color: #1DB954;
+    }
+
+    .button {
+      background: #1DB954;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 16px;
+      margin: 5px;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background: #1ed760;
+    }
+
+    .button.secondary {
+      background: #535353;
+    }
+
+    .button.secondary:hover {
+      background: #6a6a6a;
+    }
+
+    .console {
+      background-color: #000;
+      color: #1DB954;
+      font-family: monospace;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 20px;
+      height: 200px;
+      overflow-y: auto;
+    }
+
+    .log {
+      margin-bottom: 5px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .log.error {
+      color: #ff5252;
+    }
+
+    .progress-container {
+      margin-top: 20px;
+      background: #444;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #1DB954;
+      transition: width 0.3s;
+    }
+
+    .media-info {
+      margin-top: 20px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 15px;
+    }
+
+    .time-display {
+      text-align: center;
+      margin-top: 5px;
+      font-size: 14px;
+      color: #aaa;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>UG媒体通知测试</h1>
+
+    <div class="test-section">
+      <h2>通知基本测试</h2>
+      <button id="init-btn" class="button">初始化媒体控制</button>
+      <button id="test-notification-btn" class="button">测试基本通知</button>
+    </div>
+
+    <div class="test-section">
+      <h2>媒体通知测试</h2>
+
+      <div class="media-info">
+        <div><strong>曲目:</strong> <span id="track-title">测试歌曲</span></div>
+        <div><strong>歌手:</strong> <span id="track-artist">测试歌手</span></div>
+        <div><strong>专辑:</strong> <span id="track-album">测试专辑</span></div>
+        <div><strong>时长:</strong> <span id="track-duration">5:00</span></div>
+      </div>
+
+      <div class="progress-container">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+      <div id="time-display" class="time-display">00:00 / 05:00</div>
+
+      <div class="controls">
+        <button id="test-media-play-btn" class="button">自动播放测试</button>
+        <button id="update-track-btn" class="button secondary">更新曲目信息</button>
+        <button id="play-btn" class="button">播放</button>
+        <button id="pause-btn" class="button secondary">暂停</button>
+        <button id="stop-btn" class="button secondary">停止</button>
+        <button id="seek-forward-btn" class="button secondary">前进30秒</button>
+        <button id="seek-backward-btn" class="button secondary">后退30秒</button>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>调试信息</h2>
+      <div id="console" class="console"></div>
+    </div>
+  </div>
+
+  <script src="js/media-controls.js"></script>
+  <script>
+    // 模拟播放器状态
+    const player = {
+      position: 0,
+      duration: 300,
+      isPlaying: false,
+      timer: null,
+      updateInterval: null
+    };
+
+    // 控制台输出
+    function log(message, error = false) {
+      const console = document.getElementById('console');
+      const logElement = document.createElement('div');
+      logElement.className = 'log' + (error ? ' error' : '');
+      logElement.textContent = message;
+      console.appendChild(logElement);
+      console.scrollTop = console.scrollHeight;
+    }
+
+    // 格式化时间为 mm:ss
+    function formatTime(seconds) {
+      if (!seconds) return '00:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // 更新进度条
+    function updateProgress() {
+      const progressBar = document.getElementById('progress-bar');
+      const timeDisplay = document.getElementById('time-display');
+
+      if (player.duration > 0) {
+        const percent = (player.position / player.duration) * 100;
+        progressBar.style.width = `${percent}%`;
+      } else {
+        progressBar.style.width = '0%';
+      }
+
+      timeDisplay.textContent = `${formatTime(player.position)} / ${formatTime(player.duration)}`;
+    }
+
+    // 开始播放
+    async function startPlayback() {
+      if (player.isPlaying) return;
+
+      try {
+        player.isPlaying = true;
+        await window.UGMediaControl.play();
+
+        // 更新内部状态和界面
+        startProgressTimer();
+        log('开始播放');
+      } catch (err) {
+        log('播放失败: ' + err.message, true);
+      }
+    }
+
+    // 暂停播放
+    async function pausePlayback() {
+      if (!player.isPlaying) return;
+
+      try {
+        player.isPlaying = false;
+        await window.UGMediaControl.pause();
+
+        // 更新内部状态和界面
+        stopProgressTimer();
+        log('已暂停');
+      } catch (err) {
+        log('暂停失败: ' + err.message, true);
+      }
+    }
+
+    // 停止播放
+    async function stopPlayback() {
+      try {
+        player.isPlaying = false;
+        player.position = 0;
+        await window.UGMediaControl.stop();
+
+        // 更新内部状态和界面
+        stopProgressTimer();
+        updateProgress();
+        log('已停止');
+      } catch (err) {
+        log('停止失败: ' + err.message, true);
+      }
+    }
+
+    // 更新曲目位置
+    async function seekTo(position) {
+      try {
+        // 确保位置在合理范围内
+        position = Math.min(Math.max(position, 0), player.duration);
+        player.position = position;
+
+        // 更新通知
+        await window.UGMediaControl.updatePosition(position, player.duration);
+
+        // 更新界面
+        updateProgress();
+        log(`已跳转至 ${formatTime(position)}`);
+      } catch (err) {
+        log('跳转失败: ' + err.message, true);
+      }
+    }
+
+    // 开启进度计时器
+    function startProgressTimer() {
+      // 清除可能存在的旧计时器
+      stopProgressTimer();
+
+      // 创建新计时器
+      player.timer = setInterval(() => {
+        if (player.isPlaying && player.position < player.duration) {
+          player.position += 1;
+          updateProgress();
+
+          // 每5秒更新一次通知
+          if (player.position % 5 === 0) {
+            window.UGMediaControl.updatePosition(player.position, player.duration);
+          }
+
+          // 当到达结尾时自动停止
+          if (player.position >= player.duration) {
+            stopPlayback();
+          }
+        }
+      }, 1000);
+    }
+
+    // 停止进度计时器
+    function stopProgressTimer() {
+      if (player.timer) {
+        clearInterval(player.timer);
+        player.timer = null;
+      }
+    }
+
+    // 更新曲目信息
+    async function updateTrackInfo() {
+      const title = document.getElementById('track-title').textContent;
+      const artist = document.getElementById('track-artist').textContent;
+      const album = document.getElementById('track-album').textContent;
+
+      try {
+        await window.UGMediaControl.updateTrack({
+          title: title,
+          artist: artist,
+          album: album,
+          artwork: '/images/logo.ico',
+          duration: player.duration
+        });
+
+        log(`已更新曲目信息: ${title} - ${artist}`);
+      } catch (err) {
+        log('更新曲目信息失败: ' + err.message, true);
+      }
+    }
+
+    // 自动播放测试
+    async function autoPlayTest() {
+      try {
+        log('开始自动播放测试');
+
+        // 重置播放器状态
+        player.position = 0;
+        player.isPlaying = false;
+        stopProgressTimer();
+        updateProgress();
+
+        // 初始化媒体控制
+        await window.UGMediaControl.init();
+        log('媒体控制初始化成功');
+
+        // 更新曲目信息
+        await updateTrackInfo();
+
+        // 开始播放
+        await startPlayback();
+
+        // 60秒后暂停3秒再继续
+        setTimeout(async () => {
+          await pausePlayback();
+          log('测试暂停，3秒后继续');
+
+          setTimeout(async () => {
+            await startPlayback();
+            log('继续播放');
+          }, 3000);
+        }, 60000);
+
+        log('自动播放测试已启动，将在60秒后短暂暂停');
+      } catch (err) {
+        log('自动播放测试失败: ' + err.message, true);
+      }
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function () {
+      // 事件监听
+      document.getElementById('init-btn').addEventListener('click', async function () {
+        try {
+          const result = await window.UGMediaControl.init();
+          log('媒体控制初始化' + (result ? '成功' : '失败'));
+        } catch (err) {
+          log('初始化失败: ' + err.message, true);
+        }
+      });
+
+      document.getElementById('test-notification-btn').addEventListener('click', async function () {
+        const LocalNotifications = window.Capacitor?.Plugins?.LocalNotifications;
+        if (!LocalNotifications) {
+          log('通知插件不可用', true);
+          return;
+        }
+
+        try {
+          // 请求权限
+          const permResult = await LocalNotifications.requestPermissions();
+          log('通知权限: ' + JSON.stringify(permResult));
+
+          if (!permResult.display) {
+            log('无法获得通知权限', true);
+            return;
+          }
+
+          // 创建通知
+          await LocalNotifications.schedule({
+            notifications: [{
+              id: 12345,
+              title: '测试通知',
+              body: '这是一条测试通知，如果您看到此通知，则说明通知功能正常工作',
+              ongoing: true,
+              autoCancel: false,
+              extra: {
+                sticky: true,
+                ongoing: true,
+                timestamp: 0
+              }
+            }]
+          });
+
+          log('测试通知已发送');
+
+          // 5秒后取消测试通知
+          setTimeout(async () => {
+            await LocalNotifications.cancel({ notifications: [{ id: 12345 }] });
+            log('测试通知已取消');
+          }, 5000);
+        } catch (err) {
+          log('测试通知失败: ' + err.message, true);
+        }
+      });
+
+      document.getElementById('test-media-play-btn').addEventListener('click', autoPlayTest);
+      document.getElementById('update-track-btn').addEventListener('click', updateTrackInfo);
+      document.getElementById('play-btn').addEventListener('click', startPlayback);
+      document.getElementById('pause-btn').addEventListener('click', pausePlayback);
+      document.getElementById('stop-btn').addEventListener('click', stopPlayback);
+
+      document.getElementById('seek-forward-btn').addEventListener('click', function () {
+        seekTo(player.position + 30);
+      });
+
+      document.getElementById('seek-backward-btn').addEventListener('click', function () {
+        seekTo(player.position - 30);
+      });
+
+      // 自定义曲目事件处理
+      document.getElementById('track-title').addEventListener('click', function () {
+        const newTitle = prompt('输入新的曲目标题:', this.textContent);
+        if (newTitle) {
+          this.textContent = newTitle;
+        }
+      });
+
+      document.getElementById('track-artist').addEventListener('click', function () {
+        const newArtist = prompt('输入新的艺术家名称:', this.textContent);
+        if (newArtist) {
+          this.textContent = newArtist;
+        }
+      });
+
+      document.getElementById('track-album').addEventListener('click', function () {
+        const newAlbum = prompt('输入新的专辑名称:', this.textContent);
+        if (newAlbum) {
+          this.textContent = newAlbum;
+        }
+      });
+
+      document.getElementById('track-duration').addEventListener('click', function () {
+        const newDuration = prompt('输入新的时长(秒):', player.duration);
+        if (newDuration && !isNaN(newDuration)) {
+          player.duration = parseInt(newDuration);
+          this.textContent = formatTime(player.duration);
+          updateProgress();
+        }
+      });
+
+      // 初始化
+      updateProgress();
+      log('测试页面已加载，可以开始测试');
+    });
+
+    // 监听来自媒体控制的事件
+    document.addEventListener('ug-media-play', function () {
+      log('收到播放命令 (从通知栏)');
+      startPlayback();
+    });
+
+    document.addEventListener('ug-media-pause', function () {
+      log('收到暂停命令 (从通知栏)');
+      pausePlayback();
+    });
+
+    document.addEventListener('ug-media-stop', function () {
+      log('收到停止命令 (从通知栏)');
+      stopPlayback();
+    });
+
+    document.addEventListener('ug-media-previous', function () {
+      log('收到上一曲命令 (从通知栏)');
+    });
+
+    document.addEventListener('ug-media-next', function () {
+      log('收到下一曲命令 (从通知栏)');
+    });
+  </script>
+</body>
+
+</html>

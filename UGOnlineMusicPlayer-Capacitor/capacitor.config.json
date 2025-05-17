@@ -33,6 +33,15 @@
       "setLoadWithOverviewMode": true,
       "setSupportZoom": false,
       "setDesktopMode": false
+    },
+    "plugins": {
+      "LocalNotifications": {
+        "smallIcon": "ic_stat_notification",
+        "iconColor": "#FF4081",
+        "sound": "none",
+        "foreground": true,
+        "removeAllDeliveredNotificationsOnStart": false
+      }
     }
   }
 }

@@ -71,7 +71,6 @@ window.UGBridge = {
       }
     });
   },
-
   // 处理UG消息
   handleUGMessage: function (message) {
     switch (message.type) {
@@ -83,6 +82,29 @@ window.UGBridge = {
       case 'ug_player_state':
         // 处理播放器状态变化
         this.dispatchEvent('playerStateChanged', message.data);
+        break;
+
+      case 'ug_audio_play':
+        // 处理音频播放事件
+        console.log('[UGBridge] 处理音频播放:', message.data);
+        this.dispatchEvent('audio_play', message.data);
+        break;
+
+      case 'ug_audio_pause':
+        // 处理音频暂停事件
+        console.log('[UGBridge] 处理音频暂停');
+        this.dispatchEvent('audio_pause', message.data);
+        break;
+
+      case 'ug_audio_ended':
+        // 处理音频播放结束事件
+        console.log('[UGBridge] 处理音频结束');
+        this.dispatchEvent('audio_ended', message.data);
+        break;
+
+      case 'ug_audio_progress':
+        // 处理音频进度更新事件
+        this.dispatchEvent('audio_progress', message.data);
         break;
 
       default:
@@ -368,15 +390,75 @@ window.UGBridge = {
             return result;
           };
         }
-        
-        // 监听播放器状态变化
+          // 监听播放器状态变化
         const audio = document.querySelector('audio');
         if (audio) {
-          ['play', 'pause', 'timeupdate', 'ended'].forEach(event => {
+          // 为播放器添加媒体控制通知栏支持
+          ['play', 'pause', 'timeupdate', 'ended', 'seeked', 'seeking'].forEach(event => {
             audio.addEventListener(event, () => {
+              // 发送到父窗口
               UGClient.sendMessage('player_state', UGClient.getPlayerState());
             });
           });
+          
+          // 获取当前播放歌曲信息
+          function getCurrentSongInfo() {
+            // 尝试从页面元素中获取当前歌曲信息
+            let title = document.querySelector('.player .title')?.textContent || '未知歌曲';
+            let artist = document.querySelector('.player .artist')?.textContent || '未知艺术家';
+            
+            // 尝试从播放列表获取封面
+            let artwork = '';
+            const currentIndex = window.playerSettings?.playlist?.index || 0;
+            const currentSong = window.playerSettings?.playlist?.songs?.[currentIndex];
+            if (currentSong && currentSong.pic) {
+              artwork = currentSong.pic;
+            } else {
+              // 尝试从DOM获取封面
+              const coverEl = document.querySelector('.player .cover img');
+              if (coverEl && coverEl.src) {
+                artwork = coverEl.src;
+              }
+            }
+            
+            return {
+              title: title,
+              artist: artist,
+              album: '来自UG音乐播放器',
+              artwork: artwork || 'images/logo.ico',
+              duration: audio.duration || 0
+            };
+          }
+          
+          // 处理播放状态变化
+          audio.addEventListener('play', function() {
+            UGClient.sendMessage('audio_play', {
+              track: getCurrentSongInfo(),
+              currentTime: audio.currentTime,
+              duration: audio.duration
+            });
+          });
+          
+          audio.addEventListener('pause', function() {
+            UGClient.sendMessage('audio_pause', {
+              currentTime: audio.currentTime,
+              duration: audio.duration
+            });
+          });
+          
+          audio.addEventListener('ended', function() {
+            UGClient.sendMessage('audio_ended', {});
+          });
+          
+          // 定时更新进度
+          setInterval(() => {
+            if (!audio.paused) {
+              UGClient.sendMessage('audio_progress', {
+                currentTime: audio.currentTime,
+                duration: audio.duration
+              });
+            }
+          }, 1000);
         }
         
         // 通知容器页面已准备好
