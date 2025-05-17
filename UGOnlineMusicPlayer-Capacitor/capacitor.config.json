@@ -12,12 +12,27 @@
   "android": {
     "backgroundColor": "#000000",
     "allowMixedContent": true,
-    "captureInput": true,
+    "captureInput": false,
     "webContentsDebuggingEnabled": true,
-    "useLegacyBridge": true,
-    "initialFocus": false,
+    "useLegacyBridge": false,
+    "initialFocus": true,
     "hideSplashScreen": false,
     "overrideUserAgent": "Mozilla/5.0 UGMusicPlayer Android App",
-    "allowBackForwardNavigationGestures": true
+    "allowBackForwardNavigationGestures": true,
+    "appendUserAgent": " UGMusicPlayer",
+    "webViewSettings": {
+      "domStorageEnabled": true,
+      "setTextZoom": 100,
+      "setSaveFormData": true,
+      "setJavaScriptEnabled": true,
+      "allowFileAccess": true,
+      "setDefaultTextEncodingName": "UTF-8",
+      "setAllowFileAccessFromFileURLs": true,
+      "setAllowUniversalAccessFromFileURLs": true,
+      "setUseWideViewPort": true,
+      "setLoadWithOverviewMode": true,
+      "setSupportZoom": false,
+      "setDesktopMode": false
+    }
   }
 }

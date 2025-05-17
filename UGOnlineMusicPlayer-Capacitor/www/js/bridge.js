@@ -260,14 +260,14 @@ window.UGBridge = {
             }
           }
         }, true);
-        
-        // 修复输入框，特别是密码输入框
+          // 修复输入框，特别是密码输入框
         function fixInputs() {
           // 修复所有密码输入框
           document.querySelectorAll('input[type="password"]').forEach(input => {
             input.type = 'text';
             input.inputMode = 'numeric';
-            input.setAttribute('pattern', '[0-9]*');
+            // 不使用pattern限制，允许输入字母
+            // input.setAttribute('pattern', '[0-9]*');
             
             // 同时添加自动聚焦处理
             input.addEventListener('focus', function() {
@@ -280,7 +280,8 @@ window.UGBridge = {
           if (cacheKeyInput) {
             cacheKeyInput.type = 'text';
             cacheKeyInput.inputMode = 'numeric';
-            cacheKeyInput.setAttribute('pattern', '[0-9]*');
+            // 不使用pattern限制，允许输入字母
+            // cacheKeyInput.setAttribute('pattern', '[0-9]*');
           }
         }
         
@@ -383,7 +384,6 @@ window.UGBridge = {
       })();
     `;
   },
-
   // 应用Android特定修复
   applyAndroidFixes: function () {
     if (!this.iframeDoc) return;
@@ -398,6 +398,18 @@ window.UGBridge = {
       /* 修复Android上的输入框问题 */
       input, textarea {
         font-size: 16px !important; /* 防止页面缩放 */
+        -webkit-user-select: text !important;
+        user-select: text !important;
+        touch-action: manipulation !important;
+      }
+      
+      /* 修复搜索框 */
+      input[type="search"], 
+      #search-area input,
+      .searchBox input {
+        font-size: 16px !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
       }
     `;
 
@@ -412,6 +424,29 @@ window.UGBridge = {
             e.preventDefault();
             return false;
           });
+        });
+        
+        // 修复输入框inputMode和pattern设置
+        document.querySelectorAll('input').forEach(input => {
+          // 清除限制模式
+          if (input.hasAttribute('pattern') && input.getAttribute('pattern') === '[0-9]*') {
+            input.removeAttribute('pattern');
+          }
+          
+          // 修正inputMode
+          if (input.getAttribute('inputmode') === 'numeric' && 
+              !input.id !== 'cache-key' && 
+              !input.classList.contains('password')) {
+            input.setAttribute('inputmode', 'text');
+          }
+          
+          // 如果是搜索框
+          if (input.type === 'search' || 
+              (input.closest && 
+               (input.closest('.searchBox') || 
+                input.closest('#search-area')))) {
+            input.setAttribute('inputmode', 'search');
+          }
         });
       })();
     `;
