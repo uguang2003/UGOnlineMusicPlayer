@@ -274,13 +274,21 @@ function setupStateListeners() {
     // 暂停时保存状态
     savePlayerState();
   });
-
   // 监听播放进度变化事件
   rem.audio[0].addEventListener('timeupdate', function () {
     // 这里不需要频繁保存，已经有定时器在保存了
     // 但确保进度条是解锁的
     if (music_bar && music_bar.locked) {
       music_bar.lock(false);
+    }
+
+    // 更新进度条位置
+    if (music_bar && !music_bar.dragging && rem.audio[0] && rem.audio[0].duration) {
+      var currentTime = rem.audio[0].currentTime;
+      var percent = currentTime / rem.audio[0].duration;
+      if (!isNaN(percent) && isFinite(percent)) {
+        music_bar.goto(percent);
+      }
     }
 
     // 强制同步歌词，确保歌词与进度条同步
