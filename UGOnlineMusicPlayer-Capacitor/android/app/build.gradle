@@ -16,10 +16,22 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+      // 添加签名配置
+    signingConfigs {
+        release {
+            storeFile file("../../keystore/ug-music-key.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "UG666UG666UG666"
+            keyAlias "ug-music-alias"
+            keyPassword System.getenv("KEY_PASSWORD") ?: "UG666UG666UG666"
+        }
+    }
+    
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // 应用签名配置
+            signingConfig signingConfigs.release
         }
     }
 }
