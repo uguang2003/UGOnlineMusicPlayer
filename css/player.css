@@ -1081,7 +1081,7 @@ body {
     top: 50%;
     left: 0;
     right: 0;
-    height: 2px;
+    height: 4px;
     margin-top: -1px;
     border-radius: 2px;
     background-color: #808284;
@@ -1093,7 +1093,7 @@ body {
     position: absolute;
     background-color: #D8D8D8;
     width: 0;
-    height: 2px;
+    height: 4px;
     top: 50%;
     margin-top: -1px;
     border-radius: 2px;
@@ -1115,7 +1115,7 @@ body {
     left: 0px;
     margin-left: -5px;
     top: 50%;
-    margin-top: -5px;
+    margin-top: -4px;
     transition: all 0.25s ease;
     -webkit-transition: all 0.25s ease;
     -moz-transition: all 0.25s ease;

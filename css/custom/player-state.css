@@ -3,6 +3,7 @@
     background-color: rgba(255, 255, 255, 0.15) !important;
     border-left: 3px solid #31c27c !important;
     position: relative; /* 为了可能的动画效果 */
+    transition: all 0.3s ease; /* 平滑过渡 */
 }
 
 /* 播放状态特有样式 */
@@ -10,23 +11,36 @@
     color: #31c27c; /* 播放中的文字颜色 */
 }
 
-/* 确保进度条的拖动点更加明显 */
+/* 确保进度条的拖动点更加明显 - 还原为简洁样式 */
 #music-progress .mkpgb-dot {
-    width: 12px !important;
-    height: 12px !important;
+    width: 16px !important;
+    height: 16px !important;
     top: 50% !important;
-    margin-top: -6px !important;
-    margin-left: -6px !important;
-    background-color: #31c27c !important;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) !important;
+    margin-top: -7px !important;
+    margin-left: -5px !important;
+    background-color: #D8D8D8 !important;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5) !important;
     cursor: pointer !important;
-    z-index: 2 !important;
     border-radius: 50% !important;
+    transition: all 0.2s ease !important; /* 添加过渡效果 */
 }
 
-/* 播放中状态的进度条颜色 */
+/* 播放中状态的进度条颜色 - 还原为原始颜色 */
 #music-progress .mkpgb-cur {
-    background-color: #31c27c !important;
+    background-color: #D8D8D8 !important;
+    transition: all 0.2s ease !important; /* 添加过渡效果 */
+}
+
+/* 鼠标悬停在进度条上时的效果 */
+#music-progress:hover .mkpgb-dot {
+    transform: scale(1.2) !important; /* 放大效果 */
+    background-color: #31c27c !important; /* 绿色主题 */
+    box-shadow: 0 0 5px rgba(49, 194, 124, 0.6) !important; /* 绿色光晕 */
+}
+
+/* 鼠标悬停时进度条颜色变化 */
+#music-progress:hover .mkpgb-cur {
+    background-color: #31c27c !important; /* 绿色主题 */
 }
 
 /* 鼠标悬停在进度条上时显示指针样式 */
@@ -35,12 +49,95 @@
 }
 
 /* 进度条拖动时的样式 */
-#music-progress.mkpgb-dragging .mkpgb-dot {
-    transform: scale(1.2);
-    box-shadow: 0 0 10px rgba(49, 194, 124, 0.8) !important;
+.mkpgb-dragging .mkpgb-dot {
+    transform: scale(1.4) !important;
+    background-color: #31c27c !important;
+    box-shadow: 0 0 12px rgba(49, 194, 124, 0.9) !important;
+    transition: all 0.1s ease !important;
+}
+
+/* 拖动时进度条已播放部分的样式 */
+.mkpgb-dragging .mkpgb-cur {
+    background-color: #31c27c !important;
+    box-shadow: 0 0 5px rgba(49, 194, 124, 0.5) !important;
+}
+
+/* 移动端活动状态样式 */
+.mkpgb-active .mkpgb-dot {
+    transform: scale(1.2) !important;
+    background-color: #31c27c !important;
+    box-shadow: 0 0 6px rgba(49, 194, 124, 0.7) !important;
 }
 
 /* 导航中对应播放列表的高亮效果 */
 .sheet-playing {
     border-left: 3px solid #31c27c !important;
+}
+
+/* 优化滑块交互体验 */
+#music-progress .mkpgb-bar {
+    height: 4px !important; /* 原始高度 */
+    transition: all 0.2s ease !important; /* 平滑过渡 */
+    border-radius: 1px !important; /* 微微圆角 */
+}
+
+/* 鼠标悬停时的进度条效果 */
+#music-progress:hover .mkpgb-bar {
+    height: 4px !important; /* 微微增大高度 */
+    background-color: rgba(255, 255, 255, 0.25) !important; /* 微调背景色 */
+}
+
+/* 移动端布局优化 */
+@media (max-width: 768px) {
+    .list-highlight {
+        border-left-width: 2px !important;
+    }
+    
+    /* 禁止播放列表横向滚动 */
+    .music-list {
+        overflow-x: hidden !important;
+    }
+    
+    /* 调整移动端进度条布局 */
+    #music-progress {
+        margin-right: 80px !important; /* 给时间预留足够空间 */
+        margin-left: 10px !important
+    }
+    
+    /* 修正音频时间位置，防止重叠 */
+    .audio-time {
+        width: 75px !important;
+        font-size: 12px !important;
+        text-align: right !important;
+    }
+      /* 进度条拖动点调整 */
+    #music-progress .mkpgb-dot {
+        width: 16px !important; /* 增大触摸区域 */
+        height: 16px !important;
+        margin-top: -8px !important;
+        margin-left: -8px !important;
+        background-color: #31c27c !important; /* 使用绿色主题 */
+        border: 2px solid rgba(255, 255, 255, 0.9) !important; /* 增加边框提高可见度 */
+        box-shadow: 0 0 5px rgba(49, 194, 124, 0.6) !important; /* 绿色光晕效果 */
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; /* 弹性动画 */
+    }
+    
+    /* 调整进度条容器的大小和位置 */
+    .player .progress {
+        height: 30px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    .player .progress-box {
+        width: 100% !important;
+        position: relative !important;
+    }
+      /* 拖动时的样式增强 */
+    .mkpgb-dragging .mkpgb-dot {
+        background-color: #31c27c !important; /* 使用音乐播放器的绿色主题 */
+        box-shadow: 0 0 8px rgba(49, 194, 124, 0.9) !important; /* 绿色光晕 */
+        transform: scale(1.3) !important;
+        border-color: rgba(255, 255, 255, 0.9) !important;
+    }
 }
