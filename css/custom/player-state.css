@@ -71,7 +71,19 @@
 
 /* 导航中对应播放列表的高亮效果 */
 .sheet-playing {
-    border-left: 3px solid #31c27c !important;
+    position: relative !important; /* 使用相对定位 */
+}
+
+.sheet-playing:after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 70% !important; /* 高亮宽度占比，可调整 */
+    height: 2px !important;
+    background-color: #31c27c !important;
+    border-radius: 1px !important;
 }
 
 /* 优化滑块交互体验 */

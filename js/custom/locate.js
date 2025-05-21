@@ -16,22 +16,55 @@ $(function () {
     locateToNowPlaying();
     return false;
   });
+  // 拦截loadList函数，确保按钮状态与当前页面保持同步
+  try {
+    // 保存原始的loadList函数
+    var originalLoadList = window.loadList;
+    if (originalLoadList) {
+      window.loadList = function (list) {
+        // 调用原始函数
+        originalLoadList.apply(this, arguments);
+
+        // 切换列表后判断按钮显示状态
+        setTimeout(function () {
+          // 强制重新检查当前歌曲可见性，更新按钮状态
+          // 如果是正在播放列表(1)且当前歌曲不可见，会显示按钮
+          // 如果不是正在播放列表，则隐藏按钮
+          console.log('loadList切换到列表:', list, '是否是正在播放列表:', list === 1);
+          checkCurrentSongVisibility();
+        }, 200); // 给更多时间确保DOM完全更新
+      };
+      console.log('成功拦截loadList函数以控制定位按钮');
+    }
+  } catch (e) {
+    console.error('拦截loadList函数失败:', e);
+  }
+
   // 监听滚动事件，根据当前歌曲是否可见来控制按钮显示/隐藏
   $('#main-list').on('scroll', debounce(checkCurrentSongVisibility, 50));
 
   // 定期检查当前歌曲是否可见，更新按钮状态 - 减少间隔提高响应性
   setInterval(checkCurrentSongVisibility, 800);
-
   // 监听歌曲切换事件 - 使用播放器的事件
   $(document).on('play pause', function () {
     // 立即检查可见性
     checkCurrentSongVisibility();
   });
+
   // 监听列表切换事件
   $(document).on('click', '.btn[data-action]', function () {
+    // 获取点击的按钮类型
+    var action = $(this).data('action');
+
     // 立即检查一次
     checkCurrentSongVisibility();
-    // 然后在短暂延迟后再次检查（确保DOM已更新）
+
+    // 如果切换到了非"正在播放"列表，确保隐藏按钮
+    if (action && action !== 'playing') {
+      hideLocateButton();
+    }
+
+    // 在短暂延迟后再次检查（确保DOM已更新）
     setTimeout(checkCurrentSongVisibility, 200);
   });
 
@@ -41,13 +74,11 @@ $(function () {
   // 监听鼠标滚轮事件
   $(document).on('mousewheel DOMMouseScroll', debounce(function () {
     checkCurrentSongVisibility();
-  }, 50));
-
-  /**
+  }, 50));  /**
    * 检查当前播放的歌曲是否在可视区域内
    */
   function checkCurrentSongVisibility() {
-    // 确保有正在播放的歌曲且在正在播放列表中
+    // 确保有正在播放的歌曲
     if (typeof rem.playlist === 'undefined' || typeof rem.playid === 'undefined' || rem.playid === null) {
       // 没有正在播放的歌曲，隐藏按钮
       hideLocateButton();
@@ -56,22 +87,27 @@ $(function () {
 
     // 检查当前显示的是不是正在播放列表(rem.dislist == 1)
     if (rem.dislist != 1) {
-      // 不在正在播放列表页面，显示按钮
-      showLocateButton();
+      // 不在正在播放列表页面，隐藏按钮（定位按钮只在正在播放页面显示）
+      hideLocateButton();
       return;
     }
 
-    // 查找当前播放的歌曲元素
+    // 到达这里说明：1. 有正在播放的歌曲 2. 当前在"正在播放"列表页面
+    // 接下来检查歌曲是否在可视区域内    // 查找当前播放的歌曲元素
     var $currentSong = $('.list-item[data-no="' + rem.playid + '"]');
 
     if ($currentSong.length === 0) {
+      console.log('找不到正在播放的歌曲元素，显示定位按钮');
       // 找不到正在播放的歌曲元素，显示按钮
       showLocateButton();
       return;
     }
 
     // 检查歌曲是否在可视区域内
-    if (isSongVisible($currentSong)) {
+    var isVisible = isSongVisible($currentSong);
+    console.log('当前播放歌曲是否可见:', isVisible);
+
+    if (isVisible) {
       // 歌曲在可视区域内，隐藏按钮
       hideLocateButton();
     } else {
@@ -136,14 +172,24 @@ $(function () {
 
       return (elementBottom > containerTop) && (elementTop < containerBottom);
     }
-  }    /**
+  }  /**
      * 显示定位按钮（带动画效果）
      */
   function showLocateButton() {
     var $btn = $('#locate-btn');
+    console.log('尝试显示定位按钮');
 
     // 如果按钮已经显示，不做处理
-    if ($btn.is(':visible') && !$btn.hasClass('locate-btn-entering')) return;
+    if ($btn.is(':visible') && !$btn.hasClass('locate-btn-entering')) {
+      console.log('按钮已经可见，不需要再次显示');
+      return;
+    }
+
+    // 确保按钮元素存在
+    if ($btn.length === 0) {
+      console.error('找不到定位按钮元素!');
+      return;
+    }
 
     // 首先把按钮放在右侧外面，设为可见但看不见
     $btn.css({
@@ -151,6 +197,8 @@ $(function () {
       'opacity': '0',
       'transform': 'translateX(80px)'
     }).removeClass('locate-btn-exiting').addClass('locate-btn-entering');
+
+    console.log('定位按钮已设置为可见状态，即将执行动画');
 
     // 用requestAnimationFrame确保DOM更新后再开始动画
     requestAnimationFrame(function () {
