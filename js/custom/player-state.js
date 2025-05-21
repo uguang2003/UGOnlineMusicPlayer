@@ -202,15 +202,31 @@ function highlightNowPlaying() {
   // 如果没有正在播放/暂停的歌曲，直接返回
   if (rem.playlist === undefined || rem.playid === undefined) return;
 
-  // 获取当前播放/暂停的歌曲DOM元素
-  var currentSong = $(".list-item[data-no='" + rem.playid + "']");
+  // 移除所有其他元素的高亮效果
+  $(".list-item").removeClass("list-highlight");
+  $(".list-item").removeClass("list-playing");
+
+  // 获取当前播放的歌曲信息
+  var currentMusic = musicList[1].item[rem.playid];
+  if (!currentMusic || !currentMusic.id) return;
+
+  var currentSong = null;
+
+  // 在显示的列表中查找与当前播放歌曲匹配的元素（基于ID而不是位置）
+  for (var i = 0; i < musicList[rem.dislist].item.length; i++) {
+    var listMusic = musicList[rem.dislist].item[i];
+    if (!listMusic || !listMusic.id) continue;
+
+    // 比较歌曲ID和来源以确定是否为同一首歌
+    if (listMusic.id == currentMusic.id &&
+      listMusic.source == currentMusic.source) {
+      currentSong = $(".list-item[data-no='" + i + "']");
+      break; // 找到了就退出循环
+    }
+  }
 
   // 如果找到了元素
-  if (currentSong.length) {
-    // 移除其他元素的高亮效果
-    $(".list-item").removeClass("list-highlight");
-    $(".list-item").removeClass("list-playing");
-
+  if (currentSong && currentSong.length) {
     // 给当前歌曲添加高亮效果，无论是播放还是暂停状态
     currentSong.addClass("list-highlight");
 
@@ -220,7 +236,7 @@ function highlightNowPlaying() {
     }
 
     if (mkPlayer.debug) {
-      console.log('[UG Music Player] 高亮当前歌曲，ID:', rem.playid, '状态:', rem.paused ? '暂停' : '播放');
+      console.log('[UG Music Player] 高亮当前歌曲，ID:', currentMusic.id, '来源:', currentMusic.source, '状态:', rem.paused ? '暂停' : '播放');
     }
   }
 }
