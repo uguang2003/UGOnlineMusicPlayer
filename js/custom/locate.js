@@ -3,8 +3,6 @@
  * 增强版，自动检测歌曲是否可见并控制按钮显示/隐藏
  */
 $(function () {
-  console.log('网易云风格定位按钮初始化');
-
   // 初始时隐藏定位按钮
   $('#locate-btn').hide();
 
@@ -35,14 +33,12 @@ $(function () {
           // 强制重新检查当前歌曲可见性，更新按钮状态
           // 如果是正在播放列表(1)且当前歌曲不可见，会显示按钮
           // 如果不是正在播放列表，则隐藏按钮
-          console.log('loadList切换到列表:', list, '是否是正在播放列表:', list === 1);
           checkCurrentSongVisibility();
         }, 200); // 给更多时间确保DOM完全更新
       };
-      console.log('成功拦截loadList函数以控制定位按钮');
     }
   } catch (e) {
-    console.error('拦截loadList函数失败:', e);
+    // 拦截失败时静默处理
   }
 
   // 监听滚动事件，根据当前歌曲是否可见来控制按钮显示/隐藏
@@ -99,10 +95,7 @@ $(function () {
 
     // 到达这里说明：1. 有正在播放的歌曲 2. 当前在"正在播放"列表页面
     // 接下来检查歌曲是否在可视区域内    // 查找当前播放的歌曲元素
-    var $currentSong = $('.list-item[data-no="' + rem.playid + '"]');
-
-    if ($currentSong.length === 0) {
-      console.log('找不到正在播放的歌曲元素，显示定位按钮');
+    var $currentSong = $('.list-item[data-no="' + rem.playid + '"]'); if ($currentSong.length === 0) {
       // 找不到正在播放的歌曲元素，显示按钮
       showLocateButton();
       return;
@@ -110,7 +103,6 @@ $(function () {
 
     // 检查歌曲是否在可视区域内
     var isVisible = isSongVisible($currentSong);
-    console.log('当前播放歌曲是否可见:', isVisible);
 
     if (isVisible) {
       // 歌曲在可视区域内，隐藏按钮
@@ -182,11 +174,9 @@ $(function () {
      */
   function showLocateButton() {
     var $btn = $('#locate-btn');
-    console.log('尝试显示定位按钮');
 
     // 如果按钮已经显示，不做处理
     if ($btn.is(':visible') && !$btn.hasClass('locate-btn-entering')) {
-      console.log('按钮已经可见，不需要再次显示');
       return;
     }
 
@@ -202,8 +192,6 @@ $(function () {
       'opacity': '0',
       'transform': 'translateX(80px)'
     }).removeClass('locate-btn-exiting').addClass('locate-btn-entering');
-
-    console.log('定位按钮已设置为可见状态，即将执行动画');
 
     // 用requestAnimationFrame确保DOM更新后再开始动画
     requestAnimationFrame(function () {
@@ -249,12 +237,9 @@ $(function () {
   function locateToNowPlaying() {
     // 确保有正在播放的歌曲
     if (typeof rem.playlist === 'undefined' || typeof rem.playid === 'undefined' || rem.playid === null) {
-      console.log('没有正在播放的歌曲');
       showTip('当前没有正在播放的歌曲');
       return;
     }
-
-    console.log('正在定位到歌曲, 列表:', rem.playlist, '歌曲ID:', rem.playid);
 
     // 检查当前显示的是不是正在播放列表(rem.dislist == 1)
     if (rem.dislist != 1) {
@@ -288,7 +273,6 @@ $(function () {
     var $currentSong = $('.list-item[data-no="' + rem.playid + '"]');
 
     if ($currentSong.length === 0) {
-      console.log('在当前页面找不到正在播放的歌曲, playid:', rem.playid);
 
       // 再次尝试刷新列表
       try {
@@ -327,7 +311,6 @@ $(function () {
    * 执行实际的滚动动作
    */
   function performScroll($currentSong) {
-    console.log('找到歌曲元素，开始滚动');
 
     // 移除之前的高亮效果
     $('.song-highlight').removeClass('song-highlight');
@@ -389,8 +372,6 @@ $(function () {
             }
           });
         } else {
-          // 回退策略：如果mCustomScrollbar不可用，使用常规jQuery滚动
-          console.log('mCustomScrollbar API不可用，使用标准滚动');
 
           // 计算滚动位置
           var listContainer = $('#main-list');
