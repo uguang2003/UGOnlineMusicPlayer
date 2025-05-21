@@ -1,34 +1,43 @@
-/* 网易云风格的定位按钮 */
+/* 现代风格的定位按钮 */
 .netease-locate-btn {
     position: fixed;
     right: 20px;
     bottom: 120px;
-    width: 40px;
-    height: 40px;
-    background-color: #C20C0C; /* 网易云音乐红色 */
+    width: 42px;
+    height: 42px;
+    background-color: transparent !important; /* 透明背景 */
     color: white;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: none;
     z-index: 9999;
     opacity: 0;
     transform: translateX(80px);
-    transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    will-change: transform, opacity; /* 提高性能 */
+    transition: opacity 0.3s, transform 0.3s;
+    border: none;
+    will-change: transform, opacity;
 }
 
 .netease-locate-btn:hover {
-    transform: scale(1.1);
+    transform: scale(1.1) translateX(0);
     opacity: 1;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: none;
+    background-color: transparent !important;
 }
 
-.netease-locate-btn i {
-    font-size: 20px;
+.netease-locate-btn .locate-crosshair {
+    width: 22px;
+    height: 22px;
+    display: block;
+    transition: transform 0.2s;
+}
+
+.netease-locate-btn.active .locate-crosshair {
+    transform: scale(1.4);
+    color: #31c27c !important;
 }
 
 /* 定位时的歌曲高亮效果 */

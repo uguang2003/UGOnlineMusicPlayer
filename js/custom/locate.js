@@ -12,7 +12,12 @@ $(function () {
   $(document).on('click', '#locate-btn', function (e) {
     e.preventDefault();
     e.stopPropagation();
-    console.log('定位按钮被点击');
+    // 图标缩放动画
+    var $btn = $(this);
+    $btn.addClass('active');
+    setTimeout(function () {
+      $btn.removeClass('active');
+    }, 800);
     locateToNowPlaying();
     return false;
   });
