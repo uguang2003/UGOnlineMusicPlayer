@@ -1,0 +1,68 @@
+/* 网易云风格的定位按钮 */
+.netease-locate-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 120px;
+    width: 40px;
+    height: 40px;
+    background-color: #C20C0C; /* 网易云音乐红色 */
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateX(80px);
+    transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    will-change: transform, opacity; /* 提高性能 */
+}
+
+.netease-locate-btn:hover {
+    transform: scale(1.1);
+    opacity: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.netease-locate-btn i {
+    font-size: 20px;
+}
+
+/* 定位时的歌曲高亮效果 */
+@keyframes highlightSong {
+    0% { background-color: rgba(194, 12, 12, 0.1); }
+    50% { background-color: rgba(194, 12, 12, 0.2); }
+    100% { background-color: rgba(194, 12, 12, 0.1); }
+}
+
+.song-highlight {
+    animation: highlightSong 0.8s 3;
+    position: relative;
+}
+
+.song-highlight::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background-color: #C20C0C;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .netease-locate-btn {
+        width: 36px;
+        height: 36px;
+        bottom: 80px;
+        right: 15px;
+    }
+    
+    .netease-locate-btn i {
+        font-size: 18px;
+    }
+}
