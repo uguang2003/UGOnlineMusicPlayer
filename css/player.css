@@ -159,9 +159,14 @@ body {
 #blur-img {
     position: fixed;
     height: 100%;
-    left: -10%;
-    width: 120%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     overflow: hidden;
+    background-size: cover;
+    background-position: center center;
 }
 
 /* 移动端使用的模糊图像层 */
@@ -177,7 +182,7 @@ body {
     z-index: 1;
     width: 100%;
     background-size: cover;
-    background-position: bottom center;
+    background-position: center center;
 }
 
 /* 图像遮罩层 */

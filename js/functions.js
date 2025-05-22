@@ -417,26 +417,40 @@ $(function () {
         playerSavedata('volume', oldVol); // 存储音量信息
         volume_bar.goto(oldVol);    // 刷新音量显示
         if (rem.audio[0] !== undefined) rem.audio[0].volume = oldVol;  // 应用音量
-    });
-
-    if ((mkPlayer.coverbg === true && !rem.isMobile) || (mkPlayer.mcoverbg === true && rem.isMobile)) { // 开启了封面背景
+    }); if ((mkPlayer.coverbg === true && !rem.isMobile) || (mkPlayer.mcoverbg === true && rem.isMobile)) { // 开启了封面背景
 
         if (rem.isMobile) {  // 移动端采用另一种模糊方案
             $('#blur-img').html('<div class="blured-img" id="mobile-blur"></div><div class="blur-mask mobile-mask"></div>');
         } else {
-            // 背景图片初始化
-            $('#blur-img').backgroundBlur({
-                // imageURL : '', // URL to the image that will be used for blurring
-                blurAmount: 50, // 模糊度
-                imageClass: 'blured-img', // 背景区应用样式
-                overlayClass: 'blur-mask', // 覆盖背景区class，可用于遮罩或额外的效果
-                // duration: 0, // 图片淡出时间
-                endOpacity: 1 // 图像最终的不透明度
+            // 背景图片初始化 - 使用CSS方式实现响应式背景和模糊效果
+            $('#blur-img').html('<div class="blur-mask"></div>');
+            // 添加CSS过滤器效果实现模糊
+            $('#blur-img').css({
+                'background-size': 'cover',
+                'background-position': 'center center',
+                '-webkit-filter': 'blur(50px) brightness(0.7)',
+                'filter': 'blur(50px) brightness(0.7)'
             });
         }
 
         $('.blur-mask').fadeIn(1000);   // 遮罩层淡出
     }
+
+    // 添加窗口大小改变事件监听
+    $(window).resize(function () {
+        // 确保背景图片完整覆盖窗口
+        if (!rem.isMobile) {
+            $('#blur-img').css({
+                'background-size': 'cover',
+                'background-position': 'center center'
+            });
+        } else {
+            $('#mobile-blur').css({
+                'background-size': 'cover',
+                'background-position': 'center center'
+            });
+        }
+    });
 
     // 图片加载失败处理
     $('img').error(function () {
@@ -831,25 +845,42 @@ function changeCover(music) {
         if (mkPlayer.mcoverbg === true && rem.isMobile)      // 移动端封面
         {
             $("#music-cover").load(function () {
-                $("#mobile-blur").css('background-image', 'url("' + img + '")');
+                $("#mobile-blur").css({
+                    'background-image': 'url("' + img + '")',
+                    'background-size': 'cover',
+                    'background-position': 'center center'
+                });
             });
         }
         else if (mkPlayer.coverbg === true && !rem.isMobile)     // PC端封面
         {
             $("#music-cover").load(function () {
                 if (animate) {   // 渐变动画也已完成
-                    $("#blur-img").backgroundBlur(img);    // 替换图像并淡出
+                    // 直接设置背景图而不是使用backgroundBlur
+                    $("#blur-img").css({
+                        'background-image': 'url("' + img + '")',
+                        'background-size': 'cover',
+                        'background-position': 'center center',
+                        '-webkit-filter': 'blur(50px) brightness(0.7)',
+                        'filter': 'blur(50px) brightness(0.7)'
+                    });
                     $("#blur-img").animate({ opacity: "1" }, 2000); // 背景更换特效
                 } else {
                     imgload = true;     // 告诉下面的函数，图片已准备好
                 }
-
             });
 
             // 渐变动画
             $("#blur-img").animate({ opacity: "0.2" }, 1000, function () {
                 if (imgload) {   // 如果图片已经加载好了
-                    $("#blur-img").backgroundBlur(img);    // 替换图像并淡出
+                    // 直接设置背景图而不是使用backgroundBlur
+                    $("#blur-img").css({
+                        'background-image': 'url("' + img + '")',
+                        'background-size': 'cover',
+                        'background-position': 'center center',
+                        '-webkit-filter': 'blur(50px) brightness(0.7)',
+                        'filter': 'blur(50px) brightness(0.7)'
+                    });
                     $("#blur-img").animate({ opacity: "1" }, 2000); // 背景更换特效
                 } else {
                     animate = true;     // 等待图像加载完
