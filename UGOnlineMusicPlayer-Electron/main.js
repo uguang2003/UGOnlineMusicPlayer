@@ -395,12 +395,12 @@ if (!gotTheLock) {
         backgroundThrottling: false,
         transparent: true
       }
-    });
-
-    mainWindow.addBrowserView(titleBarView);
+    }); mainWindow.addBrowserView(titleBarView);
     titleBarView.setBounds({ x: 0, y: 0, width: mainWindow.getBounds().width, height: TITLE_BAR_HEIGHT });
-    titleBarView.setAutoResize({ width: true });    // 设置背景和主窗口一致
-    titleBarView.setBackgroundColor('#1a1a1a');
+    titleBarView.setAutoResize({ width: true });
+
+    // 设置背景透明
+    titleBarView.setBackgroundColor('#00000000');
 
     // 加载标题栏HTML
     titleBarView.webContents.loadFile(path.join(__dirname, 'titlebar.html'));
