@@ -35,10 +35,10 @@ contextBridge.exposeInMainWorld('settingsAPI', {
   getAppVersion: () => {
     try {
       const packageJson = require('./package.json');
-      return packageJson.version || '1.0.1';
+      return packageJson.version || '1.0.2';
     } catch (e) {
       console.error('设置窗口: 获取版本信息失败', e);
-      return '1.0.1';
+      return '1.0.2';
     }
   }
 });

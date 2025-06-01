@@ -42,7 +42,6 @@ contextBridge.exposeInMainWorld('titlebarAPI', {
   isAutoLaunch: async () => {
     return await ipcRenderer.invoke('get-auto-launch');
   },
-
   setAutoLaunch: (enable) => {
     ipcRenderer.send('set-auto-launch', enable);
   },
@@ -51,9 +50,9 @@ contextBridge.exposeInMainWorld('titlebarAPI', {
   getAppVersion: () => {
     try {
       const packageJson = require('./package.json');
-      return packageJson.version || '1.0.1';
+      return packageJson.version || '1.0.2';
     } catch (e) {
-      return '1.0.1';
+      return '1.0.2';
     }
   }
 });
