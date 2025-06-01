@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>应用设置</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #1a1a1a;
+      color: #fff;
+      padding: 20px;
+      user-select: none;
+    }
+
+    .settings-container {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .settings-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .settings-header h1 {
+      font-size: 24px;
+      font-weight: 300;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .settings-header p {
+      color: #888;
+      font-size: 14px;
+    }
+
+    .settings-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #333;
+    }
+
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+
+    .settings-label {
+      flex: 1;
+    }
+
+    .settings-label h3 {
+      font-size: 16px;
+      font-weight: 400;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+
+    .settings-label p {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.4;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+      margin-left: 20px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #444;
+      transition: 0.3s ease;
+      border-radius: 24px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: 0.3s ease;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    input:checked+.toggle-slider {
+      background-color: #4CAF50;
+    }
+
+    input:checked+.toggle-slider:before {
+      transform: translateX(24px);
+    }
+
+    .settings-footer {
+      margin-top: 40px;
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid #333;
+    }
+
+    .version-info {
+      color: #666;
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #388E3C;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background-color: #555;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: #666;
+      transform: translateY(-1px);
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="settings-container">
+    <div class="settings-header">
+      <h1>应用设置</h1>
+      <p>自定义您的音乐播放器体验</p>
+    </div>
+
+    <div class="settings-item">
+      <div class="settings-label">
+        <h3>开机自启动</h3>
+        <p>开机时自动启动UG音乐播放器</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="auto-launch">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-item">
+      <div class="settings-label">
+        <h3>关闭到托盘</h3>
+        <p>点击关闭按钮时最小化到系统托盘，而不是退出应用</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="close-to-tray">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-footer">
+      <div class="version-info">
+        版本 <span id="app-version">1.0.1</span>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-secondary" id="btn-cancel">取消</button>
+        <button class="btn btn-primary" id="btn-save">保存设置</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    设置已保存
+  </div>
+
+  <script>
+    let originalSettings = {};
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // 绑定事件监听器
+      document.getElementById('btn-save').addEventListener('click', saveSettings);
+      document.getElementById('btn-cancel').addEventListener('click', closeWindow);
+
+      // ESC键关闭窗口
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeWindow();
+        }
+      });
+
+      // 加载当前设置
+      loadSettings();
+      getAppVersion();
+    });
+
+    // 加载当前设置
+    async function loadSettings() {
+      try {
+        const autoLaunch = await window.settingsAPI.isAutoLaunch();
+        const closeToTray = await window.settingsAPI.isCloseToTray();
+
+        document.getElementById('auto-launch').checked = autoLaunch;
+        document.getElementById('close-to-tray').checked = closeToTray;
+
+        // 保存原始设置，用于取消时恢复
+        originalSettings = { autoLaunch, closeToTray };
+      } catch (error) {
+        console.error('加载设置失败:', error);
+      }
+    }
+
+    // 保存设置
+    function saveSettings() {
+      const autoLaunch = document.getElementById('auto-launch').checked;
+      const closeToTray = document.getElementById('close-to-tray').checked;
+
+      // 保存设置
+      window.settingsAPI.setAutoLaunch(autoLaunch);
+      window.settingsAPI.setCloseToTray(closeToTray);
+
+      // 显示保存成功提示
+      showToast('设置已保存');
+
+      // 延迟关闭窗口
+      setTimeout(() => {
+        closeWindow();
+      }, 1000);
+    }
+
+    // 关闭窗口
+    function closeWindow() {
+      window.settingsAPI.closeWindow();
+    }
+
+    // 获取应用版本
+    function getAppVersion() {
+      const version = window.settingsAPI.getAppVersion();
+      document.getElementById('app-version').textContent = version;
+    }
+
+    // 显示提示
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+  </script>
+</body>
+
+</html>

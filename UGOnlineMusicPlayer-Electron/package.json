@@ -23,6 +23,7 @@
     "electron": "^29.0.1",
     "electron-builder": "^24.9.1"
   },
+  "dependencies": {},
   "build": {
     "appId": "com.ug.musicplayer",
     "productName": "UG在线音乐播放器",
