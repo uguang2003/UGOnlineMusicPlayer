@@ -16,10 +16,14 @@ contextBridge.exposeInMainWorld('titlebarAPI', {
   closeWindow: () => {
     ipcRenderer.send('close-window');
   },
-
   // 显示设置窗口
   showSettings: () => {
     ipcRenderer.send('show-settings');
+  },
+
+  // 显示右键菜单
+  showContextMenu: () => {
+    ipcRenderer.send('show-context-menu');
   },
 
   // 获取窗口状态

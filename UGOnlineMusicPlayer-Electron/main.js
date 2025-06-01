@@ -14,7 +14,6 @@ let titleBarView;
 let contentView;
 let settingsWindow = null; // 设置窗口
 let tray = null;
-let isMaximized = false;
 const TITLE_BAR_HEIGHT = 32; // 标题栏高度
 
 // 配置文件路径
@@ -297,16 +296,22 @@ if (!gotTheLock) {
         .toggle-switch { -webkit-app-region: no-drag; }
       `);
     });
-  } function createWindow() {
+  }  // 创建主窗口
+  function createWindow() {
     // 创建浏览器窗口，使用无边框
     mainWindow = new BrowserWindow({
       width: 1280,
       height: 800,
+      minWidth: 800,
+      minHeight: 600,
       icon: path.join(__dirname, 'resources/icon.ico'),
       frame: false, // 无边框窗口
       show: false, // 初始时不显示，等内容加载完成后再显示
-      backgroundColor: '#00000000', // 完全透明背景
-      transparent: true, // 启用透明窗口
+      backgroundColor: '#1a1a1a', // 深色背景，和标题栏保持一致
+      transparent: false, // 禁用透明以确保最大化功能正常
+      resizable: true,
+      maximizable: true,
+      minimizable: true,
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
@@ -318,25 +323,21 @@ if (!gotTheLock) {
     });
 
     // 先创建内容视图
-    createContentView();
-
-    // 再创建标题栏视图（确保标题栏在上层）
+    createContentView();    // 再创建标题栏视图（确保标题栏在上层）
     createTitleBarView();
 
     // 调整视图布局
-    resizeViews();
+    resizeViews();// 窗口大小变化时，调整视图布局
+    mainWindow.on('resize', resizeViews);
 
-    // 窗口大小变化时，调整视图布局
-    mainWindow.on('resize', resizeViews);    // 窗口最大化/还原时，更新标题栏最大化按钮
+    // 窗口最大化/还原时，更新标题栏最大化按钮
     mainWindow.on('maximize', () => {
-      isMaximized = true;
       if (titleBarView && titleBarView.webContents) {
         titleBarView.webContents.send('window-state-changed', true);
       }
     });
 
     mainWindow.on('unmaximize', () => {
-      isMaximized = false;
       if (titleBarView && titleBarView.webContents) {
         titleBarView.webContents.send('window-state-changed', false);
       }
@@ -349,7 +350,9 @@ if (!gotTheLock) {
     });
 
     // 设置窗口标题
-    mainWindow.setTitle('UG在线音乐播放器');    // 监听关闭事件，根据配置决定是否隐藏窗口
+    mainWindow.setTitle('UG在线音乐播放器');
+
+    // 监听关闭事件，根据配置决定是否隐藏窗口
     mainWindow.on('close', (event) => {
       // 如果不是真正要退出应用，则根据配置决定行为
       if (!app.isQuitting) {
@@ -377,10 +380,11 @@ if (!gotTheLock) {
     mainWindow.on('closed', function () {
       // 取消引用 window 对象
       mainWindow = null;
-      titleBarView = null;
-      contentView = null;
+      titleBarView = null; contentView = null;
     });
-  }  // 创建标题栏视图
+  }
+
+  // 创建标题栏视图
   function createTitleBarView() {
     titleBarView = new BrowserView({
       webPreferences: {
@@ -395,10 +399,8 @@ if (!gotTheLock) {
 
     mainWindow.addBrowserView(titleBarView);
     titleBarView.setBounds({ x: 0, y: 0, width: mainWindow.getBounds().width, height: TITLE_BAR_HEIGHT });
-    titleBarView.setAutoResize({ width: true });
-
-    // 设置背景透明
-    titleBarView.setBackgroundColor('#00000000');
+    titleBarView.setAutoResize({ width: true });    // 设置背景和主窗口一致
+    titleBarView.setBackgroundColor('#1a1a1a');
 
     // 加载标题栏HTML
     titleBarView.webContents.loadFile(path.join(__dirname, 'titlebar.html'));
@@ -410,11 +412,10 @@ if (!gotTheLock) {
         const currentMaximized = mainWindow.isMaximized();
         titleBarView.webContents.send('window-state-changed', currentMaximized);
       }, 50);
-    });
-
-    // 阻止新窗口打开
+    });    // 阻止新窗口打开
     titleBarView.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   }
+
   // 创建内容视图
   function createContentView() {
     contentView = new BrowserView({
@@ -436,11 +437,13 @@ if (!gotTheLock) {
       y: 0, // 从顶部开始
       width: mainBounds.width,
       height: mainBounds.height // 全高度
-    });
+    });    // 自动调整大小
+    contentView.setAutoResize({ width: true, height: true });
 
-    // 自动调整大小
-    contentView.setAutoResize({ width: true, height: true });    // 加载主页面
-    contentView.webContents.loadURL('https://music.ug666.top');    // 注入CSS，优化透明标题栏的显示
+    // 加载主页面
+    contentView.webContents.loadURL('https://music.ug666.top');
+
+    // 注入CSS，优化透明标题栏的显示
     contentView.webContents.once('did-finish-load', () => {
       contentView.webContents.insertCSS(`
         /* 确保页面顶部内容不被标题栏遮挡 */
@@ -487,6 +490,7 @@ if (!gotTheLock) {
       }
     });
   }
+
   // 调整视图大小
   function resizeViews() {
     if (!mainWindow || !titleBarView || !contentView) return;
@@ -505,10 +509,10 @@ if (!gotTheLock) {
     titleBarView.setBounds({
       x: 0,
       y: 0,
-      width: mainBounds.width,
-      height: TITLE_BAR_HEIGHT
+      width: mainBounds.width, height: TITLE_BAR_HEIGHT
     });
   }
+
   // 当 Electron 完成初始化并准备创建浏览器窗口时调用这个方法
   app.whenReady().then(() => {
     // 设置CSP
@@ -519,12 +523,69 @@ if (!gotTheLock) {
           'Content-Security-Policy': ["default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https: http:; img-src 'self' data: https: http:;"]
         }
       });
-    });
-
-    // 移除顶部菜单栏
+    });    // 移除顶部菜单栏
     Menu.setApplicationMenu(null);
 
+    // 为窗口设置系统菜单（右键菜单）
+    const systemMenu = Menu.buildFromTemplate([
+      {
+        label: '还原',
+        enabled: false,
+        click: () => {
+          if (mainWindow && mainWindow.isMaximized()) {
+            mainWindow.unmaximize();
+          }
+        }
+      },
+      {
+        label: '移动',
+        enabled: false
+      },
+      {
+        label: '大小',
+        enabled: false
+      },
+      {
+        label: '最小化',
+        click: () => {
+          if (mainWindow) {
+            mainWindow.minimize();
+          }
+        }
+      },
+      {
+        label: '最大化',
+        click: () => {
+          if (mainWindow && !mainWindow.isMaximized()) {
+            mainWindow.maximize();
+          }
+        }
+      },
+      { type: 'separator' },
+      {
+        label: '关闭    Alt+F4',
+        click: () => {
+          if (mainWindow) {
+            mainWindow.close();
+          }
+        }
+      }
+    ]);    // 更新系统菜单状态
+    function updateSystemMenu() {
+      if (mainWindow) {
+        const isMaximized = mainWindow.isMaximized();
+        systemMenu.items[0].enabled = isMaximized; // 还原
+        systemMenu.items[4].enabled = !isMaximized; // 最大化
+      }
+    }
+
     createWindow();
+
+    // 在创建窗口后监听窗口状态变化以更新菜单
+    if (mainWindow) {
+      mainWindow.on('maximize', updateSystemMenu);
+      mainWindow.on('unmaximize', updateSystemMenu);
+    }
 
     // 创建系统托盘
     createTray();
@@ -537,12 +598,14 @@ if (!gotTheLock) {
     // 设置IPC处理函数
     setupIPC();
   });
-
   // 设置IPC通信
   function setupIPC() {
     // 窗口控制
     ipcMain.on('minimize-window', () => {
-      if (mainWindow) mainWindow.minimize();
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        console.log('最小化窗口');
+        mainWindow.minimize();
+      }
     }); ipcMain.on('maximize-window', () => {
       if (mainWindow) {
         if (mainWindow.isMaximized()) {
@@ -554,7 +617,7 @@ if (!gotTheLock) {
     });
 
     ipcMain.on('close-window', () => {
-      if (mainWindow) {
+      if (mainWindow && !mainWindow.isDestroyed()) {
         const config = getConfig();
         if (app.isQuitting || !config.closeToTray) {
           mainWindow.close();
@@ -562,16 +625,58 @@ if (!gotTheLock) {
           mainWindow.hide();
         }
       }
-    });    // 获取窗口状态
+    });
+
+    // 获取窗口状态
     ipcMain.handle('get-window-state', async () => {
       if (mainWindow) {
-        const state = mainWindow.isMaximized();
-        return state;
+        return mainWindow.isMaximized();
       }
       return false;
-    });// 设置对话框
+    });    // 设置对话框
     ipcMain.on('show-settings', () => {
       createSettingsWindow();
+    });
+
+    // 显示右键菜单
+    ipcMain.on('show-context-menu', (event) => {
+      if (mainWindow) {
+        const isMaximized = mainWindow.isMaximized();
+        const contextMenu = Menu.buildFromTemplate([
+          {
+            label: '还原',
+            enabled: isMaximized,
+            click: () => {
+              if (mainWindow.isMaximized()) {
+                mainWindow.unmaximize();
+              }
+            }
+          },
+          {
+            label: '最小化',
+            click: () => {
+              mainWindow.minimize();
+            }
+          },
+          {
+            label: '最大化',
+            enabled: !isMaximized,
+            click: () => {
+              if (!mainWindow.isMaximized()) {
+                mainWindow.maximize();
+              }
+            }
+          },
+          { type: 'separator' },
+          {
+            label: '关闭',
+            click: () => {
+              mainWindow.close();
+            }
+          }
+        ]);
+        contextMenu.popup();
+      }
     });
 
     // 关闭设置窗口
@@ -619,7 +724,9 @@ if (!gotTheLock) {
       } catch (error) {
         console.error('设置自启动失败:', error);
       }
-    });    // 设置关闭行为
+    });
+
+    // 设置关闭行为
     ipcMain.on('set-close-to-tray', (event, closeToTray) => {
       saveCloseToTrayConfig(closeToTray);
     });
