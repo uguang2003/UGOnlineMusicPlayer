@@ -32,6 +32,10 @@
       height: 32px;
       background: transparent;
       position: relative;
+      overflow: hidden;
+      /* 防止内容溢出 */
+      min-width: 300px;
+      /* 确保最小宽度 */
     }
 
     .titlebar-drag-region {
@@ -39,6 +43,16 @@
       height: 100%;
       display: flex;
       align-items: center;
+      min-width: 0;
+      /* 允许缩小 */
+    }
+
+    .titlebar-buttons {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      /* 按钮区域不缩小 */
+      height: 100%;
     }
 
     .app-icon {
@@ -182,20 +196,22 @@
       <div class="window-title">UG在线音乐播放器</div>
     </div>
 
-    <div class="titlebar-settings" id="btn-settings" title="设置">
-      <div class="icon-settings"></div>
-    </div>
+    <div class="titlebar-buttons">
+      <div class="titlebar-settings" id="btn-settings" title="设置">
+        <div class="icon-settings"></div>
+      </div>
 
-    <div class="titlebar-button" id="btn-min" title="最小化">
-      <div class="icon-min"></div>
-    </div>
+      <div class="titlebar-button" id="btn-min" title="最小化">
+        <div class="icon-min"></div>
+      </div>
 
-    <div class="titlebar-button" id="btn-max" title="最大化">
-      <div class="icon-max"></div>
-    </div>
+      <div class="titlebar-button" id="btn-max" title="最大化">
+        <div class="icon-max"></div>
+      </div>
 
-    <div class="titlebar-button" id="btn-close" title="关闭">
-      <div class="icon-close"></div>
+      <div class="titlebar-button" id="btn-close" title="关闭">
+        <div class="icon-close"></div>
+      </div>
     </div>
   </div>
   <script>

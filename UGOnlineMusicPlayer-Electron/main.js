@@ -328,16 +328,24 @@ if (!gotTheLock) {
 
     // 调整视图布局
     resizeViews();// 窗口大小变化时，调整视图布局
-    mainWindow.on('resize', resizeViews);
-
-    // 窗口最大化/还原时，更新标题栏最大化按钮
+    mainWindow.on('resize', resizeViews);    // 窗口最大化/还原时，更新标题栏最大化按钮
     mainWindow.on('maximize', () => {
+      // 强制调整视图尺寸
+      setTimeout(() => {
+        resizeViews();
+      }, 50);
+
       if (titleBarView && titleBarView.webContents) {
         titleBarView.webContents.send('window-state-changed', true);
       }
     });
 
     mainWindow.on('unmaximize', () => {
+      // 强制调整视图尺寸
+      setTimeout(() => {
+        resizeViews();
+      }, 50);
+
       if (titleBarView && titleBarView.webContents) {
         titleBarView.webContents.send('window-state-changed', false);
       }
@@ -396,7 +404,10 @@ if (!gotTheLock) {
         transparent: true
       }
     }); mainWindow.addBrowserView(titleBarView);
-    titleBarView.setBounds({ x: 0, y: 0, width: mainWindow.getBounds().width, height: TITLE_BAR_HEIGHT });
+
+    // 使用内部尺寸设置初始边界
+    const [width, height] = mainWindow.getContentSize();
+    titleBarView.setBounds({ x: 0, y: 0, width: width, height: TITLE_BAR_HEIGHT });
     titleBarView.setAutoResize({ width: true });
 
     // 设置背景透明
@@ -426,18 +437,16 @@ if (!gotTheLock) {
         webviewTag: true,
         preload: path.join(__dirname, 'preload.js')
       }
-    });
+    }); mainWindow.addBrowserView(contentView);
 
-    mainWindow.addBrowserView(contentView);
-
-    // 设置内容区域大小 - 从顶部开始显示，让背景能渗透到标题栏
-    const mainBounds = mainWindow.getBounds();
+    // 设置内容区域大小 - 使用内部尺寸
+    const [width, height] = mainWindow.getContentSize();
     contentView.setBounds({
       x: 0,
       y: 0, // 从顶部开始
-      width: mainBounds.width,
-      height: mainBounds.height // 全高度
-    });    // 自动调整大小
+      width: width,
+      height: height // 全高度
+    });// 自动调整大小
     contentView.setAutoResize({ width: true, height: true });
 
     // 加载主页面
@@ -490,26 +499,27 @@ if (!gotTheLock) {
       }
     });
   }
-
   // 调整视图大小
   function resizeViews() {
     if (!mainWindow || !titleBarView || !contentView) return;
 
-    const mainBounds = mainWindow.getBounds();
+    // 使用内部尺寸而不是getBounds，避免最大化时的边界问题
+    const [width, height] = mainWindow.getContentSize();
 
     // 先调整内容视图（全屏显示）
     contentView.setBounds({
       x: 0,
       y: 0,
-      width: mainBounds.width,
-      height: mainBounds.height
+      width: width,
+      height: height
     });
 
     // 再调整标题栏视图（覆盖在上层）
     titleBarView.setBounds({
       x: 0,
       y: 0,
-      width: mainBounds.width, height: TITLE_BAR_HEIGHT
+      width: width,
+      height: TITLE_BAR_HEIGHT
     });
   }
 
