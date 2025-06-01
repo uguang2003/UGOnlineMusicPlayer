@@ -90,13 +90,10 @@ if (!gotTheLock) {
   // 注册全局快捷键的函数 - 分离到独立函数，便于需要时重新注册
   function registerGlobalShortcuts() {
     // 先解除所有已注册的快捷键，防止重复注册
-    globalShortcut.unregisterAll();
-
-    // 下一首歌: Ctrl+Alt+右箭头
+    globalShortcut.unregisterAll();    // 下一首歌: Ctrl+Alt+右箭头
     globalShortcut.register('CommandOrControl+Alt+Right', () => {
-      if (mainWindow) {
-        // 直接点击下一首按钮，这是最可靠的方法
-        mainWindow.webContents.executeJavaScript(`
+      if (contentView) {
+        contentView.webContents.executeJavaScript(`
           (function() {
             const nextButton = document.querySelector('.btn-next');
             if (nextButton) {
@@ -104,18 +101,14 @@ if (!gotTheLock) {
               return true;
             }
             return false;
-          })();
-        `).then(result => {
-          // console.log('下一首按钮点击' + (result ? '成功' : '失败'));
+          })();        `).then(result => {
+          // 快捷键执行完成
         }).catch(err => console.error('执行JavaScript失败:', err));
       }
-    });
-
-    // 上一首歌: Ctrl+Alt+左箭头
+    });    // 上一首歌: Ctrl+Alt+左箭头
     globalShortcut.register('CommandOrControl+Alt+Left', () => {
-      if (mainWindow) {
-        // 直接点击上一首按钮
-        mainWindow.webContents.executeJavaScript(`
+      if (contentView) {
+        contentView.webContents.executeJavaScript(`
           (function() {
             const prevButton = document.querySelector('.btn-prev');
             if (prevButton) {
@@ -123,18 +116,14 @@ if (!gotTheLock) {
               return true;
             }
             return false;
-          })();
-        `).then(result => {
-          // console.log('上一首按钮点击' + (result ? '成功' : '失败'));
+          })();        `).then(result => {
+          // 快捷键执行完成
         }).catch(err => console.error('执行JavaScript失败:', err));
       }
-    });
-
-    // 播放/暂停: Ctrl+Alt+空格
+    });    // 播放/暂停: Ctrl+Alt+空格
     globalShortcut.register('CommandOrControl+Alt+Space', () => {
-      if (mainWindow) {
-        // 直接点击播放/暂停按钮
-        mainWindow.webContents.executeJavaScript(`
+      if (contentView) {
+        contentView.webContents.executeJavaScript(`
           (function() {
             const playButton = document.querySelector('.btn-play');
             if (playButton) {
@@ -142,9 +131,8 @@ if (!gotTheLock) {
               return true;
             }
             return false;
-          })();
-        `).then(result => {
-          // console.log('播放/暂停按钮点击' + (result ? '成功' : '失败'));
+          })();        `).then(result => {
+          // 快捷键执行完成
         }).catch(err => console.error('执行JavaScript失败:', err));
       }
     });
@@ -170,12 +158,11 @@ if (!gotTheLock) {
             mainWindow.focus();
           }
         }
-      },
-      {
+      }, {
         label: '播放/暂停(Ctrl+Alt+Space)',
         click: () => {
-          if (mainWindow) {
-            mainWindow.webContents.executeJavaScript(`
+          if (contentView) {
+            contentView.webContents.executeJavaScript(`
               (function() {
                 const playButton = document.querySelector('.btn-play');
                 if (playButton) {
@@ -191,8 +178,8 @@ if (!gotTheLock) {
       {
         label: '上一首(Ctrl+Alt+Left)',
         click: () => {
-          if (mainWindow) {
-            mainWindow.webContents.executeJavaScript(`
+          if (contentView) {
+            contentView.webContents.executeJavaScript(`
               (function() {
                 const prevButton = document.querySelector('.btn-prev');
                 if (prevButton) {
@@ -204,12 +191,11 @@ if (!gotTheLock) {
             `);
           }
         }
-      },
-      {
+      }, {
         label: '下一首 (Ctrl+Alt+Right)',
         click: () => {
-          if (mainWindow) {
-            mainWindow.webContents.executeJavaScript(`
+          if (contentView) {
+            contentView.webContents.executeJavaScript(`
               (function() {
                 const nextButton = document.querySelector('.btn-next');
                 if (nextButton) {
@@ -377,11 +363,11 @@ if (!gotTheLock) {
         return false;
       }
       return true;
-    });
-
-    // 当窗口准备好后显示
+    });    // 当窗口准备好后显示
     mainWindow.once('ready-to-show', () => {
       mainWindow.show();
+      mainWindow.focus(); // 确保窗口获得焦点
+      mainWindow.restore(); // 如果窗口被最小化，恢复它
     });
 
     // 当 window 被关闭，这个事件会被触发
@@ -590,6 +576,14 @@ if (!gotTheLock) {
     }
 
     createWindow();
+
+    // 确保窗口在创建后正常显示
+    setTimeout(() => {
+      if (mainWindow && !mainWindow.isVisible()) {
+        mainWindow.show();
+        mainWindow.focus();
+      }
+    }, 1000);
 
     // 在创建窗口后监听窗口状态变化以更新菜单
     if (mainWindow) {
