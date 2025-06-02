@@ -135,6 +135,12 @@ if (!gotTheLock) {
           // 快捷键执行完成
         }).catch(err => console.error('执行JavaScript失败:', err));
       }
+    });    // 开发者工具: Ctrl+Shift+I (备用快捷键)
+    globalShortcut.register('CommandOrControl+Shift+I', () => {
+      if (contentView) {
+        // 以分离窗口的方式打开开发者工具，避免被标题栏遮挡
+        contentView.webContents.openDevTools({ mode: 'detach' });
+      }
     });
   }
 
@@ -335,12 +341,6 @@ if (!gotTheLock) {
       if (titleBarView && titleBarView.webContents) {
         titleBarView.webContents.send('window-state-changed', false);
       }
-    });// 允许打开开发者工具
-    mainWindow.webContents.on('before-input-event', (event, input) => {
-      if (input.key.toLowerCase() === 'f12') {
-        contentView.webContents.openDevTools();
-        event.preventDefault();
-      }
     });
 
     // 设置窗口标题
@@ -471,6 +471,13 @@ if (!gotTheLock) {
           height: calc(100% + ${TITLE_BAR_HEIGHT}px) !important;
         }
       `);
+    });    // 添加F12开发者工具快捷键支持
+    contentView.webContents.on('before-input-event', (event, input) => {
+      if (input.key.toLowerCase() === 'f12') {
+        // 以分离窗口的方式打开开发者工具，避免被标题栏遮挡
+        contentView.webContents.openDevTools({ mode: 'detach' });
+        event.preventDefault();
+      }
     });
 
     // 处理页面内导航
