@@ -1,25 +1,25 @@
 /**
- * UG音乐播放器 - Android WebView 全面输入修复
- * 集成基础输入修复、中文输入修复和搜狗输入法专用修复
+ * UG音乐播放�?- Android WebView 全面输入修复
+ * 集成基础输入修复、中文输入修复和搜狗输入法专用修�?
  * 解决安卓设备上WebView输入问题
  */
 (function () {
-  // 只在Android设备上运行
+  // 只在Android设备上运�?
   if (!/android/i.test(navigator.userAgent)) return;
 
-  console.log('[UG InputFix] 初始化全面输入修复...');
+  // ��־��ɾ��
 
   // 等待页面加载完成
   document.addEventListener('DOMContentLoaded', initInputFixes);
 
-  // 如果DOM已经加载完成，立即执行
+  // 如果DOM已经加载完成，立即执�?
   if (document.readyState === 'interactive' || document.readyState === 'complete') {
     initInputFixes();
   }
 
-  // 初始化所有输入修复
+  // 初始化所有输入修�?
   function initInputFixes() {
-    console.log('[UG InputFix] 应用全面输入修复');
+    // ��־��ɾ��
 
     // 添加必要的元数据标签
     addMetaTags();
@@ -42,7 +42,7 @@
             applyFixToDocument(iframe.contentDocument);
           }
         } catch (e) {
-          console.error('[UG InputFix] 无法访问iframe内容:', e);
+          // ������־��ɾ��
         }
       });
     });
@@ -52,12 +52,12 @@
       if (e.target &&
         (e.target.getAttribute('data-action') === 'search' ||
           (e.target.closest && e.target.closest('[data-action="search"]')))) {
-        console.log('[UG InputFix] 检测到搜索按钮点击');
+        // ��־��ɾ��
         setTimeout(fixAllInputElements, 300);
       }
     }, true);
 
-    // 特别处理Layer弹窗中的输入框
+    // 特别处理Layer弹窗中的输入�?
     if (window.layer && window.layer.open) {
       const origOpen = window.layer.open;
       window.layer.open = function () {
@@ -67,7 +67,7 @@
         setTimeout(function () {
           document.querySelectorAll('.layui-layer input').forEach(input => {
             if (input.type === 'password') {
-              // 保持数字键盘但移除限制模式
+              // 保持数字键盘但移除限制模�?
               input.setAttribute('inputmode', 'numeric');
               if (input.hasAttribute('pattern')) {
                 input.removeAttribute('pattern');
@@ -81,7 +81,7 @@
     }
   }
 
-  // 添加元数据标签
+  // 添加元数据标�?
   function addMetaTags() {
     // 确保页面使用正确的字符集
     let charset = document.querySelector('meta[charset]');
@@ -94,7 +94,7 @@
     // 确保视口设置正确
     let viewport = document.querySelector('meta[name="viewport"]');
     if (viewport) {
-      // 修改现有视口设置，不要使用user-scalable=no，会影响中文输入法
+      // 修改现有视口设置，不要使用user-scalable=no，会影响中文输入�?
       viewport.setAttribute('content',
         'width=device-width, initial-scale=1.0, maximum-scale=1.0');
     }
@@ -118,7 +118,7 @@
         font-family: sans-serif !important;
       }
       
-      /* 搜索框样式 */
+      /* 搜索框样�?*/
       #search-area input,
       .searchBox input,
       input[type="search"] {
@@ -134,7 +134,7 @@
         background-color: rgba(0, 123, 255, 0.2) !important;
       }
       
-      /* 确保可编辑区域正常工作 */
+      /* 确保可编辑区域正常工�?*/
       [contenteditable=true] {
         -webkit-user-select: text !important; 
         user-select: text !important;
@@ -161,13 +161,13 @@
     const observer = new MutationObserver(function (mutations) {
       let inputFound = false;
 
-      // 检查每个变化
+      // 检查每个变�?
       mutations.forEach(function (mutation) {
         if (mutation.addedNodes && mutation.addedNodes.length) {
           for (let i = 0; i < mutation.addedNodes.length; i++) {
             const node = mutation.addedNodes[i];
 
-            // 只处理元素节点
+            // 只处理元素节�?
             if (node.nodeType === 1) {
               if (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA' ||
                 (node.querySelectorAll && (
@@ -181,20 +181,20 @@
         }
       });
 
-      // 如果发现了输入框，执行修复
+      // 如果发现了输入框，执行修�?
       if (inputFound) {
         fixAllInputElements();
       }
     });
 
-    // 监听整个文档的变化
+    // 监听整个文档的变�?
     observer.observe(document.documentElement, {
       childList: true,
       subtree: true
     });
   }
 
-  // 修复文档中的所有输入元素
+  // 修复文档中的所有输入元�?
   function applyFixToDocument(doc) {
     if (!doc || !doc.querySelectorAll) return;
 
@@ -216,9 +216,9 @@
     doc.querySelectorAll('input, textarea, [contenteditable=true]').forEach(fixSingleInput);
   }
 
-  // 修复所有输入元素
+  // 修复所有输入元�?
   function fixAllInputElements() {
-    console.log('[UG InputFix] 修复所有输入元素...');
+    // ��־��ɾ��
     document.querySelectorAll('input, textarea, [contenteditable=true]').forEach(fixSingleInput);
   }
 
@@ -226,18 +226,18 @@
   function fixSingleInput(input) {
     if (!input) return;
 
-    // 密码字段需要特殊处理
+    // 密码字段需要特殊处�?
     const isPassword = input.type === 'password' || input.classList.contains('password') || input.id === 'cache-key';
     if (isPassword) {
       // 对于密码相关输入保持数字键盘
       input.setAttribute('inputmode', 'numeric');
-      return; // 不进行其他修改
+      return; // 不进行其他修�?
     }
 
-    // 设置语言为中文
+    // 设置语言为中�?
     input.lang = 'zh-CN';
 
-    // 清除可能阻碍输入法的属性
+    // 清除可能阻碍输入法的属�?
     if (input.hasAttribute('pattern')) {
       input.removeAttribute('pattern');
     }
@@ -258,7 +258,7 @@
       input.removeAttribute('spellcheck');
     }
 
-    // 如果是输入模式为数字的非密码字段，改为文本输入
+    // 如果是输入模式为数字的非密码字段，改为文本输�?
     if (input.getAttribute('inputmode') === 'numeric') {
       input.setAttribute('inputmode', 'text');
     }
@@ -273,13 +273,13 @@
     // 使用克隆节点替换原节点，清除可能的事件监听器
     const newInput = input.cloneNode(true);
     if (input.parentNode) {
-      // 保存当前值
+      // 保存当前�?
       const currentValue = input.value || '';
 
       // 替换节点
       input.parentNode.replaceChild(newInput, input);
 
-      // 恢复值
+      // 恢复�?
       if (newInput.tagName.toLowerCase() !== 'div') { // 不是contenteditable元素
         newInput.value = currentValue;
       }
@@ -298,16 +298,16 @@
 
     // 中文输入事件处理
     newInput.addEventListener('compositionstart', function (e) {
-      console.log('[UG InputFix] 中文输入开始');
+      // ��־��ɾ��
       e.target.classList.add('composing');
     });
 
     newInput.addEventListener('compositionend', function (e) {
-      console.log('[UG InputFix] 中文输入结束');
+      // ��־��ɾ��
       e.target.classList.remove('composing');
     });
 
-    // 阻止冒泡，防止点击输入框导致其他事件被触发
+    // 阻止冒泡，防止点击输入框导致其他事件被触�?
     newInput.addEventListener('touchstart', function (e) {
       e.stopPropagation();
     }, true);
@@ -320,7 +320,7 @@
     return newInput;
   }
 
-  // 添加延迟聚焦逻辑，帮助某些设备上的输入法激活
+  // 添加延迟聚焦逻辑，帮助某些设备上的输入法激�?
   window.focusInput = function (inputId) {
     setTimeout(function () {
       const input = document.getElementById(inputId);

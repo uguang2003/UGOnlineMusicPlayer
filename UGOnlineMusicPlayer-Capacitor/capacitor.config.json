@@ -32,16 +32,17 @@
       "setUseWideViewPort": true,
       "setLoadWithOverviewMode": true,
       "setSupportZoom": false,
-      "setDesktopMode": false
+      "setDesktopMode": false,
+      "setMixedContentMode": 0,
+      "setMediaPlaybackRequiresUserGesture": false,
+      "setDomStorageEnabled": true,
+      "setDatabaseEnabled": true,
+      "setAllowContentAccess": true
     },
-    "plugins": {
-      "LocalNotifications": {
-        "smallIcon": "ic_stat_notification",
-        "iconColor": "#FF4081",
-        "sound": "none",
-        "foreground": true,
-        "removeAllDeliveredNotificationsOnStart": false
-      }
-    }
+    "permissions": [
+      "android.permission.WAKE_LOCK",
+      "android.permission.FOREGROUND_SERVICE",
+      "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+    ]
   }
 }

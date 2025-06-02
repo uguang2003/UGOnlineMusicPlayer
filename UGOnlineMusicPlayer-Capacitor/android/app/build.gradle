@@ -2,7 +2,8 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "com.ug666.musicplayer"
-    compileSdkVersion rootProject.ext.compileSdkVersion    defaultConfig {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    defaultConfig {
         applicationId "com.ug666.musicplayer"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion

@@ -225,32 +225,16 @@
     <h2>网络连接已断开</h2>
     <p>请检查您的网络连接并重试</p>
     <button id="retry-button" class="retry-button">重试</button>
-  </div>
-  <!-- 错误状态 -->
+  </div> <!-- 错误状态 -->
   <div id="error-screen" class="error-screen">
     <div class="error-icon">⚠️</div>
     <h2>加载失败</h2>
     <p>无法加载UG音乐播放器</p>
     <button id="error-retry-button" class="retry-button">重试</button>
-  </div>
-
-  <!-- 媒体测试浮动按钮 -->
-  <div id="media-test-buttons"
-    style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: rgba(0,0,0,0.7); border-radius: 10px; padding: 10px;">
-    <button id="test-notification-btn"
-      style="background: #FF4081; color: white; border: none; padding: 8px 15px; margin: 5px; border-radius: 5px;">测试通知</button>
-    <button id="test-media-play-btn"
-      style="background: #2196F3; color: white; border: none; padding: 8px 15px; margin: 5px; border-radius: 5px;">播放测试</button>
-  </div>
-
-  <!-- 先加载核心脚本 -->
-  <script src="js/bridge.js"></script>
+  </div> <!-- 加载简化的脚本 -->
   <script src="js/app.js"></script>
+  <script src="js/background-autoplay.js"></script>
   <script src="js/input-combined-fix.js"></script>
-  <!-- 媒体控制通知栏支持 -->
-  <script src="js/media-controls.js"></script>
-  <!-- 媒体测试脚本 -->
-  <script src="js/media-test.js"></script>
 </body>
 
 </html>
