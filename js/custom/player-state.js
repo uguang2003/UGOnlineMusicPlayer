@@ -18,7 +18,6 @@ function savePlayerState() {
   // 获取当前歌曲
   var currentMusic = musicList[1].item[rem.playid];
   if (!currentMusic) return;
-
   // 保存播放信息
   var playerState = {
     playlist: rem.playlist,
@@ -27,6 +26,7 @@ function savePlayerState() {
     duration: rem.audio[0] ? rem.audio[0].duration : 0,
     paused: rem.paused,
     volume: volume_bar ? volume_bar.percent : mkPlayer.volume,
+    order: rem.order || 2, // 保存播放顺序状态（默认为列表循环）
     musicInfo: currentMusic,
     timestamp: new Date().getTime()
   };
@@ -51,12 +51,19 @@ function restorePlayerState() {
   if (playerState && playerState.musicInfo) {
     // 设置播放列表和ID
     rem.playlist = playerState.playlist || 1;
-    rem.playid = playerState.playid || 0;
-
-    // 恢复音量设置
+    rem.playid = playerState.playid || 0;    // 恢复音量设置
     if (playerState.volume !== undefined && volume_bar) {
       volume_bar.goto(playerState.volume);
       if (playerState.volume === 0) $(".btn-quiet").addClass("btn-state-quiet"); // 添加静音样式
+    }
+
+    // 恢复播放顺序设置
+    if (playerState.order !== undefined) {
+      rem.order = playerState.order;
+      updateOrderButtonUI(rem.order); // 更新播放顺序按钮的UI
+      if (mkPlayer.debug) {
+        console.log('[UG Music Player] 恢复播放顺序状态:', rem.order);
+      }
     }
 
     // 如果是暂停状态或者不自动播放
@@ -135,6 +142,31 @@ function restorePlayerState() {
       // 无论如何都高亮当前歌曲
       setTimeout(highlightNowPlaying, 800);
     }
+  }
+}
+
+// 更新播放顺序按钮的UI显示
+function updateOrderButtonUI(order) {
+  var orderDiv = $(".btn-order");
+  orderDiv.removeClass(); // 清除所有class
+
+  switch (order) {
+    case 1: // 单曲循环
+      orderDiv.addClass("player-btn btn-order btn-order-single");
+      orderDiv.attr("title", "单曲循环");
+      break;
+    case 2: // 列表循环
+      orderDiv.addClass("player-btn btn-order btn-order-list");
+      orderDiv.attr("title", "列表循环");
+      break;
+    case 3: // 随机播放
+      orderDiv.addClass("player-btn btn-order btn-order-random");
+      orderDiv.attr("title", "随机播放");
+      break;
+    default: // 默认为列表循环
+      orderDiv.addClass("player-btn btn-order btn-order-list");
+      orderDiv.attr("title", "列表循环");
+      break;
   }
 }
 

@@ -384,11 +384,13 @@ $(function () {
     // 播放、暂停按钮的处理
     $(".btn-play").click(function () {
         pause();
-    });
-
-    // 循环顺序的处理
+    });    // 循环顺序的处理
     $(".btn-order").click(function () {
         orderChange();
+        // 保存播放状态，包括新的播放顺序
+        if (typeof savePlayerState === 'function') {
+            savePlayerState();
+        }
     });
 
     // 上一首歌
@@ -924,13 +926,34 @@ function loadList(list) {
         } else {
             console.log('加载播放列表 ' + list + ' - ' + musicList[list].name);
         }
-    }
-
-    rem.mainList.html('');   // 清空列表中原有的元素
+    } rem.mainList.html('');   // 清空列表中原有的元素
     addListhead();      // 向列表中加入列表头
 
     if (musicList[list].item.length == 0) {
-        addListbar("nodata");   // 列表中没有数据
+        // 如果是正在播放列表(list==1)且为空，则加载默认歌单的内容
+        if (list == 1 && mkPlayer.defaultlist && musicList[mkPlayer.defaultlist] && musicList[mkPlayer.defaultlist].item.length > 0) {
+            // 将默认歌单的歌曲复制到正在播放列表
+            musicList[1].item = musicList[mkPlayer.defaultlist].item.slice(); // 使用slice()创建副本
+
+            // 显示默认歌单的歌曲
+            for (var i = 0; i < musicList[1].item.length; i++) {
+                var tmpMusic = musicList[1].item[i];
+                addItem(i + 1, tmpMusic.name, tmpMusic.artist, tmpMusic.album);
+                // 清空URL以便重新加载
+                tmpMusic.url = "";
+            }
+
+            // 保存正在播放列表
+            playerSavedata('playing', musicList[1].item);
+
+            // 添加提示信息，告知用户当前显示的是默认歌单
+            addListbar("defaultlist");
+
+            // 添加清空列表按钮
+            addListbar("clear");
+        } else {
+            addListbar("nodata");   // 列表中没有数据
+        }
     } else {
 
         // 逐项添加数据
@@ -1011,10 +1034,12 @@ function addListbar(types) {
 
         case "loading": // 加载中
             html = '<div class="list-item text-center" id="list-foot">播放列表加载中...</div>';
+            break; case "nodata":  // 列表中没有内容
+            html = '<div class="list-item text-center" id="list-foot">可能是个假列表，什么也没有</div>';
             break;
 
-        case "nodata":  // 列表中没有内容
-            html = '<div class="list-item text-center" id="list-foot">可能是个假列表，什么也没有</div>';
+        case "defaultlist":  // 正在播放列表为空，显示默认歌单内容
+            html = '<div class="list-item text-center" id="list-foot">正在播放列表为空，显示默认歌单 - ' + (musicList[mkPlayer.defaultlist] ? musicList[mkPlayer.defaultlist].name : '热门歌曲') + '</div>';
             break;
 
         case "clear":   // 清空列表
