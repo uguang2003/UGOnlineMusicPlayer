@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var elements = {
     appFrame: document.getElementById('app-frame'),
     loader: document.getElementById('loader'),
+    loadingProgress: document.getElementById('loading-progress'),
     offlineScreen: document.getElementById('offline-screen'),
     errorScreen: document.getElementById('error-screen'),
     retryButton: document.getElementById('retry-button'),
@@ -20,16 +21,15 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   var state = {
-    isLoaded: false
+    isLoaded: false,
+    progressInterval: null
   };
 
   // 初始化
   function init() {
-    console.log('🎵 初始化UG音乐播放器...');
     setupEventListeners();
     loadApp();
   }
-
   // 设置事件监听器
   function setupEventListeners() {
     // 重试按钮
@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 网络状态监听
     window.addEventListener('online', function () {
-      console.log('📶 网络已连接');
       if (!state.isLoaded) {
         hideOfflineScreen();
         loadApp();
@@ -57,38 +56,58 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     window.addEventListener('offline', function () {
-      console.log('📶 网络已断开');
       showOfflineScreen();
     });
   }
-
   // 加载应用
   function loadApp() {
-    console.log('🚀 开始加载UG音乐播放器...');
     showLoader();
+    startProgressAnimation();
 
     if (elements.appFrame) {
       elements.appFrame.src = CONFIG.MUSIC_URL;
 
       elements.appFrame.onload = function () {
-        console.log('✅ 应用加载完成');
+        stopProgressAnimation();
         hideLoader();
         showApp();
         state.isLoaded = true;
       };
 
       elements.appFrame.onerror = function () {
-        console.error('❌ 应用加载失败');
+        stopProgressAnimation();
         showErrorScreen();
       };
 
       // 加载超时处理
       setTimeout(function () {
         if (!state.isLoaded) {
-          console.warn('⚠️ 应用加载超时');
+          stopProgressAnimation();
           showErrorScreen();
         }
       }, CONFIG.LOADING_TIMEOUT);
+    }
+  }
+
+  // 进度条动画
+  function startProgressAnimation() {
+    if (elements.loadingProgress) {
+      var progress = 0;
+      state.progressInterval = setInterval(function () {
+        progress += Math.random() * 15;
+        if (progress > 90) progress = 90;
+        elements.loadingProgress.style.width = progress + '%';
+      }, 200);
+    }
+  }
+
+  function stopProgressAnimation() {
+    if (state.progressInterval) {
+      clearInterval(state.progressInterval);
+      state.progressInterval = null;
+    }
+    if (elements.loadingProgress) {
+      elements.loadingProgress.style.width = '100%';
     }
   }
 

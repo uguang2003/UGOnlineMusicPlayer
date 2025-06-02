@@ -130,9 +130,20 @@
     .progress-bar {
       height: 100%;
       width: 0%;
-      background-color: #1db954;
+      background: linear-gradient(90deg, #1db954, #1ed760);
       border-radius: 4px;
-      transition: width 0.3s ease;
+      transition: width 0.2s ease-out;
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -200px 0;
+      }
+
+      100% {
+        background-position: 200px 0;
+      }
     }
 
     .offline-screen {
