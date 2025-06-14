@@ -71,16 +71,18 @@ if(defined('CACHE_PATH') && !is_dir(CACHE_PATH)) createFolders(CACHE_PATH);
 
 $types = getParam('types');
 switch($types)   // 根据请求的 Api，执行相应操作
-{
-    case 'url':   // 获取歌曲链接
+{    case 'url':   // 获取歌曲链接
         $id = getParam('id');  // 歌曲ID
         $use_local = getParam('use_local', '0');  // 是否强制使用本地源
         
-        // 尝试使用第三方 API
+        // 优先尝试使用第三方 API 获取歌曲URL
         $thirdPartyData = requestThirdPartyApi('url', $id, $source, $use_local);
         
         if($thirdPartyData !== false) {
             // 第三方API成功获取数据
+            if (defined('DEBUG') && DEBUG === true) {
+                error_log("第三方API成功获取音乐URL，歌曲ID: " . $id);
+            }
             echojson($thirdPartyData);
         } else {
             // 第三方API失败，使用本地API
@@ -660,7 +662,7 @@ function getParam($key, $default='')
 }
 
 /**
- * 请求第三方 meting 接口
+ * 请求第三方 meting 接口（仅用于歌曲URL获取）
  * @param $type 请求类型
  * @param $id ID
  * @param $source 音乐源
@@ -670,24 +672,35 @@ function getParam($key, $default='')
 function requestThirdPartyApi($type, $id, $source = 'netease', $use_local = 0) {
     // 如果明确要使用本地源，则直接返回false让系统使用本地API
     if ($use_local == 1) {
+        if (defined('DEBUG') && DEBUG === true) {
+            error_log("强制使用本地源，跳过第三方API");
+        }
         return false;
     }
     
-    // 只有URL类型请求才使用第三方API，其他类型（搜索、歌词、评论等）都使用本地API
+    // 只有URL类型请求才使用第三方API，其他类型（歌词、评论、搜索等）都使用本地API
     if ($type != 'url') {
+        if (defined('DEBUG') && DEBUG === true) {
+            error_log("非URL类型请求，跳过第三方API: " . $type);
+        }
         return false;
     }
 
     // 构建第三方API请求URL
     $apiUrl = "https://api.qijieya.cn/meting/?server={$source}&type={$type}&id={$id}";
+    
+    if (defined('DEBUG') && DEBUG === true) {
+        error_log("尝试第三方API: " . $apiUrl);
+    }
 
     // 使用curl请求第三方接口
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 5); // 5秒超时
+    curl_setopt($ch, CURLOPT_TIMEOUT, 8); // 8秒超时，给第三方API更多时间
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
     
     // 处理URL类型请求
     return requestThirdPartyMusicUrl($ch, $apiUrl);
@@ -702,16 +715,21 @@ function requestThirdPartyApi($type, $id, $source = 'netease', $use_local = 0) {
 function requestThirdPartyMusicUrl($ch, $apiUrl) {
     // 先进行头部请求，检查内容类型
     curl_setopt($ch, CURLOPT_NOBODY, true);
-    curl_exec($ch);
+    curl_setopt($ch, CURLOPT_HEADER, true);
+    $headResult = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
     $contentLength = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+    
+    if (defined('DEBUG') && DEBUG === true) {
+        error_log("第三方API头部检查 - HTTP状态码: {$httpCode}, 内容类型: {$contentType}, 内容长度: {$contentLength}");
+    }
     
     // 判断是否为成功的HTTP响应
     if ($httpCode < 200 || $httpCode >= 400) {
         curl_close($ch);
         if (defined('DEBUG') && DEBUG === true) {
-            error_log("第三方APIHTTP请求失败，状态码: " . $httpCode);
+            error_log("第三方API HTTP请求失败，状态码: " . $httpCode);
         }
         return false;
     }
@@ -725,7 +743,7 @@ function requestThirdPartyMusicUrl($ch, $apiUrl) {
     );
 
     // 如果内容长度为0或太小，可能不是有效的音频文件
-    if ($contentLength <= 1000 && $isAudioOrDoc) {
+    if ($contentLength !== -1 && $contentLength <= 1000 && $isAudioOrDoc) {
         curl_close($ch);
         if (defined('DEBUG') && DEBUG === true) {
             error_log("第三方API返回的内容长度太小，不可能是有效的音频文件: " . $contentLength);
@@ -734,33 +752,48 @@ function requestThirdPartyMusicUrl($ch, $apiUrl) {
     }
     
     // 根据内容类型判断处理方式
-    if ($isAudioOrDoc && $contentLength > 1000) {
+    if ($isAudioOrDoc && ($contentLength > 1000 || $contentLength === -1)) {
         // 是音频文件或二进制流，直接使用URL
         $br = estimateBitrate($contentType, $contentLength);
         curl_close($ch);
         
+        if (defined('DEBUG') && DEBUG === true) {
+            error_log("第三方API返回音频流，直接使用URL");
+        }
+        
         // 构建并返回JSON格式的音频URL数据
         return json_encode([
             'url' => $apiUrl,
-            'size' => $contentLength,
+            'size' => $contentLength > 0 ? $contentLength : 0,
             'br' => $br,
             'type' => 'audio'
         ]);
-    } else if (strpos($contentType, 'application/json') !== false) {
-        // 是JSON响应，需要获取并解析内容
+    } else if (strpos($contentType, 'application/json') !== false || strpos($contentType, 'text/') !== false) {
+        // 是JSON响应或文本响应，需要获取并解析内容
         curl_setopt($ch, CURLOPT_NOBODY, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, false);
         $result = curl_exec($ch);
+        $curl_error = curl_error($ch);
         curl_close($ch);
         
-        // 解析JSON响应
+        if ($result === false) {
+            if (defined('DEBUG') && DEBUG === true) {
+                error_log("第三方API CURL请求失败: " . $curl_error);
+            }
+            return false;
+        }
+        
+        // 尝试解析JSON响应
         $jsonData = json_decode($result, true);
         if (is_array($jsonData) && isset($jsonData['url']) && !empty($jsonData['url'])) {
+            if (defined('DEBUG') && DEBUG === true) {
+                error_log("第三方API返回有效JSON数据");
+            }
             return $result; // 返回JSON字符串
         } else {
             if (defined('DEBUG') && DEBUG === true) {
-                error_log("第三方API返回的JSON不包含有效的URL: " . $result);
+                error_log("第三方API返回的JSON不包含有效的URL: " . substr($result, 0, 200));
             }
             return false;
         }
