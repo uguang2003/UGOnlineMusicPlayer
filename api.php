@@ -687,7 +687,8 @@ function requestThirdPartyApi($type, $id, $source = 'netease', $use_local = 0) {
     }
 
     // 构建第三方API请求URL
-    $apiUrl = "https://api.qijieya.cn/meting/?server={$source}&type={$type}&id={$id}";
+    // $apiUrl = "https://api.qijieya.cn/meting/?server={$source}&type={$type}&id={$id}";
+    $apiUrl = "https://api.obdo.cc/meting/?server={$source}&type={$type}&id={$id}";
     
     if (defined('DEBUG') && DEBUG === true) {
         error_log("尝试第三方API: " . $apiUrl);
@@ -703,7 +704,14 @@ function requestThirdPartyApi($type, $id, $source = 'netease', $use_local = 0) {
     curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
     
     // 处理URL类型请求
-    return requestThirdPartyMusicUrl($ch, $apiUrl);
+    // return requestThirdPartyMusicUrl($ch, $apiUrl);
+
+    return json_encode([
+            'url' => $apiUrl,
+            'size' => 0,
+            'br' => 0,
+            'type' => 'audio'
+        ]);
 }
 
 /**
