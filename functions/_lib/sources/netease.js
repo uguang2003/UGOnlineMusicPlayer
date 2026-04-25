@@ -181,32 +181,35 @@ export async function getPlaylist(id) {
 }
 
 /**
- * 搜索歌曲（weapi 加密接口）
- * 等价于 Meting.php search() (case 'netease')
+ * 搜索歌曲 - 走老 API (不加密、GET)
+ * 之前用 weapi /api/cloudsearch/pc 在 EdgeOne 边缘 IP 上易被网易云风控
+ * 改用老接口 /api/search/get，response.result.songs[i] 字段是 artists/album
+ * format.js 的 formatNeteaseSong 已支持 ar/artists 双兼容，前端无需改动
  */
 export async function search(keyword, count = 20, page = 1) {
-  const data = await weapiRequest('/api/cloudsearch/pc', {
-    s: keyword,
-    type: 1,
-    limit: count,
-    total: 'true',
-    offset: (page - 1) * count,
+  const data = await oldApiRequest('/api/search/get', {
+    params: {
+      s: keyword,
+      type: 1,
+      limit: count,
+      offset: (page - 1) * count,
+    },
   });
-  return (data.result && data.result.songs) || [];
+  return (data && data.result && data.result.songs) || [];
 }
 
 /**
- * 获取热评 + 普通评论
- * 等价于 Meting.php comments() (case 'netease')
+ * 获取热评 + 普通评论 - 走老 API (不加密)
+ * 老接口 /api/v1/resource/comments/R_SO_4_{id} 返回字段 hotComments / comments / total
+ * 前端 functions.js:583-597 直接读这些字段，兼容
  */
 export async function getComments(id, count = 50, page = 1) {
-  const data = await weapiRequest(`/api/v1/resource/comments/R_SO_4_${id}`, {
-    rid: `R_SO_4_${id}`,
-    offset: (page - 1) * count,
-    total: 'true',
-    limit: count,
+  return await oldApiRequest(`/api/v1/resource/comments/R_SO_4_${id}`, {
+    params: {
+      limit: count,
+      offset: (page - 1) * count,
+    },
   });
-  return data;
 }
 
 // ==================== 老 API（不加密） ====================
