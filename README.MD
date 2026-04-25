@@ -6,6 +6,45 @@
 
 ## 📋 版本更新
 
+### V2.0.0 (2026.04.25) — 🚀 EdgeOne Pages 重构
+
+#### 重大架构变更
+
+- **后端从 PHP 迁移到 EdgeOne Pages Functions（JavaScript 边缘函数）**
+  - 不再需要服务器，部署到腾讯云 EdgeOne 完全免费
+  - 国内访问速度提升、不受 PHP-FPM 进程数限制
+  - 100 万次/月免费调用额度对个人项目绰绰有余
+- **加密内核纯 JS 重写**
+  - 网易云 weapi: AES-128-CBC 双层 + RSA-2048 (BigInt 模幂实现)，与 PHP 100% 等价（用 `Meting.php:1114` 的硬编码 vector 验证）
+  - 百度: AES-128-CBC（Web Crypto API）
+  - 酷狗: 纯 JS MD5（RFC 1321 标准实现，因 Web Crypto 已弃用 MD5）
+- **音源全部支持**: netease / tencent / kugou / baidu / kuwo（xiami 已 2021 停服，占位）
+- **117 个单元/集成测试全部通过**
+
+#### 砍掉的功能
+
+- `cache/` 文件缓存（边缘函数无文件系统）→ 走浏览器 HTTP 缓存
+- `temp/` 服务器缓存下载 → 改为前端直拉
+- PHP `$_SESSION` → 改用前端 `localStorage`（项目原本就在用）
+- `cron` 定时清理 → 不再需要
+
+#### 部署方法
+
+详见 [DEPLOY.md](DEPLOY.md)。简单说：推 Git 到 EdgeOne Pages → 一键部署 → 完事。
+
+#### 文件结构
+
+```
+functions/                 # 边缘函数后端
+├── api.js                 # PHP 兼容入口 (/api?types=xxx)
+├── api/*.js               # 11 个 RESTful endpoint (/api/url 等)
+└── _lib/                  # 加密 / 6 源 fetcher / 工具
+dev-server.mjs             # 零依赖本地 dev server (node 直跑)
+legacy-php/                # 原 PHP 代码归档（可参考，不部署）
+```
+
+---
+
 ### V1.0.2 (2025.06.02)
 
 #### 🎯 主要改进
