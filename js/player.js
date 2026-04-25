@@ -6,7 +6,7 @@
  *************************************************/
 // 播放器功能配置
 var mkPlayer = {
-    api: "api.php", // api地址
+    api: "/api", // api地址（EdgeOne Pages Functions 入口；本地开发可改回 'api.php'）
     loadcount: 20,  // 搜索结果一次加载多少条
     comments: true, // 是否开启歌曲评论功能
     method: "POST",     // 数据传输方式(POST/GET)
