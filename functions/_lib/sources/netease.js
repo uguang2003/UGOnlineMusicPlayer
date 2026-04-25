@@ -7,6 +7,7 @@
  */
 
 import { neteaseEncrypt } from '../crypto.js';
+import { md5 } from '../md5.js';
 
 // 与 Meting.php:982-991 对齐的请求头（伪装成网易云客户端避免风控）
 const NETEASE_DEFAULT_HEADERS = {
@@ -148,24 +149,41 @@ export async function getLyric(id) {
 }
 
 /**
- * 获取封面（图片 URL，无需请求接口，直接拼）
- * 等价于 Meting.php pic()
- * 注意：网易云的 pic_id 已经是 al.pic_str 字符串，直接拼地址即可，无需 MD5 混淆
+ * 获取封面 URL（直接拼地址，不调接口）
+ * 网易云 CDN 路径要求形如 /<hash>/<picId>.jpg
+ * hash = base64(md5(picId XOR magic))，等价于 Meting.php neteaseEncryptId
  */
-export async function getPic(id, size = 300) {
-  // pic_id 是网易云返回的 al.pic_str（数字字符串），直接走 p3.music.126.net
+export function getPic(id, size = 300) {
+  const hash = neteaseEncryptId(id);
   return {
-    url: `https://p3.music.126.net/${neteaseSimplePicHash(id)}/${id}.jpg?param=${size}y${size}`,
+    url: `https://p3.music.126.net/${hash}/${id}.jpg?param=${size}y${size}`,
   };
 }
 
 /**
- * 简易实现（用于无 MD5 时的兜底）
- * 实际 Meting.php 用了 MD5 加盐，这里 P1 阶段先返回空目录段，让网易云 CDN 尝试自动解析
- * P2 阶段补 MD5 后改写
+ * 网易云 picId → CDN 路径 hash
+ * 等价于 Meting.php netease_encryptId
+ *   1. picId 字符串 XOR magic 串
+ *   2. 对结果做 raw MD5（16 字节）
+ *   3. base64 编码
+ *   4. 把 base64 中的 / + 替换为 _ -
  */
-function neteaseSimplePicHash(_id) {
-  return ''; // CDN 大多数情况下无 hash 也能解析
+const NETEASE_PIC_MAGIC = '3go8&$8*3*3h0k(2)2';
+
+function neteaseEncryptId(id) {
+  const idStr = String(id);
+  const mixed = new Uint8Array(idStr.length);
+  for (let i = 0; i < idStr.length; i++) {
+    mixed[i] = idStr.charCodeAt(i) ^ NETEASE_PIC_MAGIC.charCodeAt(i % NETEASE_PIC_MAGIC.length);
+  }
+  // md5() 返回 hex 字符串，转回 16 字节
+  const hex = md5(mixed);
+  const bytes = new Uint8Array(16);
+  for (let i = 0; i < 16; i++) bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+  // base64
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\//g, '_').replace(/\+/g, '-');
 }
 
 /**

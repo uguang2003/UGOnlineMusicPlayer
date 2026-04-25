@@ -9,15 +9,20 @@
 
 /**
  * 网易云歌曲对象 → 前端格式
- * 输入: cloudsearch 接口返回的 result.songs[i]
+ * 兼容两种响应：
+ *   - weapi cloudsearch: result.songs[i].ar / al.pic_str
+ *   - 老 API /search/get: result.songs[i].artists / album.picId (BigInt)
  */
 export function formatNeteaseSong(raw) {
+  const al = raw.al || raw.album || {};
+  // picId 是大整数，转字符串避免 JS 精度丢失
+  const picId = al.pic_str || al.pic || (al.picId != null ? String(al.picId) : '');
   return {
     id: raw.id,
     name: raw.name,
     artist: (raw.ar || raw.artists || []).map((a) => a.name),
-    album: (raw.al || raw.album || {}).name || '',
-    pic_id: (raw.al || raw.album || {}).pic_str || (raw.al || raw.album || {}).pic || '',
+    album: al.name || '',
+    pic_id: picId,
     url_id: raw.id,
     lyric_id: raw.id,
     source: 'netease',
