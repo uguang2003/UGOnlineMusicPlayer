@@ -26,7 +26,7 @@ UGOnlineMusicPlayer/
 │   │       └── index.js      # 6 源汇总入口
 │   └── package.json          # type: module
 ├── index.html、css/、js/、images/、plugns/  # 静态前端（保持不变）
-├── tests/                    # Node.js 单元/集成测试（不部署）
+├── dev-server.mjs            # 零依赖本地 dev server
 ├── legacy-php/               # 原 PHP 代码（已归档，不部署）
 └── DEPLOY.md                 # 本文档
 ```
@@ -85,36 +85,19 @@ UGOnlineMusicPlayer/
 
 ---
 
-## 本地开发与测试
+## 本地开发
 
-### 跑单元测试（推荐先跑一遍验证）
+项目自带零依赖 dev server，模拟 EdgeOne Functions 行为：
 
 ```bash
 cd UGOnlineMusicPlayer
-node tests/crypto.test.js      # 18 个加密测试（含 PHP 黄金 vector）
-node tests/md5.test.js         # 11 个 MD5 测试（RFC 1321 标准）
-node tests/url.test.js         # 11 个 url 路由测试
-node tests/sources.test.js     # 29 个 6 源结构测试
-node tests/endpoints.test.js   # 30 个 endpoint 综合测试
-node tests/api-compat.test.js  # 18 个 PHP 兼容入口测试
+node dev-server.mjs
+# 访问 http://localhost:8000
 ```
 
-**累计 117 个测试，全部通过即可放心部署**。
+dev server 会自动加载 `functions/api/*.js` 和 `functions/api.js`，并把其他路径作为静态文件提供，让你可以本地完整体验播放器（功能与部署后一致）。
 
-### 浏览器集成测试
-
-部署后访问 `https://你的域名/test-edge.html`，点击各按钮验证 endpoint 是否正常工作。
-
-### 本地模拟（可选）
-
-EdgeOne Pages 没有官方本地 CLI，但因为代码是标准 Web API，可以用 Cloudflare 的 `wrangler` 模拟（功能等价）：
-
-```bash
-npm install -g wrangler
-cd UGOnlineMusicPlayer
-wrangler pages dev . --compatibility-date=2024-01-01
-# 访问 http://localhost:8788
-```
+如果端口被占用：`PORT=8001 node dev-server.mjs`
 
 ---
 
@@ -189,24 +172,8 @@ A: 进入 `legacy-php/` 目录，运行 `docker-compose up -d` 即可（旧 dock
 
 ---
 
-## 测试覆盖率（截至发布）
-
-| 测试文件 | 测试数 | 覆盖 |
-|---------|--------|------|
-| crypto.test.js | 18 | RSA、AES、neteaseEncrypt、baiduEncrypt、随机密钥 |
-| md5.test.js | 11 | RFC 1321 全部标准 vector + UTF-8 + 二进制 |
-| url.test.js | 11 | url endpoint 路由 + 参数校验 + obdo.cc 默认路径 |
-| sources.test.js | 29 | 6 源 × 4 方法 exports 完整性 + 占位行为 |
-| endpoints.test.js | 30 | 11 endpoint × OPTIONS/参数/未知源/Cookie 鉴权 |
-| api-compat.test.js | 18 | PHP `?types=xxx` 派发 + POST body 正确转发 |
-| **合计** | **117** | **全部通过** ✅ |
-
-> 注：联网类测试（真实调网易云/QQ 接口）未在自动化测试中跑，需部署到 EdgeOne 后通过 `test-edge.html` 进行回归。
-
----
-
 ## 后续维护
 
 - 新增音源：在 `functions/_lib/sources/` 加文件，并在 `index.js` 注册
-- 修改加密：`functions/_lib/crypto.js` + 跑 `node tests/crypto.test.js` 确保 PHP 黄金 vector 仍通过
+- 修改加密：`functions/_lib/crypto.js`（提交前用 dev-server 真机回归一下）
 - 增加 endpoint：在 `functions/api/` 加文件，并在 `functions/api.js` 的 `ROUTES` 注册

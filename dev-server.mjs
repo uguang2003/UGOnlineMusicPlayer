@@ -138,6 +138,5 @@ http.createServer(handle).listen(PORT, () => {
   console.log(`\n🎵 UG Music Edge Dev Server`);
   console.log(`   Running:   http://localhost:${PORT}`);
   console.log(`   Player:    http://localhost:${PORT}/index.html`);
-  console.log(`   API test:  http://localhost:${PORT}/test-edge.html`);
   console.log(`   Press Ctrl+C to stop\n`);
 });

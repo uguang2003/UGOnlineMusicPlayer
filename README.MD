@@ -39,9 +39,8 @@ functions/                 # 边缘函数后端
 ├── api.js                 # PHP 兼容入口 (/api?types=xxx)
 ├── api/*.js               # 11 个 RESTful endpoint (/api/url 等)
 └── _lib/                  # 加密 / 6 源 fetcher / 工具
+dev-server.mjs             # 零依赖本地 dev server (node 直跑)
 legacy-php/                # 原 PHP 代码归档（可参考，不部署）
-tests/                     # Node.js 单测（不部署）
-test-edge.html             # 浏览器集成测试页
 ```
 
 ---
