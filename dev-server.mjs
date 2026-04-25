@@ -48,10 +48,16 @@ async function loadRoutes() {
       ROUTES.set(`/api/${name}`, mod.onRequest);
     }
   }
-  // /api PHP 兼容入口由 functions/api.js 提供
-  const compat = await import(pathToFileURL(path.join(ROOT, 'functions/api.js')).href);
-  if (typeof compat.onRequest === 'function') {
-    ROUTES.set('/api', compat.onRequest);
+  // /api PHP 兼容入口（functions/api.js）已废弃 —— EdgeOne 路由 bug 让它不可用
+  // 前端通过 $.ajaxPrefilter 改走 /api/<type> RESTful 路径
+  // 这里保留 try 加载，便于回滚或本地测试
+  try {
+    const compat = await import(pathToFileURL(path.join(ROOT, 'functions/api.js')).href);
+    if (typeof compat.onRequest === 'function') {
+      ROUTES.set('/api', compat.onRequest);
+    }
+  } catch {
+    /* functions/api.js 不存在则跳过，保持向前兼容 */
   }
   console.log(`[dev-server] loaded ${ROUTES.size} routes:`);
   for (const k of [...ROUTES.keys()].sort()) console.log('   ', k);

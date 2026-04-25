@@ -756,7 +756,7 @@ function download(music) {
         // 移动设备使用直接下载模式，通过修改后的API接口
         var loadMsg = layer.msg('准备下载...', { time: 3000 });
         // 构造直接下载的URL（使用新增的direct参数）
-        var directDownloadUrl = mkPlayer.api + '?types=download&direct=1&artist=' + encodeURIComponent(music.artist) +
+        var directDownloadUrl = mkPlayer.api + '/download?direct=1&artist=' + encodeURIComponent(music.artist) +
             '&name=' + encodeURIComponent(music.name) +
             '&source=' + encodeURIComponent(music.source) +
             '&url=' + encodeURIComponent(music.url);

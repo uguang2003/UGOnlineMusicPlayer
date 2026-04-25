@@ -5,6 +5,21 @@
  * 时间：2018-3-11
  *************************************************/
 
+// === EdgeOne 路由兼容 prefilter（v2.0.1 修复）===
+// 把所有 $.ajax({ url: mkPlayer.api 或 'api.php', data: "types=xxx&..." }) 自动转成 /api/xxx
+// 原因：EdgeOne Pages 当 functions/api.js 与 functions/api/*.js 同时存在时,
+//      /api 路径会被错误路由到 functions/api/url.js（不是 PHP 兼容入口）
+// 修复：前端直接走 RESTful /api/<type> 路径，每个 endpoint 直接命中
+$.ajaxPrefilter(function (options) {
+    if (typeof options.url !== 'string') return;
+    if (options.url !== mkPlayer.api && options.url !== 'api.php') return;
+    if (typeof options.data !== 'string') return;
+    var m = /(?:^|&)types=([^&]+)/.exec(options.data);
+    if (!m) return;
+    options.url = mkPlayer.api + '/' + m[1];
+    options.data = options.data.replace(/(?:^|&)types=[^&]+/, '').replace(/^&/, '');
+});
+
 // ajax加载搜索结果
 function ajaxSearch() {
     if (rem.wd === "") {
