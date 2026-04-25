@@ -46,25 +46,30 @@ export function handleOptions() {
 }
 
 /**
- * 解析请求参数，兼容 GET query 与 POST x-www-form-urlencoded / JSON
+ * 解析请求参数，兼容 GET query 与 POST x-www-form-urlencoded / JSON / multipart
+ *
+ * 重要：不要对 urlencoded 调 request.formData()，EdgeOne / 部分 V8 isolate 实现
+ * 对 application/x-www-form-urlencoded 的 formData() 行为不一致（可能解析失败但不抛错）
+ * 改用 text() + URLSearchParams，兼容性最稳
  */
 export async function parseParams(request) {
   const url = new URL(request.url);
   const params = Object.fromEntries(url.searchParams.entries());
 
-  if (request.method === 'POST') {
-    const ct = request.headers.get('content-type') || '';
+  if (request.method === 'POST' || request.method === 'PUT' || request.method === 'PATCH') {
+    const ct = (request.headers.get('content-type') || '').toLowerCase();
     try {
       if (ct.includes('application/json')) {
         const body = await request.json();
-        Object.assign(params, body);
-      } else if (ct.includes('application/x-www-form-urlencoded') || ct.includes('multipart/form-data')) {
-        const formData = await request.formData();
-        for (const [k, v] of formData.entries()) {
+        if (body && typeof body === 'object') Object.assign(params, body);
+      } else if (ct.includes('multipart/form-data')) {
+        // multipart 必须用 formData()
+        const fd = await request.formData();
+        for (const [k, v] of fd.entries()) {
           params[k] = typeof v === 'string' ? v : v.name;
         }
       } else {
-        // 兜底: 当作 urlencoded 文本解析
+        // urlencoded、空 content-type、任意未知 → 按 urlencoded 文本解析
         const text = await request.text();
         if (text) {
           const sp = new URLSearchParams(text);
