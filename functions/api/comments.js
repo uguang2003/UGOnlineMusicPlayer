@@ -9,6 +9,31 @@
 import { jsonResponse, errorResponse, handleOptions, parseParams } from '../_lib/cors.js';
 import * as netease from '../_lib/sources/netease.js';
 
+// http://p1.music.126.net/... → https://...
+// 网易云老 API 头像/图片 URL 用 http，HTTPS 页面会触发 Mixed Content 警告
+function toHttps(url) {
+  return typeof url === 'string' ? url.replace(/^http:\/\//, 'https://') : url || '';
+}
+
+// 把网易云 weapi 响应的评论项简化成前端期望的格式
+// 前端 functions.js:589-591 读 jsonData.hot_comment / .comment（单数）
+// 前端 functions.js:627 读 c.user.avatar（不是 avatarUrl）
+function formatComment(c) {
+  if (!c) return null;
+  const user = c.user || {};
+  return {
+    user: {
+      nickname: user.nickname || '',
+      avatar: toHttps(user.avatarUrl || ''),
+      userId: user.userId,
+    },
+    content: c.content || '',
+    time: c.time,
+    timeStr: c.timeStr,
+    likedCount: c.likedCount || 0,
+  };
+}
+
 export async function onRequest(context) {
   const { request } = context;
   if (request.method === 'OPTIONS') return handleOptions();
@@ -26,7 +51,14 @@ export async function onRequest(context) {
 
   try {
     const data = await netease.getComments(id, count, page);
-    return jsonResponse(data);
+    // 把 weapi 字段名转成前端期望的格式（hotComments → hot_comment, avatarUrl → avatar）
+    return jsonResponse({
+      code: data?.code || 200,
+      hot_comment: (data?.hotComments || []).map(formatComment).filter(Boolean),
+      comment: (data?.comments || []).map(formatComment).filter(Boolean),
+      total: data?.total || 0,
+      more: data?.more || false,
+    });
   } catch (err) {
     return errorResponse(`comments fetch failed: ${err.message}`, 500);
   }
